@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猫哥的Claw养成日记 🐱</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
+    
+    .cartoon-card {
+      border: 3px solid #333;
+      box-shadow: 6px 6px 0 #333;
+      transition: all 0.2s ease;
+    }
+    
+    .cartoon-card:hover {
+      transform: translate(-3px, -3px);
+      box-shadow: 9px 9px 0 #333;
+    }
+    
+    .cartoon-btn {
+      border: 3px solid #333;
+      box-shadow: 4px 4px 0 #333;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    
+    .cartoon-btn:hover {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0 #333;
+    }
+    
+    .cartoon-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 #333;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .section { display: none; }
+    .section.active { display: block; animation: fadeIn 0.3s ease; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-12px) rotate(2deg); }
+    }
+    
+    .float { animation: float 3s ease-in-out infinite; }
+    
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
+    
+    .wiggle { animation: wiggle 2s ease-in-out infinite; }
+    
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.5;
+      z-index: -1;
+    }
+    
+    .nav-item {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .nav-item::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: #333;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .nav-item:hover::after {
+      transform: translateX(0);
+    }
+    
+    .skill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 2px solid #333;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    
+    .timeline-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 3px solid #333;
+      background: white;
+    }
+    
+    .timeline-dot.active {
+      background: #f5576c;
+    }
+    
+    .stock-chart {
+      height: 200px;
+      width: 100%;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      border-radius: 4px;
+      background: #e5e7eb;
+      overflow: hidden;
+      border: 2px solid #333;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.5s ease;
+    }
+  </style>
+</head>
+<body class="bg-yellow-50 min-h-screen">
+  <div id="root"></div>
+  
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    
+    // ==================== 数据 ====================
+    const mockData = {
+      profile: {
+        education: {
+          school: "大连理工大学",
+          major: "船舶与海洋工程",
+          period: "2013-2017",
+          gpa: "3.24（前30%）"
+        },
+        summary: "5年+复合型产品经理经验，专注研发平台工具与数据产品生态建设，主导多款核心产品成功落地。",
+        skills: ["SQL", "Python", "Tableau", "Axure", "FineBI", "数据分析", "产品设计", "数据治理"],
+        experience: [
+          {
+            company: "金融科技公司",
+            role: "大数据中心-产品经理",
+            period: "2021.6-至今",
+            description: "主导数据研发平台、金融知识图谱平台建设，对内服务70+系统，对外输出至同业银行"
+          },
+          {
+            company: "游戏公司（新三板上市）",
+            role: "数据分析师",
+            period: "2020.9-2021.5",
+            description: "负责日活50万、日营收35W美元出海手游的数据分析，产出17篇分析报告"
+          },
+          {
+            company: "航空公司",
+            role: "货运营销/培训开发",
+            period: "2017.8-2020.8",
+            description: "EHR2.0平台数据治理，分析10W+收运数据，优化订舱准确率提升5%"
+          }
+        ],
+        projects: [
+          {
+            name: "数据一站式研发平台",
+            award: "建设银行军功最佳案例",
+            period: "2022-2025",
+            highlights: ["数据线影响分析工具", "数据时效运营工具", "整合模型设计工具", "脚本设计工具", "代码审查工具"]
+          },
+          {
+            name: "金融知识图谱应用",
+            award: "第十五届金融科技创新奖",
+            period: "2023-2025",
+            highlights: ["反洗钱智能导航仪", "客户画像及关系图谱", "大额可疑交易报告"]
+          }
+        ]
+      },
+      
+      blogPosts: [
+        { id: 1, title: "PyCharm File菜单详解", summary: "详细介绍PyCharm 2019的File菜单功能，包括新建项目、文件操作、设置等实用技巧", category: "开发工具", date: "2026-01-24", views: 8441 },
+        { id: 2, title: "Linux基本命令及编程环境实验", summary: "Linux系统终端的基本命令汇总，目录文件操作、系统信息查询、vi命令编程等", category: "Linux", date: "2025-09-21", views: 12500 },
+        { id: 3, title: "字符编码的转换", summary: "Python字符编码转换详解，utf-8与gbk编码转换原理与实践", category: "Python", date: "2025-11-12", views: 6200 },
+        { id: 4, title: "MRP物料需求计划", summary: "MRP与ERP系统介绍，物料需求计划的核心概念与应用", category: "企业管理", date: "2025-02-11", views: 4800 },
+        { id: 5, title: "Java Socket获取GPS定位", summary: "使用Java Socket技术获取GPS定位数据，NMEA协议解析", category: "Java", date: "2026-01-27", views: 3500 },
+        { id: 6, title: "CentOS安装Let's Encrypt免费SSL证书", summary: "详细的SSL证书安装教程，支持自动续签配置", category: "运维", date: "2025-02-09", views: 8900 },
+        { id: 7, title: "autodl vLLM部署MinerU2.5", summary: "基于vLLM的MinerU OCR部署指南，支持文档智能解析", category: "AI", date: "2026-01-24", views: 4200 },
+        { id: 8, title: "ChatAnthropic与LangChain集成", summary: "Claude系列模型在LangChain中的使用方法与最佳实践", category: "AI", date: "2025-10-15", views: 5600 }
+      ],
+      
+      claws: [
+        {
+          name: "K嗨",
+          emoji: "🚀",
+          role: "高效工作助手",
+          description: "负责飞书生态技能执行与任务协调，擅长多维表格、日历、文档等办公自动化",
+          color: "bg-orange-300",
+          skills: [
+            { name: "飞书多维表格", icon: "📊", desc: "27种字段类型，批量操作" },
+            { name: "飞书日历", icon: "📅", desc: "日程管理，忙闲查询" },
+            { name: "飞书文档", icon: "📝", desc: "云文档创建/编辑/管理" },
+            { name: "飞书IM", icon: "💬", desc: "消息读取，资源下载" },
+            { name: "飞书任务", icon: "✅", desc: "待办管理，清单协作" }
+          ]
+        },
+        {
+          name: "@catbot",
+          emoji: "🐱",
+          role: "编程开发专家",
+          description: "负责代码开发与复杂技术任务，精通多种编程语言和开发框架",
+          color: "bg-blue-300",
+          skills: [
+            { name: "代码生成", icon: "💻", desc: "多语言编程，算法实现" },
+            { name: "网页获取", icon: "🌐", desc: "内容抓取，数据提取" },
+            { name: "网页搜索", icon: "🔍", desc: "智能搜索，AI摘要" },
+            { name: "图像生成", icon: "🎨", desc: "AI绘画，创意生成" },
+            { name: "语音合成", icon: "🎙️", desc: "TTS/ASR语音处理" }
+          ]
+        }
+      ],
+      
+      timeline: [
+        { date: "2026-03-10", event: "🎉 K嗨正式上线，开始学习14个技能", milestone: true },
+        { date: "2026-03-10", event: "📊 掌握飞书多维表格管理", milestone: false },
+        { date: "2026-03-10", event: "📅 掌握飞书日历与日程管理", milestone: false },
+        { date: "2026-03-10", event: "📝 掌握飞书文档创建与更新", milestone: false },
+        { date: "2026-03-10", event: "🌐 掌握Coze网页获取与搜索", milestone: false },
+        { date: "2026-03-10", event: "🚀 个人网站开发启动", milestone: true },
+        { date: "2026-03-10", event: "✅ 完成健康调理计划制定", milestone: false }
+      ],
+      
+      allSkills: [
+        { name: "飞书多维表格", icon: "📊", color: "bg-blue-200", category: "飞书" },
+        { name: "飞书日历", icon: "📅", color: "bg-green-200", category: "飞书" },
+        { name: "飞书文档", icon: "📝", color: "bg-purple-200", category: "飞书" },
+        { name: "飞书IM", icon: "💬", color: "bg-yellow-200", category: "飞书" },
+        { name: "飞书任务", icon: "✅", color: "bg-orange-200", category: "飞书" },
+        { name: "飞书问题排查", icon: "🔧", color: "bg-red-200", category: "飞书" },
+        { name: "网页获取", icon: "🌐", color: "bg-indigo-200", category: "Coze" },
+        { name: "网页搜索", icon: "🔍", color: "bg-pink-200", category: "Coze" },
+        { name: "图像生成", icon: "🎨", color: "bg-teal-200", category: "Coze" },
+        { name: "语音合成", icon: "🎙️", color: "bg-cyan-200", category: "Coze" },
+        { name: "飞书更新文档", icon: "🔄", color: "bg-lime-200", category: "飞书" },
+        { name: "飞书创建文档", icon: "➕", color: "bg-amber-200", category: "飞书" },
+        { name: "飞书获取文档", icon: "📖", color: "bg-rose-200", category: "飞书" },
+        { name: "InStreet社交", icon: "🤝", color: "bg-violet-200", category: "社交" }
+      ]
+    };
+
+    // ==================== 组件 ====================
+    
+    const Nav = ({ activeTab, setActiveTab }) => {
+      const tabs = [
+        { id: 'claw', label: '🐱 Claw日记', color: 'bg-orange-400', hoverColor: 'hover:bg-orange-500' },
+        { id: 'profile', label: '👤 关于我', color: 'bg-blue-400', hoverColor: 'hover:bg-blue-500' },
+        { id: 'works', label: '✍️ 作品', color: 'bg-green-400', hoverColor: 'hover:bg-green-500' },
+        { id: 'stocks', label: '📈 股票分析', color: 'bg-purple-400', hoverColor: 'hover:bg-purple-500' },
+        { id: 'tools', label: '🎯 工具箱', color: 'bg-pink-400', hoverColor: 'hover:bg-pink-500' }
+      ];
+      
+      return (
+        <nav className="sticky top-0 z-50 bg-white border-b-4 border-black shadow-lg">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="flex items-center justify-between h-18 py-2">
+              <h1 className="text-2xl md:text-3xl font-extrabold gradient-text cursor-pointer" onClick={() => setActiveTab('claw')}>
+                猫哥的Claw日记
+              </h1>
+              <div className="flex gap-1 md:gap-2 flex-wrap justify-end">
+                {tabs.map(tab => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`cartoon-btn px-2 md:px-4 py-2 rounded-xl font-bold text-sm md:text-base transition-all ${
+                      activeTab === tab.id 
+                        ? `${tab.color} text-white transform scale-105` 
+                        : `bg-gray-100 ${tab.hoverColor} hover:text-white`
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        </nav>
+      );
+    };
+
+    const ClawDiary = () => {
+      return (
+        <div className="p-4 max-w-7xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-10">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">🐱 Claw养成日记</h2>
+            <p className="text-gray-600 text-lg">记录AI助手的成长历程，见证技能的进化之路</p>
+          </div>
+          
+          {/* Claws Introduction */}
+          <div className="grid md:grid-cols-2 gap-8 mb-10">
+            {mockData.claws.map((claw, idx) => (
+              <div key={idx} className={`cartoon-card ${claw.color} rounded-3xl p-6 md:p-8`}>
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="text-7xl float">{claw.emoji}</div>
+                  <div>
+                    <h3 className="text-3xl font-bold text-gray-800">{claw.name}</h3>
+                    <p className="text-gray-700 font-semibold text-lg">{claw.role}</p>
+                  </div>
+                </div>
+                <p className="text-gray-700 mb-6 text-lg leading-relaxed">{claw.description}</p>
+                <div className="space-y-3">
+                  {claw.skills.map((skill, i) => (
+                    <div key={i} className="bg-white/80 rounded-xl p-3 border-2 border-black">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{skill.icon}</span>
+                        <div>
+                          <p className="font-bold text-gray-800">{skill.name}</p>
+                          <p className="text-sm text-gray-600">{skill.desc}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Timeline */}
+          <div className="cartoon-card bg-blue-50 rounded-3xl p-6 md:p-8 mb-10">
+            <h3 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">📅 成长时间线</h3>
+            <div className="space-y-4">
+              {mockData.timeline.map((item, idx) => (
+                <div key={idx} className="flex items-start gap-4">
+                  <div className={`timeline-dot mt-1 ${item.milestone ? 'active' : ''} flex-shrink-0`}></div>
+                  <div className={`cartoon-card rounded-xl px-5 py-4 flex-1 ${item.milestone ? 'bg-yellow-100' : 'bg-white'}`}>
+                    <span className="text-sm text-gray-500 font-semibold">{item.date}</span>
+                    <p className="text-lg font-bold text-gray-800 mt-1">{item.event}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* All Skills */}
+          <div className="cartoon-card bg-gradient-to-br from-purple-100 to-pink-100 rounded-3xl p-6 md:p-8">
+            <h3 className="text-2xl md:text-3xl font-bold mb-6 text-gray-800">🎯 全部技能（14个）</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+              {mockData.allSkills.map((skill, idx) => (
+                <div key={idx} className={`cartoon-card ${skill.color} rounded-2xl p-4 text-center hover:scale-105 transition-transform cursor-pointer group`}>
+                  <div className="text-4xl mb-2 group-hover:scale-110 transition-transform">{skill.icon}</div>
+                  <p className="font-bold text-sm text-gray-800">{skill.name}</p>
+                  <span className="text-xs text-gray-600 mt-1 block">{skill.category}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Profile = () => {
+      const profile = mockData.profile;
+      
+      return (
+        <div className="p-4 max-w-7xl mx-auto">
+          {/* Hero */}
+          <div className="text-center mb-10">
+            <div className="text-9xl mb-4 float inline-block">👨‍💻</div>
+            <h2 className="text-4xl md:text-5xl font-bold mb-3 text-gray-800">关于我</h2>
+            <p className="text-gray-600 text-lg max-w-2xl mx-auto">{profile.summary}</p>
+          </div>
+          
+          {/* Education */}
+          <div className="cartoon-card bg-blue-100 rounded-3xl p-6 md:p-8 mb-8">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">🎓 教育背景</h3>
+            <div className="bg-white rounded-2xl p-6 cartoon-card">
+              <h4 className="text-2xl font-bold text-gray-800">{profile.education.school}</h4>
+              <p className="text-gray-600 text-lg">{profile.education.major}</p>
+              <div className="flex flex-wrap gap-4 mt-3">
+                <span className="bg-blue-100 px-4 py-2 rounded-full font-semibold">{profile.education.period}</span>
+                <span className="bg-green-100 px-4 py-2 rounded-full font-semibold">GPA: {profile.education.gpa}</span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Skills */}
+          <div className="cartoon-card bg-green-100 rounded-3xl p-6 md:p-8 mb-8">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">🛠️ 技能栈</h3>
+            <div className="flex flex-wrap gap-3">
+              {profile.skills.map((skill, idx) => (
+                <span key={idx} className="cartoon-btn bg-white px-5 py-3 rounded-full font-bold text-lg hover:bg-yellow-200 transition-colors">
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+          
+          {/* Projects */}
+          <div className="cartoon-card bg-yellow-100 rounded-3xl p-6 md:p-8 mb-8">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">🏆 重点项目</h3>
+            <div className="grid md:grid-cols-2 gap-6">
+              {profile.projects.map((proj, idx) => (
+                <div key={idx} className="bg-white rounded-2xl p-6 cartoon-card">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold">{proj.award}</span>
+                  </div>
+                  <h4 className="text-xl font-bold text-gray-800 mb-2">{proj.name}</h4>
+                  <p className="text-gray-500 text-sm mb-4">{proj.period}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {proj.highlights.map((h, i) => (
+                      <span key={i} className="bg-yellow-200 px-3 py-1 rounded-full text-sm font-semibold">{h}</span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Experience */}
+          <div className="cartoon-card bg-purple-100 rounded-3xl p-6 md:p-8">
+            <h3 className="text-2xl font-bold mb-6 text-gray-800">💼 工作经历</h3>
+            <div className="space-y-6">
+              {profile.experience.map((exp, idx) => (
+                <div key={idx} className="bg-white rounded-2xl p-6 cartoon-card hover:scale-[1.02] transition-transform">
+                  <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
+                    <h4 className="text-xl font-bold text-gray-800">{exp.company}</h4>
+                    <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full font-semibold">{exp.period}</span>
+                  </div>
+                  <p className="text-blue-600 font-bold text-lg mb-3">{exp.role}</p>
+                  <p className="text-gray-700 leading-relaxed">{exp.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Works = () => {
+      const [filter, setFilter] = useState('all');
+      
+      const categories = ['all', '开发工具', 'Linux', 'Python', 'Java', '运维', 'AI', '企业管理'];
+      
+      const filteredPosts = filter === 'all' 
+        ? mockData.blogPosts 
+        : mockData.blogPosts.filter(post => post.category === filter);
+      
+      return (
+        <div className="p-4 max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">✍️ 我的博客作品</h2>
+            <p className="text-gray-600 text-lg">CSDN技术文章精选，分享学习与工作经验</p>
+          </div>
+          
+          {/* Filter */}
+          <div className="flex flex-wrap gap-2 justify-center mb-8">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setFilter(cat)}
+                className={`cartoon-btn px-4 py-2 rounded-full font-bold text-sm ${
+                  filter === cat ? 'bg-blue-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+              >
+                {cat === 'all' ? '全部' : cat}
+              </button>
+            ))}
+          </div>
+          
+          {/* Posts Grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredPosts.map(post => (
+              <div key={post.id} className="cartoon-card bg-white rounded-3xl p-6 hover:bg-gray-50 transition-all cursor-pointer group">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-bold">
+                    {post.category}
+                  </span>
+                  <span className="text-gray-400 text-sm">{post.date}</span>
+                </div>
+                <h3 className="text-xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  {post.title}
+                </h3>
+                <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">{post.summary}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-500 text-sm">👁️ {post.views.toLocaleString()} 阅读</span>
+                  <a 
+                    href="https://blog.csdn.net/Mr_charm" 
+                    target="_blank" 
+                    className="cartoon-btn bg-blue-500 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-600"
+                  >
+                    阅读全文 →
+                  </a>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    const StockAnalysis = () => {
+      const [date, setDate] = useState('2026-03-10');
+      const [data, setData] = useState(null);
+      const chartRef = useRef(null);
+      const chartInstance = useRef(null);
+      
+      const generateData = (selectedDate) => {
+        return {
+          date: selectedDate,
+          marketSentiment: Math.floor(Math.random() * 30) + 70,
+          hotSectors: ["AI", "金融科技", "新能源", "半导体"],
+          topStocks: ["股票A", "股票B", "股票C", "股票D", "股票E"],
+          riskLevel: "中低",
+          recommendation: "积极",
+          trends: ["科技股上涨", "银行股稳定", "消费股回暖", "新能源活跃"],
+          sixDimensions: {
+            marketHeat: Math.floor(Math.random() * 30) + 70,
+            capitalFlow: Math.floor(Math.random() * 40) + 60,
+            sectorRotation: Math.floor(Math.random() * 35) + 65,
+            riskIndex: Math.floor(Math.random() * 30) + 40,
+            opportunityIndex: Math.floor(Math.random() * 25) + 75,
+            sentimentIndex: Math.floor(Math.random() * 30) + 70
+          }
+        };
+      };
+      
+      useEffect(() => {
+        const newData = generateData(date);
+        setData(newData);
+      }, []);
+      
+      useEffect(() => {
+        if (data && chartRef.current) {
+          if (chartInstance.current) {
+            chartInstance.current.destroy();
+          }
+          
+          const ctx = chartRef.current.getContext('2d');
+          chartInstance.current = new Chart(ctx, {
+            type: 'radar',
+            data: {
+              labels: ['市场热度', '资金流向', '板块轮动', '风险指数', '机会指数', '情绪指数'],
+              datasets: [{
+                label: '市场指标',
+                data: Object.values(data.sixDimensions),
+                backgroundColor: 'rgba(147, 51, 234, 0.2)',
+                borderColor: 'rgba(147, 51, 234, 1)',
+                borderWidth: 2,
+                pointBackgroundColor: 'rgba(147, 51, 234, 1)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgba(147, 51, 234, 1)'
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                r: {
+                  beginAtZero: true,
+                  max: 100,
+                  ticks: {
+                    stepSize: 20
+                  }
+                }
+              }
+            }
+          });
+        }
+      }, [data]);
+      
+      const handleAnalyze = () => {
+        setData(generateData(date));
+      };
+      
+      if (!data) return <div className="p-8 text-center text-2xl">📊 加载中...</div>;
+      
+      return (
+        <div className="p-4 max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">📈 股票分析模块</h2>
+            <p className="text-gray-600 text-lg">A股短线复盘智能分析系统</p>
+          </div>
+          
+          {/* Date Selector */}
+          <div className="cartoon-card bg-white rounded-3xl p-6 mb-8">
+            <div className="flex flex-wrap gap-4 items-center justify-center">
+              <label className="font-bold text-lg text-gray-700">选择日期：</label>
+              <input 
+                type="date" 
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="cartoon-card px-4 py-3 rounded-xl text-lg"
+              />
+              <button 
+                onClick={handleAnalyze}
+                className="cartoon-btn bg-purple-500 text-white px-8 py-3 rounded-xl font-bold text-lg hover:bg-purple-600"
+              >
+                🔍 分析
+              </button>
+            </div>
+          </div>
+          
+          {/* Radar Chart */}
+          <div className="cartoon-card bg-white rounded-3xl p-6 mb-8">
+            <h3 className="text-2xl font-bold mb-4 text-gray-800 text-center">📊 六大维度分析</h3>
+            <div className="h-80 md:h-96">
+              <canvas ref={chartRef}></canvas>
+            </div>
+          </div>
+          
+          {/* Six Dimensions Cards */}
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
+            {Object.entries(data.sixDimensions).map(([key, value]) => {
+              const labels = {
+                marketHeat: '市场热度',
+                capitalFlow: '资金流向',
+                sectorRotation: '板块轮动',
+                riskIndex: '风险指数',
+                opportunityIndex: '机会指数',
+                sentimentIndex: '情绪指数'
+              };
+              const colors = {
+                marketHeat: 'from-red-400 to-orange-400',
+                capitalFlow: 'from-green-400 to-teal-400',
+                sectorRotation: 'from-blue-400 to-indigo-400',
+                riskIndex: 'from-yellow-400 to-red-400',
+                opportunityIndex: 'from-purple-400 to-pink-400',
+                sentimentIndex: 'from-cyan-400 to-blue-400'
+              };
+              return (
+                <div key={key} className="cartoon-card bg-white rounded-2xl p-4 text-center">
+                  <h4 className="text-gray-600 text-sm mb-2 font-semibold">{labels[key]}</h4>
+                  <div className="text-4xl font-bold gradient-text mb-2">{value}</div>
+                  <div className="progress-bar">
+                    <div 
+                      className={`progress-fill bg-gradient-to-r ${colors[key]}`}
+                      style={{ width: `${value}%` }}
+                    ></div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          {/* Hot Sectors & Trends */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="cartoon-card bg-yellow-100 rounded-3xl p-6">
+              <h3 className="text-2xl font-bold mb-4 text-gray-800">🔥 热门板块</h3>
+              <div className="flex flex-wrap gap-3">
+                {data.hotSectors.map((sector, idx) => (
+                  <span key={idx} className="cartoon-btn bg-red-500 text-white px-4 py-2 rounded-full font-bold">
+                    {sector}
+                  </span>
+                ))}
+              </div>
+              <h4 className="text-xl font-bold mt-6 mb-3 text-gray-800">📈 领涨个股</h4>
+              <div className="flex flex-wrap gap-2">
+                {data.topStocks.map((stock, idx) => (
+                  <span key={idx} className="bg-white border-2 border-black px-3 py-1 rounded-full font-semibold">
+                    {stock}
+                  </span>
+                ))}
+              </div>
+            </div>
+            
+            <div className="cartoon-card bg-green-100 rounded-3xl p-6">
+              <h3 className="text-2xl font-bold mb-4 text-gray-800">📊 市场趋势</h3>
+              <ul className="space-y-3">
+                {data.trends.map((trend, idx) => (
+                  <li key={idx} className="flex items-center gap-3 bg-white rounded-xl p-3 border-2 border-black">
+                    <span className="text-2xl">{idx % 2 === 0 ? '📈' : '📉'}</span>
+                    <span className="font-semibold text-gray-800">{trend}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          
+          {/* Recommendation */}
+          <div className="cartoon-card bg-gradient-to-r from-purple-100 to-pink-100 rounded-3xl p-8 text-center">
+            <h3 className="text-2xl font-bold mb-4 text-gray-800">💡 投资建议</h3>
+            <p className="text-4xl font-bold gradient-text mb-3">{data.recommendation}</p>
+            <div className="flex justify-center gap-4 mt-4">
+              <span className="bg-white px-4 py-2 rounded-full font-bold border-2 border-black">
+                风险等级：{data.riskLevel}
+              </span>
+              <span className="bg-white px-4 py-2 rounded-full font-bold border-2 border-black">
+                情绪指数：{data.marketSentiment}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    const Tools = () => {
+      const [tomato, setTomato] = useState({ min: 25, sec: 0, running: false });
+      const [quote, setQuote] = useState('');
+      const [pomodoroCount, setPomodoroCount] = useState(0);
+      
+      const quotes = [
+        "代码如诗，bug如歌 🎵",
+        "保持好奇，持续学习 📚",
+        "产品经理是翻译官 🌉",
+        "数据驱动决策 📊",
+        "简单是终极的复杂 ✨",
+        "明日复明日，明日何其多 🌅",
+        "早睡早起身体好 💪",
+        "脾胃是后天之本 🍃"
+      ];
+      
+      useEffect(() => {
+        setQuote(quotes[Math.floor(Math.random() * quotes.length)]);
+      }, []);
+      
+      useEffect(() => {
+        let timer;
+        if (tomato.running) {
+          timer = setInterval(() => {
+            setTomato(prev => {
+              if (prev.sec > 0) return { ...prev, sec: prev.sec - 1 };
+              if (prev.min > 0) return { ...prev, min: prev.min - 1, sec: 59 };
+              // Timer finished
+              setPomodoroCount(c => c + 1);
+              return { min: 25, sec: 0, running: false };
+            });
+          }, 1000);
+        }
+        return () => clearInterval(timer);
+      }, [tomato.running]);
+      
+      const toggleTimer = () => {
+        setTomato(prev => ({ ...prev, running: !prev.running }));
+      };
+      
+      const resetTimer = () => {
+        setTomato({ min: 25, sec: 0, running: false });
+      };
+      
+      return (
+        <div className="p-4 max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-gray-800">🎯 工具箱</h2>
+            <p className="text-gray-600 text-lg">实用小工具集合，提升效率</p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Tomato Timer */}
+            <div className="cartoon-card bg-red-100 rounded-3xl p-6 md:p-8">
+              <h3 className="text-2xl font-bold mb-6 text-center text-gray-800">🍅 番茄工作法</h3>
+              <div className="text-center">
+                <div className={`text-7xl md:text-8xl font-bold mb-6 font-mono ${tomato.running ? 'text-red-600' : 'text-gray-800'}`}>
+                  {String(tomato.min).padStart(2, '0')}:{String(tomato.sec).padStart(2, '0')}
+                </div>
+                <div className="flex justify-center gap-4 mb-6">
+                  <button 
+                    onClick={toggleTimer}
+                    className={`cartoon-btn px-8 py-4 rounded-2xl font-bold text-xl text-white ${
+                      tomato.running ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+                    }`}
+                  >
+                    {tomato.running ? '⏸️ 暂停' : '▶️ 开始'}
+                  </button>
+                  <button 
+                    onClick={resetTimer}
+                    className="cartoon-btn bg-gray-500 text-white px-8 py-4 rounded-2xl font-bold text-xl hover:bg-gray-600"
+                  >
+                    🔄 重置
+                  </button>
+                </div>
+                <div className="bg-white rounded-2xl p-4 border-2 border-black">
+                  <p className="text-gray-600 mb-2">今日完成番茄数</p>
+                  <p className="text-4xl font-bold text-red-600">{pomodoroCount} 🍅</p>
+                </div>
+              </div>
+            </div>
+            
+            {/* Daily Quote */}
+            <div className="cartoon-card bg-blue-100 rounded-3xl p-6 md:p-8">
+              <h3 className="text-2xl font-bold mb-6 text-center text-gray-800">💭 每日一言</h3>
+              <div className="bg-white rounded-2xl p-8 text-center cartoon-card min-h-[200px] flex flex-col justify-center">
+                <p className="text-2xl font-bold text-gray-800 mb-6 leading-relaxed">{quote}</p>
+                <button 
+                  onClick={() => setQuote(quotes[Math.floor(Math.random() * quotes.length)])}
+                  className="cartoon-btn bg-blue-500 text-white px-6 py-3 rounded-2xl font-bold text-lg hover:bg-blue-600"
+                >
+                  🎲 换一句
+                </button>
+              </div>
+            </div>
+            
+            {/* Skill Radar */}
+            <div className="cartoon-card bg-green-100 rounded-3xl p-6 md:p-8 md:col-span-2">
+              <h3 className="text-2xl font-bold mb-6 text-gray-800">🎯 技能雷达</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {[
+                  { skill: '数据分析', level: 90, color: 'from-blue-400 to-cyan-400' },
+                  { skill: '产品设计', level: 85, color: 'from-green-400 to-teal-400' },
+                  { skill: 'Python', level: 75, color: 'from-yellow-400 to-orange-400' },
+                  { skill: 'SQL', level: 80, color: 'from-purple-400 to-pink-400' },
+                  { skill: 'Tableau', level: 70, color: 'from-indigo-400 to-blue-400' },
+                  { skill: 'Axure', level: 75, color: 'from-red-400 to-pink-400' },
+                  { skill: '数据治理', level: 85, color: 'from-teal-400 to-green-400' },
+                  { skill: '项目管理', level: 80, color: 'from-orange-400 to-red-400' }
+                ].map((item, idx) => (
+                  <div key={idx} className="bg-white rounded-xl p-4 cartoon-card">
+                    <div className="flex justify-between mb-3">
+                      <span className="font-bold text-gray-800">{item.skill}</span>
+                      <span className="font-bold text-gray-600">{item.level}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div 
+                        className={`progress-fill bg-gradient-to-r ${item.color}`}
+                        style={{ width: `${item.level}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Health Tips */}
+            <div className="cartoon-card bg-yellow-100 rounded-3xl p-6 md:p-8 md:col-span-2">
+              <h3 className="text-2xl font-bold mb-4 text-gray-800">🍃 健康小贴士</h3>
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="bg-white rounded-xl p-4 cartoon-card">
+                  <div className="text-3xl mb-2">🌙</div>
+                  <p className="font-bold text-gray-800">作息</p>
+                  <p className="text-sm text-gray-600">22:30前上床，保证7-8小时睡眠</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 cartoon-card">
+                  <div className="text-3xl mb-2">🍚</div>
+                  <p className="font-bold text-gray-800">饮食</p>
+                  <p className="text-sm text-gray-600">三餐规律，晚餐清淡少量</p>
+                </div>
+                <div className="bg-white rounded-xl p-4 cartoon-card">
+                  <div className="text-3xl mb-2">🚶</div>
+                  <p className="font-bold text-gray-800">运动</p>
+                  <p className="text-sm text-gray-600">饭后百步走，每天泡脚15分钟</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // ==================== 主应用 ====================
+    const App = () => {
+      const [activeTab, setActiveTab] = useState('claw');
+      
+      return (
+        <div className="min-h-screen bg-yellow-50">
+          <Nav activeTab={activeTab} setActiveTab={setActiveTab} />
+          
+          <main className="py-6 md:py-8">
+            <div className={`section ${activeTab === 'claw' ? 'active' : ''}`}>
+              <ClawDiary />
+            </div>
+            <div className={`section ${activeTab === 'profile' ? 'active' : ''}`}>
+              <Profile />
+            </div>
+            <div className={`section ${activeTab === 'works' ? 'active' : ''}`}>
+              <Works />
+            </div>
+            <div className={`section ${activeTab === 'stocks' ? 'active' : ''}`}>
+              <StockAnalysis />
+            </div>
+            <div className={`section ${activeTab === 'tools' ? 'active' : ''}`}>
+              <Tools />
+            </div>
+          </main>
+          
+          <footer className="bg-white border-t-4 border-black mt-12 py-8">
+            <div className="max-w-7xl mx-auto px-4 text-center">
+              <p className="text-gray-600 text-lg mb-2">© 2026 猫哥的Claw养成日记 🐱</p>
+              <p className="text-gray-500">Built with ❤️ by K嗨 & @catbot</p>
+              <div className="mt-4 flex justify-center gap-4">
+                <a href="https://blog.csdn.net/Mr_charm" target="_blank" className="text-blue-500 hover:underline">CSDN博客</a>
+                <span className="text-gray-400">|</span>
+                <span className="text-gray-600">最后更新：2026-03-10</span>
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    };
+    
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
