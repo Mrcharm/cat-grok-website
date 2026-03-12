@@ -32,3 +32,6 @@ Thumbs.db
 tmp/
 temp/
 *.tmp
+
+# Memory files (may contain sensitive info)
+memory/

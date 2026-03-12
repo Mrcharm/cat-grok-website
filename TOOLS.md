@@ -37,6 +37,13 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 
 ---
 
+## 用户信息
+
+### 基本信息
+- **姓名**: 谢呈文（猫哥）
+- **当前地址**: 厦门
+- **时区**: Asia/Shanghai
+
 ## GitHub 配置
 
 ### 个人网站仓库
