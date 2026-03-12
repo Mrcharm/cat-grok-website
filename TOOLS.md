@@ -42,7 +42,7 @@ Skills are shared. Your setup is yours. Keeping them apart means you can update 
 ### 个人网站仓库
 - **仓库地址**: https://github.com/mrcharm/cat-grok-website.git
 - **网站地址**: https://mrcharm.github.io/cat-grok-website/
-- **Token**: [从用户处获取]
+- **Token**: 存储在 `.env` 文件中（已加入 .gitignore，不会上传）
 - **默认分支**: main
 - **部署方式**: GitHub Pages (Deploy from a branch)
 
