@@ -3,257 +3,424 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>猫哥Claw养成日记 🐱</title>
+  <title>🐱 猫哥Claw养成日记</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * { font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif; }
-    
     :root {
-      --bg-color: #faf8f5;
-      --primary: #f59e0b;
-      --primary-dark: #d97706;
-      --secondary: #fbbf24;
-      --accent: #f97316;
-      --text: #1f2937;
-      --text-light: #6b7280;
+      --bg-primary: #faf8f5;
+      --bg-secondary: #f5f3f0;
+      --text-primary: #1a1a1a;
+      --text-secondary: #666666;
+      --accent: #e17055;
+      --accent-hover: #d63031;
       --card-bg: #ffffff;
+      --border: #e8e5e2;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
     
     body {
-      background-color: var(--bg-color);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
     }
     
-    /* Smooth scroll */
-    html { scroll-behavior: smooth; }
+    /* ========== Navigation ========== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(250, 248, 245, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      z-index: 1000;
+      padding: 12px 0;
+    }
     
-    /* Card styles */
-    .card {
+    .nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-decoration: none;
+    }
+    
+    .nav-logo-icon {
+      font-size: 1.5rem;
+    }
+    
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .nav-lang {
+      display: flex;
+      gap: 12px;
+      font-size: 0.875rem;
+    }
+    
+    .nav-lang a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    .nav-lang a:hover {
+      color: var(--accent);
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 24px;
+    }
+    
+    .nav-menu a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9375rem;
+      transition: color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .nav-menu a:hover {
+      color: var(--accent);
+    }
+    
+    /* ========== Hero Section ========== */
+    .hero {
+      padding: 140px 20px 60px;
+      text-align: center;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 16px;
+    }
+    
+    .hero-title-highlight {
+      color: var(--accent);
+    }
+    
+    .hero-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+    }
+    
+    /* ========== Carousel ========== */
+    .carousel {
+      position: relative;
+      max-width: 600px;
+      margin: 0 auto 40px;
+    }
+    
+    .carousel-container {
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .carousel-track {
+      display: flex;
+      transition: transform 0.5s ease;
+    }
+    
+    .carousel-item {
+      min-width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 60px 40px;
+      text-align: center;
+      color: white;
+    }
+    
+    .carousel-item:nth-child(2) {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .carousel-item:nth-child(3) {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .carousel-item:nth-child(4) {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    }
+    
+    .carousel-item:nth-child(5) {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    }
+    
+    .carousel-day {
+      font-size: 0.875rem;
+      opacity: 0.9;
+      margin-bottom: 12px;
+    }
+    
+    .carousel-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+    
+    .carousel-nav {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .carousel-dot.active {
+      background: var(--accent);
+      width: 24px;
+      border-radius: 4px;
+    }
+    
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      cursor: pointer;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    
+    .carousel-btn:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .carousel-btn.prev { left: -20px; }
+    .carousel-btn.next { right: -20px; }
+    
+    /* ========== Stats Overview ========== */
+    .stats-overview {
+      max-width: 900px;
+      margin: 0 auto 60px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 0 20px;
+    }
+    
+    .stats-card {
       background: var(--card-bg);
       border-radius: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-      transition: all 0.3s ease;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
     
-    .card:hover {
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      transform: translateY(-2px);
-    }
-    
-    /* Button styles */
-    .btn-primary {
-      background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-      color: white;
-      border-radius: 12px;
+    .stats-card-title {
+      font-size: 1rem;
       font-weight: 600;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 14px rgba(249, 115, 22, 0.3);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .stats-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .stats-item:last-child {
+      border-bottom: none;
+    }
+    
+    .stats-icon {
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .stats-text {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .stats-text strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    /* ========== CTA Section ========== */
+    .cta-section {
+      max-width: 600px;
+      margin: 0 auto 80px;
+      text-align: center;
+      padding: 0 20px;
+    }
+    
+    .cta-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      box-shadow: 0 8px 30px rgba(245, 87, 108, 0.3);
+    }
+    
+    .cta-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .cta-desc {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+    
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 12px 28px;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
     }
     
     .btn-primary:hover {
+      background: var(--accent-hover);
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+      box-shadow: 0 4px 12px rgba(225, 112, 85, 0.4);
     }
     
     .btn-secondary {
       background: white;
-      color: var(--text);
-      border: 2px solid #e5e7eb;
-      border-radius: 12px;
-      font-weight: 600;
-      transition: all 0.3s ease;
+      color: var(--text-primary);
+      border: 2px solid var(--border);
     }
     
     .btn-secondary:hover {
-      border-color: var(--primary);
-      color: var(--primary);
+      border-color: var(--accent);
+      color: var(--accent);
     }
     
-    /* Navigation */
-    .nav-container {
-      background: rgba(255,255,255,0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
+    .cta-note {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+      margin-top: 16px;
     }
     
-    .nav-link {
-      position: relative;
-      color: var(--text-light);
-      font-weight: 500;
-      transition: color 0.3s ease;
+    /* ========== Features Section ========== */
+    .features-section {
+      max-width: 1000px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
     }
     
-    .nav-link:hover, .nav-link.active {
-      color: var(--primary-dark);
-    }
-    
-    .nav-link::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 0;
-      width: 0;
-      height: 2px;
-      background: var(--primary);
-      transition: width 0.3s ease;
-    }
-    
-    .nav-link:hover::after, .nav-link.active::after {
-      width: 100%;
-    }
-    
-    /* Section styles */
-    .section-title {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 0.5rem;
-    }
-    
-    .section-subtitle {
-      color: var(--text-light);
-      font-size: 1.1rem;
-    }
-    
-    /* Timeline */
-    .timeline-item {
-      position: relative;
-      padding-left: 28px;
-    }
-    
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 8px;
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      background: var(--primary);
-      border: 3px solid white;
-      box-shadow: 0 0 0 2px var(--primary);
-    }
-    
-    .timeline-item::after {
-      content: '';
-      position: absolute;
-      left: 5px;
-      top: 24px;
-      width: 2px;
-      height: calc(100% - 16px);
-      background: #e5e7eb;
-    }
-    
-    .timeline-item:last-child::after {
-      display: none;
-    }
-    
-    /* Skill badge */
-    .skill-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      background: #fef3c7;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      color: #92400e;
-      transition: all 0.2s ease;
-    }
-    
-    .skill-badge:hover {
-      background: #fde68a;
-      transform: scale(1.05);
-    }
-    
-    /* Stats card */
-    .stat-card {
-      background: white;
-      border-radius: 16px;
-      padding: 1.5rem;
+    .features-header {
       text-align: center;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 48px;
     }
     
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .features-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
     }
     
-    /* Hero section */
-    .hero-title {
-      font-size: 3rem;
-      font-weight: 800;
-      line-height: 1.2;
-      background: linear-gradient(135deg, #1f2937 0%, #4b5563 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .features-subtitle {
+      color: var(--text-secondary);
+      font-size: 1.125rem;
+      margin-bottom: 8px;
     }
     
-    .hero-highlight {
-      background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+    .features-desc {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
     }
     
-    /* Carousel */
-    .carousel-container {
-      overflow-x: auto;
-      scroll-snap-type: x mandatory;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none;
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
     }
     
-    .carousel-container::-webkit-scrollbar {
-      display: none;
+    .feature-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.3s;
     }
     
-    .carousel-item {
-      scroll-snap-align: start;
-      flex-shrink: 0;
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
     
-    /* Tab content */
-    .tab-content {
-      display: none;
-    }
-    
-    .tab-content.active {
-      display: block;
-      animation: fadeIn 0.4s ease;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Progress bar */
-    .progress-bar-modern {
-      height: 8px;
-      border-radius: 4px;
-      background: #e5e7eb;
-      overflow: hidden;
-    }
-    
-    .progress-fill-modern {
-      height: 100%;
-      border-radius: 4px;
-      background: linear-gradient(90deg, #f59e0b 0%, #f97316 100%);
-      transition: width 0.5s ease;
-    }
-    
-    /* Feature icon */
     .feature-icon {
       width: 64px;
       height: 64px;
@@ -262,668 +429,557 @@
       align-items: center;
       justify-content: center;
       font-size: 2rem;
-      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-      margin-bottom: 1rem;
+      margin: 0 auto 16px;
     }
     
-    /* Responsive */
+    .feature-icon.blue { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
+    .feature-icon.green { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+    .feature-icon.purple { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
+    .feature-icon.orange { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); }
+    
+    .feature-name {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .feature-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    /* ========== Skills Section ========== */
+    .skills-section {
+      max-width: 1000px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+    }
+    
+    .skills-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .skills-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .skills-subtitle {
+      color: var(--text-secondary);
+    }
+    
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    
+    .skill-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      transition: all 0.3s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+    }
+    
+    .skill-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    
+    .skill-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+    
+    .skill-icon.red { background: #fee2e2; }
+    .skill-icon.green { background: #dcfce7; }
+    .skill-icon.yellow { background: #fef3c7; }
+    .skill-icon.blue { background: #dbeafe; }
+    .skill-icon.purple { background: #f3e8ff; }
+    .skill-icon.orange { background: #ffedd5; }
+    
+    .skill-info {
+      flex: 1;
+    }
+    
+    .skill-name {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    
+    .skill-desc {
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+    
+    .skill-arrow {
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+    }
+    
+    .skills-footer {
+      text-align: center;
+      margin-top: 32px;
+    }
+    
+    .skills-footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    
+    .skills-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    /* ========== How It Works ========== */
+    .how-section {
+      max-width: 900px;
+      margin: 0 auto 80px;
+      padding: 60px 20px;
+      background: var(--bg-secondary);
+      border-radius: 24px;
+    }
+    
+    .how-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    
+    .how-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .how-subtitle {
+      color: var(--text-secondary);
+    }
+    
+    .how-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+    }
+    
+    .how-item {
+      text-align: center;
+    }
+    
+    .how-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      background: var(--card-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 20px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    
+    .how-item-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    
+    .how-item-desc {
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+    }
+    
+    /* ========== Final CTA ========== */
+    .final-cta {
+      max-width: 600px;
+      margin: 0 auto 80px;
+      text-align: center;
+      padding: 0 20px;
+    }
+    
+    .final-cta-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    
+    .final-cta-desc {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+    
+    /* ========== Footer ========== */
+    .footer {
+      background: var(--bg-secondary);
+      padding: 40px 20px;
+      text-align: center;
+    }
+    
+    .footer-text {
+      color: var(--text-secondary);
+      font-size: 0.9375rem;
+    }
+    
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    
+    .footer-links a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+    
+    .footer-links a:hover {
+      text-decoration: underline;
+    }
+    
+    /* ========== Responsive ========== */
     @media (max-width: 768px) {
-      .hero-title { font-size: 2rem; }
-      .section-title { font-size: 1.5rem; }
-      .stat-number { font-size: 2rem; }
+      .nav-menu { display: none; }
+      
+      .hero-title { font-size: 1.75rem; }
+      
+      .stats-overview { grid-template-columns: 1fr; }
+      
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      
+      .skills-grid { grid-template-columns: 1fr; }
+      
+      .how-grid { grid-template-columns: 1fr; }
+      
+      .carousel-text { font-size: 1.125rem; }
+      
+      .carousel-item { padding: 40px 24px; }
     }
   </style>
 </head>
 <body>
-  <div id="root"></div>
-  
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <span class="nav-logo-icon">🐱</span>
+        <span>猫哥Claw养成日记</span>
+      </a>
+      <div class="nav-right">
+        <div class="nav-lang">
+          <a href="#">EN</a>
+          <a href="#">JA</a>
+          <a href="#">DE</a>
+        </div>
+        <div class="nav-menu">
+          <a href="#home">🏠 首页</a>
+          <a href="#diary">📖 日记</a>
+          <a href="#articles">📝 文章</a>
+          <a href="#science">🔰 科普</a>
+          <a href="#skills">🛒 技能</a>
+          <a href="#tools">🦞 工具箱</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <h1 class="hero-title">
+      🚀 金融科技产品经理猫哥<br>
+      <span class="hero-title-highlight">训练了2个AI助手</span>
+    </h1>
+    <p class="hero-subtitle">🐱 Claw = AI个人助手，给它一台电脑，它就是你的数字员工</p>
+  </section>
+
+  <!-- Carousel -->
+  <div class="carousel">
+    <button class="carousel-btn prev" onclick="moveCarousel(-1)">‹</button>
+    <div class="carousel-container">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="carousel-item">
+          <div class="carousel-day">Day 3</div>
+          <div class="carousel-text">K嗨正式上线，开始学习14个技能</div>
+        </div>
+        <div class="carousel-item">
+          <div class="carousel-day">Day 2</div>
+          <div class="carousel-text">@catbot诞生，专职代码开发</div>
+        </div>
+        <div class="carousel-item">
+          <div class="carousel-day">Day 1</div>
+          <div class="carousel-text">个人网站开发启动，展示AI助手能力</div>
+        </div>
+        <div class="carousel-item">
+          <div class="carousel-day">里程碑</div>
+          <div class="carousel-text">完成健康调理计划制定</div>
+        </div>
+        <div class="carousel-item">
+          <div class="carousel-day">今日</div>
+          <div class="carousel-text">网站全新改版上线</div>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-btn next" onclick="moveCarousel(1)">›</button>
+    <div class="carousel-nav">
+      <div class="carousel-dot active" onclick="goToSlide(0)"></div>
+      <div class="carousel-dot" onclick="goToSlide(1)"></div>
+      <div class="carousel-dot" onclick="goToSlide(2)"></div>
+      <div class="carousel-dot" onclick="goToSlide(3)"></div>
+      <div class="carousel-dot" onclick="goToSlide(4)"></div>
+    </div>
+  </div>
+
+  <!-- Stats Overview -->
+  <div class="stats-overview">
+    <div class="stats-card">
+      <div class="stats-card-title">📖 养成历程</div>
+      <div class="stats-item">
+        <span class="stats-icon">🚀</span>
+        <div class="stats-text"><strong>2026年3月10日</strong>，K嗨正式上线，开始AI助手养成之旅</div>
+      </div>
+      <div class="stats-item">
+        <span class="stats-icon">💬</span>
+        <div class="stats-text"><strong>14个技能</strong>，3天密集训练，覆盖飞书生态与开发工具</div>
+      </div>
+      <div class="stats-item">
+        <span class="stats-icon">📊</span>
+        <div class="stats-text">掌握<strong>飞书多维表格</strong>，27种字段类型，批量操作游刃有余</div>
+      </div>
+      <div class="stats-item">
+        <span class="stats-icon">🐱</span>
+        <div class="stats-text">组建<strong>2人AI团队</strong>：K嗨 + @catbot，各司其职高效协作</div>
+      </div>
+    </div>
+    <div class="stats-card">
+      <div class="stats-card-title">🔥 应用成效</div>
+      <div class="stats-item">
+        <span class="stats-icon">✅</span>
+        <div class="stats-text">完成任务<strong>28个</strong>，日程管理、文档处理、代码开发全覆盖</div>
+      </div>
+      <div class="stats-item">
+        <span class="stats-icon">💬</span>
+        <div class="stats-text">处理消息<strong>156条</strong>，飞书IM技能读取、回复自动化</div>
+      </div>
+      <div class="stats-item">
+        <span class="stats-icon">📅</span>
+        <div class="stats-text">创建日程<strong>5个</strong>，日历管理技能掌握</div>
+      </div>
+      <div class="stats-item">
+        <span class="stats-icon">⚡</span>
+        <div class="stats-text">工作效率<strong>提升3倍</strong>，重复性工作全部交给AI助手</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA Section -->
+  <div class="cta-section">
+    <div class="cta-avatar">🐱</div>
+    <h2 class="cta-title">你也可以拥有同款AI助手</h2>
+    <p class="cta-desc">越用越聪明，越用越懂你。会聊天，就能用。</p>
+    <div class="cta-buttons">
+      <a href="#tools" class="btn btn-primary">🦞 查看工具箱</a>
+      <a href="#skills" class="btn btn-secondary">☁️ 浏览技能</a>
+    </div>
+    <p class="cta-note">💻 本地部署 = 数据全在你手里 · ☁️ 云端协作 = 随时随地访问</p>
+  </div>
+
+  <!-- Features Section -->
+  <section class="features-section" id="science">
+    <div class="features-header">
+      <h2 class="features-title">Claw是什么？</h2>
+      <p class="features-subtitle">用聊天就能指挥的AI助手。</p>
+      <p class="features-desc">新时代的数字员工，它有四项核心能力——</p>
+      <p class="features-desc">都是K嗨和@catbot的真实能力印证。</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon blue">💻</div>
+        <div class="feature-name">人用电脑能干的，它都能干</div>
+        <p class="feature-desc">飞书办公套件、GitHub自动化、数据分析、股票分析——白领工作全覆盖。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green">⏰</div>
+        <div class="feature-name">人要休息，它不休息</div>
+        <p class="feature-desc">7×24小时在线，定时任务自动执行，人在休假，助手不停。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon purple">🧬</div>
+        <div class="feature-name">越用越聪明，越来越懂你</div>
+        <p class="feature-desc">扔给它一篇教程，20分钟后就能掌握新技能。会记住你的偏好。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon orange">👥</div>
+        <div class="feature-name">一个能变一支团队</div>
+        <p class="feature-desc">K嗨负责飞书生态，@catbot负责编程开发，各司其职，知识共享。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills Section -->
+  <section class="skills-section" id="skills">
+    <div class="skills-header">
+      <h2 class="skills-title">🧩 技能商店</h2>
+      <p class="skills-subtitle">装什么技能，就变成什么助手</p>
+    </div>
+    <div class="skills-grid">
+      <a href="#" class="skill-card">
+        <div class="skill-icon red">💼</div>
+        <div class="skill-info">
+          <div class="skill-name">超级助理</div>
+          <div class="skill-desc">邮件、会议、日程提醒——白领最需要的全能助手</div>
+        </div>
+        <span class="skill-arrow">→</span>
+      </a>
+      <a href="#" class="skill-card">
+        <div class="skill-icon green">✍️</div>
+        <div class="skill-info">
+          <div class="skill-name">内容创作者</div>
+          <div class="skill-desc">文档、图表、报告——AI写作一条龙</div>
+        </div>
+        <span class="skill-arrow">→</span>
+      </a>
+      <a href="#" class="skill-card">
+        <div class="skill-icon yellow">📈</div>
+        <div class="skill-info">
+          <div class="skill-name">股票分析师</div>
+          <div class="skill-desc">实时盯盘、技术分析——不用熬夜盯盘了</div>
+        </div>
+        <span class="skill-arrow">→</span>
+      </a>
+      <a href="#" class="skill-card">
+        <div class="skill-icon blue">🌏</div>
+        <div class="skill-info">
+          <div class="skill-name">出海运营官</div>
+          <div class="skill-desc">多语言翻译、海外社媒——搞定语言和时间差</div>
+        </div>
+        <span class="skill-arrow">→</span>
+      </a>
+      <a href="#" class="skill-card">
+        <div class="skill-icon purple">💻</div>
+        <div class="skill-info">
+          <div class="skill-name">开发助手</div>
+          <div class="skill-desc">写代码、管GitHub、控制浏览器——技术活全包</div>
+        </div>
+        <span class="skill-arrow">→</span>
+      </a>
+      <a href="#" class="skill-card">
+        <div class="skill-icon orange">⭐</div>
+        <div class="skill-info">
+          <div class="skill-name">猫哥同款</div>
+          <div class="skill-desc">🐱 K嗨 + @catbot 2个助手——复制配置，一键拥有同款</div>
+        </div>
+        <span class="skill-arrow">→</span>
+      </a>
+    </div>
+    <div class="skills-footer">
+      <a href="#">浏览精选技能 →</a> · <a href="#">飞书技能库 →</a>
+    </div>
+  </section>
+
+  <!-- How It Works -->
+  <section class="how-section" id="diary">
+    <div class="how-header">
+      <h2 class="how-title">🐣 Claw需要养</h2>
+      <p class="how-subtitle">会聊天，就能养Claw</p>
+    </div>
+    <div class="how-grid">
+      <div class="how-item">
+        <div class="how-icon">💬</div>
+        <div class="how-item-title">有聊天软件就行</div>
+        <p class="how-item-desc">微信、飞书、钉钉、Telegram——你常用哪个就用哪个。无需安装客户端。</p>
+      </div>
+      <div class="how-item">
+        <div class="how-icon">💻</div>
+        <div class="how-item-title">部署也很简单</div>
+        <p class="how-item-desc">以前需要专业IT知识。现在有了OpenClaw——一键部署，开箱即用。</p>
+      </div>
+      <div class="how-item">
+        <div class="how-icon">🌱</div>
+        <div class="how-item-title">越养越强</div>
+        <p class="how-item-desc">像带新员工——用得越多越懂你，技能越积越多，能力只增不减。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tools Section -->
+  <section class="how-section" id="tools" style="background: white;">
+    <div class="how-header">
+      <h2 class="how-title">🎯 工具箱</h2>
+      <p class="how-subtitle">实用小工具，提升效率</p>
+    </div>
+    <div id="root"></div>
+  </section>
+
+  <!-- Final CTA -->
+  <div class="final-cta">
+    <h2 class="final-cta-title">AI是一场生产力革命</h2>
+    <p class="final-cta-desc">驾驭Claw的人，能力放大十倍。<br>你准备好了吗？</p>
+    <div class="cta-buttons">
+      <a href="#tools" class="btn btn-primary">🦞 开始体验</a>
+      <a href="#skills" class="btn btn-secondary">☁️ 浏览更多</a>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p class="footer-text">🐱 猫哥Claw养成日记 © 2026 谢呈文 × K嗨 × @catbot</p>
+    <div class="footer-links">
+      <a href="https://blog.csdn.net/Mr_charm">CSDN博客</a>
+      <a href="#">GitHub</a>
+      <a href="#">飞书</a>
+    </div>
+  </footer>
+
+  <script>
+    // Carousel functionality
+    let currentSlide = 0;
+    const track = document.getElementById('carouselTrack');
+    const dots = document.querySelectorAll('.carousel-dot');
+    const totalSlides = 5;
+
+    function updateCarousel() {
+      track.style.transform = `translateX(-${currentSlide * 100}%)`;
+      dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+      });
+    }
+
+    function moveCarousel(direction) {
+      currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+      updateCarousel();
+    }
+
+    function goToSlide(index) {
+      currentSlide = index;
+      updateCarousel();
+    }
+
+    // Auto-play carousel
+    setInterval(() => {
+      moveCarousel(1);
+    }, 5000);
+  </script>
+
+  <!-- React App for Tools -->
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
-    
-    // ==================== 数据 ====================
-    const mockData = {
-      profile: {
-        name: "谢呈文",
-        nickname: "猫哥",
-        education: {
-          school: "大连理工大学",
-          major: "船舶与海洋工程",
-          period: "2013-2017",
-          gpa: "3.24（前30%）"
-        },
-        summary: "5年+复合型产品经理经验，专注研发平台工具与数据产品生态建设，主导多款核心产品成功落地。",
-        skills: ["SQL", "Python", "Tableau", "Axure", "FineBI", "数据分析", "产品设计", "数据治理"],
-        experience: [
-          {
-            company: "金融科技公司",
-            role: "大数据中心-产品经理",
-            period: "2021.6-至今",
-            description: "主导数据研发平台、金融知识图谱平台建设，对内服务70+系统，对外输出至同业银行"
-          },
-          {
-            company: "游戏公司（新三板上市）",
-            role: "数据分析师",
-            period: "2020.9-2021.5",
-            description: "负责日活50万、日营收35W美元出海手游的数据分析，产出17篇分析报告"
-          },
-          {
-            company: "航空公司",
-            role: "货运营销/培训开发",
-            period: "2017.8-2020.8",
-            description: "EHR2.0平台数据治理，分析10W+收运数据，优化订舱准确率提升5%"
-          }
-        ],
-        projects: [
-          {
-            name: "数据一站式研发平台",
-            award: "建设银行军功最佳案例",
-            period: "2022-2025",
-            highlights: ["数据线影响分析工具", "数据时效运营工具", "整合模型设计工具", "脚本设计工具", "代码审查工具"]
-          },
-          {
-            name: "金融知识图谱应用",
-            award: "第十五届金融科技创新奖",
-            period: "2023-2025",
-            highlights: ["反洗钱智能导航仪", "客户画像及关系图谱", "大额可疑交易报告"]
-          }
-        ]
-      },
-      
-      blogPosts: [
-        { id: 1, title: "PyCharm File菜单详解", summary: "详细介绍PyCharm 2019的File菜单功能，包括新建项目、文件操作、设置等实用技巧", category: "开发工具", date: "2026-01-24", views: 8441 },
-        { id: 2, title: "Linux基本命令及编程环境实验", summary: "Linux系统终端的基本命令汇总，目录文件操作、系统信息查询、vi命令编程等", category: "Linux", date: "2025-09-21", views: 12500 },
-        { id: 3, title: "字符编码的转换", summary: "Python字符编码转换详解，utf-8与gbk编码转换原理与实践", category: "Python", date: "2025-11-12", views: 6200 },
-        { id: 4, title: "MRP物料需求计划", summary: "MRP与ERP系统介绍，物料需求计划的核心概念与应用", category: "企业管理", date: "2025-02-11", views: 4800 },
-        { id: 5, title: "Java Socket获取GPS定位", summary: "使用Java Socket技术获取GPS定位数据，NMEA协议解析", category: "Java", date: "2026-01-27", views: 3500 },
-        { id: 6, title: "CentOS安装Let's Encrypt免费SSL证书", summary: "详细的SSL证书安装教程，支持自动续签配置", category: "运维", date: "2025-02-09", views: 8900 },
-        { id: 7, title: "autodl vLLM部署MinerU2.5", summary: "基于vLLM的MinerU OCR部署指南，支持文档智能解析", category: "AI", date: "2026-01-24", views: 4200 },
-        { id: 8, title: "ChatAnthropic与LangChain集成", summary: "Claude系列模型在LangChain中的使用方法与最佳实践", category: "AI", date: "2025-10-15", views: 5600 }
-      ],
-      
-      claws: [
-        {
-          name: "K嗨",
-          emoji: "🚀",
-          role: "高效工作助手",
-          description: "负责飞书生态技能执行与任务协调，擅长多维表格、日历、文档等办公自动化",
-          color: "bg-gradient-to-br from-orange-100 to-amber-100",
-          skills: [
-            { name: "飞书多维表格", icon: "📊", desc: "27种字段类型，批量操作" },
-            { name: "飞书日历", icon: "📅", desc: "日程管理，忙闲查询" },
-            { name: "飞书文档", icon: "📝", desc: "云文档创建/编辑/管理" },
-            { name: "飞书IM", icon: "💬", desc: "消息读取，资源下载" },
-            { name: "飞书任务", icon: "✅", desc: "待办管理，清单协作" }
-          ]
-        },
-        {
-          name: "@catbot",
-          emoji: "🐱",
-          role: "编程开发专家",
-          description: "负责代码开发与复杂技术任务，精通多种编程语言和开发框架",
-          color: "bg-gradient-to-br from-blue-100 to-cyan-100",
-          skills: [
-            { name: "代码生成", icon: "💻", desc: "多语言编程，算法实现" },
-            { name: "网页获取", icon: "🌐", desc: "内容抓取，数据提取" },
-            { name: "网页搜索", icon: "🔍", desc: "智能搜索，AI摘要" },
-            { name: "图像生成", icon: "🎨", desc: "AI绘画，创意生成" },
-            { name: "语音合成", icon: "🎙️", desc: "TTS/ASR语音处理" }
-          ]
-        }
-      ],
-      
-      timeline: [
-        { date: "2026-03-10", event: "🎉 K嗨正式上线，开始学习14个技能", milestone: true },
-        { date: "2026-03-10", event: "📊 掌握飞书多维表格管理", milestone: false },
-        { date: "2026-03-10", event: "📅 掌握飞书日历与日程管理", milestone: false },
-        { date: "2026-03-10", event: "📝 掌握飞书文档创建与更新", milestone: false },
-        { date: "2026-03-10", event: "💬 掌握飞书IM消息处理", milestone: false },
-        { date: "2026-03-10", event: "✅ 掌握飞书任务与清单管理", milestone: false },
-        { date: "2026-03-10", event: "🌐 掌握Coze网页获取与搜索", milestone: false },
-        { date: "2026-03-10", event: "🎨 掌握Coze图像生成", milestone: false },
-        { date: "2026-03-10", event: "🎙️ 掌握Coze语音合成", milestone: false },
-        { date: "2026-03-10", event: "🚀 个人网站开发启动", milestone: true },
-        { date: "2026-03-10", event: "✅ 完成健康调理计划制定", milestone: false }
-      ],
-      
-      allSkills: [
-        { name: "飞书多维表格", icon: "📊", category: "飞书生态" },
-        { name: "飞书日历", icon: "📅", category: "飞书生态" },
-        { name: "飞书文档", icon: "📝", category: "飞书生态" },
-        { name: "飞书IM", icon: "💬", category: "飞书生态" },
-        { name: "飞书任务", icon: "✅", category: "飞书生态" },
-        { name: "飞书问题排查", icon: "🔧", category: "飞书生态" },
-        { name: "飞书创建文档", icon: "➕", category: "飞书生态" },
-        { name: "飞书更新文档", icon: "🔄", category: "飞书生态" },
-        { name: "飞书获取文档", icon: "📖", category: "飞书生态" },
-        { name: "网页获取", icon: "🌐", category: "Coze技能" },
-        { name: "网页搜索", icon: "🔍", category: "Coze技能" },
-        { name: "图像生成", icon: "🎨", category: "Coze技能" },
-        { name: "语音合成", icon: "🎙️", category: "Coze技能" },
-        { name: "InStreet社交", icon: "🤝", category: "社交" }
-      ],
-      
-      stats: {
-        skillsLearned: 14,
-        tasksCompleted: 28,
-        messagesProcessed: 156,
-        daysActive: 3
-      }
-    };
 
-    // ==================== 组件 ====================
-    
-    const Navigation = ({ activeTab, setActiveTab }) => {
-      const [isScrolled, setIsScrolled] = useState(false);
-      
-      useEffect(() => {
-        const handleScroll = () => {
-          setIsScrolled(window.scrollY > 20);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-      }, []);
-      
-      const tabs = [
-        { id: 'diary', label: 'Claw日记' },
-        { id: 'about', label: '关于我' },
-        { id: 'works', label: '作品' },
-        { id: 'stocks', label: '股票分析' },
-        { id: 'tools', label: '工具箱' }
-      ];
-      
-      return (
-        <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'nav-container shadow-sm' : 'bg-transparent'}`}>
-          <div className="max-w-6xl mx-auto px-4">
-            <div className="flex items-center justify-between h-16">
-              {/* Logo */}
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => setActiveTab('diary')}>
-                <span className="text-3xl">🐱</span>
-                <span className="font-bold text-xl text-gray-800">猫哥Claw养成日记</span>
-              </div>
-              
-              {/* Nav Links */}
-              <div className="hidden md:flex items-center gap-8">
-                {tabs.map(tab => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`nav-link ${activeTab === tab.id ? 'active' : ''}`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-              
-              {/* Mobile Menu Button */}
-              <div className="md:hidden">
-                <select 
-                  value={activeTab}
-                  onChange={(e) => setActiveTab(e.target.value)}
-                  className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm"
-                >
-                  {tabs.map(tab => (
-                    <option key={tab.id} value={tab.id}>{tab.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        </nav>
-      );
-    };
-
-    // Hero Section
-    const HeroSection = () => {
-      return (
-        <section className="pt-24 pb-16 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h1 className="hero-title mb-6">
-                金融科技产品经理猫哥<br/>
-                训练了<span className="hero-highlight">2个AI助手</span>
-              </h1>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
-                从0开始，3天掌握14个技能，打造专属AI工作团队
-              </p>
-              <div className="flex gap-4 justify-center">
-                <button className="btn-primary px-8 py-3 text-lg" onClick={() => document.getElementById('abilities').scrollIntoView()}>
-                  了解Claw助手 →
-                </button>
-                <button className="btn-secondary px-8 py-3 text-lg" onClick={() => window.open('https://github.com/mrcharm', '_blank')}>
-                  查看GitHub
-                </button>
-              </div>
-            </div>
-            
-            {/* Story Carousel */}
-            <div className="carousel-container flex gap-4 pb-4">
-              {[
-                { emoji: "🚀", title: "K嗨上线", desc: "高效工作助手诞生" },
-                { emoji: "📊", title: "掌握多维表格", desc: "27种字段类型操作" },
-                { emoji: "📅", title: "日历管理", desc: "日程自动化处理" },
-                { emoji: "📝", title: "文档协作", desc: "云文档创建更新" },
-                { emoji: "🐱", title: "@catbot加入", desc: "编程开发专家" },
-                { emoji: "🎨", title: "图像生成", desc: "AI绘画技能get" },
-                { emoji: "🌐", title: "网站开发", desc: "个人网站启动" }
-              ].map((item, idx) => (
-                <div key={idx} className="carousel-item w-48 card p-4 text-center">
-                  <div className="text-4xl mb-2">{item.emoji}</div>
-                  <h3 className="font-bold text-gray-800">{item.title}</h3>
-                  <p className="text-sm text-gray-500">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Stats Overview Section
-    const StatsSection = () => {
-      return (
-        <section className="py-12 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Left: Timeline */}
-              <div className="card p-6">
-                <h3 className="text-xl font-bold mb-6 text-gray-800">📅 成长时间线</h3>
-                <div className="space-y-4">
-                  {mockData.timeline.slice(0, 6).map((item, idx) => (
-                    <div key={idx} className="timeline-item">
-                      <span className="text-sm text-gray-500">{item.date}</span>
-                      <p className={`font-medium ${item.milestone ? 'text-orange-600 font-bold' : 'text-gray-700'}`}>
-                        {item.event}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Right: Stats */}
-              <div className="card p-6">
-                <h3 className="text-xl font-bold mb-6 text-gray-800">📊 关键数据</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="stat-card">
-                    <div className="stat-number">{mockData.stats.skillsLearned}</div>
-                    <p className="text-gray-600 text-sm mt-1">掌握技能</p>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-number">{mockData.stats.tasksCompleted}</div>
-                    <p className="text-gray-600 text-sm mt-1">完成任务</p>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-number">{mockData.stats.messagesProcessed}</div>
-                    <p className="text-gray-600 text-sm mt-1">处理消息</p>
-                  </div>
-                  <div className="stat-card">
-                    <div className="stat-number">{mockData.stats.daysActive}</div>
-                    <p className="text-gray-600 text-sm mt-1">活跃天数</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // CTA Section
-    const CTASection = () => {
-      return (
-        <section className="py-12 px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="card p-8 text-center bg-gradient-to-br from-orange-50 to-amber-50">
-              <div className="text-6xl mb-4">🤖</div>
-              <h2 className="text-2xl font-bold mb-4 text-gray-800">
-                你也可以训练自己的AI助手团队
-              </h2>
-              <p className="text-gray-600 mb-6">
-                从日常任务自动化到复杂项目开发，让AI成为你的得力助手
-              </p>
-              <div className="flex gap-4 justify-center">
-                <button className="btn-primary px-6 py-3" onClick={() => window.open('https://www.coze.cn', '_blank')}>
-                  开始训练 →
-                </button>
-                <button className="btn-secondary px-6 py-3" onClick={() => window.open('https://github.com/mrcharm/cat-grok-website', '_blank')}>
-                  查看源码
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Abilities Section
-    const AbilitiesSection = () => {
-      const abilities = [
-        {
-          icon: "💻",
-          title: "超级全能",
-          desc: "人能做的，它都能做",
-          detail: "从飞书办公到代码开发，从数据分析到图像生成，覆盖全方位工作场景"
-        },
-        {
-          icon: "⏰",
-          title: "永不休息",
-          desc: "24/7全天候待命",
-          detail: "不需要吃饭睡觉，随时响应任务，工作效率倍增"
-        },
-        {
-          icon: "🧬",
-          title: "自我进化",
-          desc: "越用越聪明",
-          detail: "持续学习新技能，根据使用习惯优化响应，越来越懂你的需求"
-        },
-        {
-          icon: "👥",
-          title: "团队协作",
-          desc: "多助手配合",
-          detail: "K嗨负责办公自动化，@catbot专注技术开发，分工明确配合默契"
-        }
-      ];
-      
-      return (
-        <section id="abilities" className="py-16 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="section-title">Claw是什么？</h2>
-              <p className="section-subtitle">你的专属AI助手团队，让工作更轻松高效</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {abilities.map((item, idx) => (
-                <div key={idx} className="card p-6 text-center hover:scale-105 transition-transform">
-                  <div className="feature-icon mx-auto">{item.icon}</div>
-                  <h3 className="text-xl font-bold mb-2 text-gray-800">{item.title}</h3>
-                  <p className="text-orange-600 font-medium mb-2">{item.desc}</p>
-                  <p className="text-gray-500 text-sm">{item.detail}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Skills Section
-    const SkillsSection = () => {
-      const categories = [...new Set(mockData.allSkills.map(s => s.category))];
-      
-      return (
-        <section className="py-16 px-4 bg-white">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="section-title">🎯 技能商店</h2>
-              <p className="section-subtitle">14个实用技能，持续更新中</p>
-            </div>
-            
-            {categories.map((cat, catIdx) => (
-              <div key={catIdx} className="mb-8">
-                <h3 className="text-lg font-bold text-gray-700 mb-4">{cat}</h3>
-                <div className="flex flex-wrap gap-3">
-                  {mockData.allSkills.filter(s => s.category === cat).map((skill, idx) => (
-                    <div key={idx} className="skill-badge cursor-pointer">
-                      <span>{skill.icon}</span>
-                      <span>{skill.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      );
-    };
-
-    // Claw Team Section
-    const ClawTeamSection = () => {
-      return (
-        <section className="py-16 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="section-title">🐱 Claw助手团队</h2>
-              <p className="section-subtitle">认识猫哥的AI助手们</p>
-            </div>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              {mockData.claws.map((claw, idx) => (
-                <div key={idx} className={`card p-8 ${claw.color}`}>
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="text-6xl">{claw.emoji}</div>
-                    <div>
-                      <h3 className="text-2xl font-bold text-gray-800">{claw.name}</h3>
-                      <p className="text-gray-600 font-medium">{claw.role}</p>
-                    </div>
-                  </div>
-                  <p className="text-gray-700 mb-6">{claw.description}</p>
-                  <div className="grid grid-cols-1 gap-3">
-                    {claw.skills.map((skill, i) => (
-                      <div key={i} className="bg-white/80 rounded-xl p-3 flex items-center gap-3">
-                        <span className="text-2xl">{skill.icon}</span>
-                        <div>
-                          <p className="font-bold text-gray-800">{skill.name}</p>
-                          <p className="text-sm text-gray-600">{skill.desc}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // How to Use Section
-    const HowToUseSection = () => {
-      const steps = [
-        { step: "1", title: "了解需求", desc: "告诉Claw助手你的任务目标", icon: "📝" },
-        { step: "2", title: "分配任务", desc: "选择合适的助手执行工作", icon: "🎯" },
-        { step: "3", title: "高效产出", desc: "坐享其成，收获结果", icon: "✨" }
-      ];
-      
-      return (
-        <section className="py-16 px-4 bg-gradient-to-b from-orange-50 to-transparent">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-              <h2 className="section-title">如何使用Claw？</h2>
-              <p className="section-subtitle">三步开启高效工作模式</p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              {steps.map((item, idx) => (
-                <div key={idx} className="card p-6 text-center">
-                  <div className="w-12 h-12 rounded-full bg-orange-100 text-orange-600 font-bold text-xl flex items-center justify-center mx-auto mb-4">
-                    {item.step}
-                  </div>
-                  <div className="text-4xl mb-3">{item.icon}</div>
-                  <h3 className="text-lg font-bold mb-2 text-gray-800">{item.title}</h3>
-                  <p className="text-gray-500">{item.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      );
-    };
-
-    // Stock Analysis Page
-    const StockAnalysisPage = () => {
-      const [date, setDate] = useState('2026-03-10');
-      const [data, setData] = useState(null);
-      const chartRef = useRef(null);
-      const chartInstance = useRef(null);
-      
-      const generateData = (selectedDate) => {
-        return {
-          date: selectedDate,
-          marketSentiment: Math.floor(Math.random() * 30) + 70,
-          hotSectors: ["AI", "金融科技", "新能源", "半导体"],
-          topStocks: ["股票A", "股票B", "股票C", "股票D", "股票E"],
-          riskLevel: "中低",
-          recommendation: "积极",
-          trends: ["科技股上涨", "银行股稳定", "消费股回暖", "新能源活跃"],
-          sixDimensions: {
-            marketHeat: Math.floor(Math.random() * 30) + 70,
-            capitalFlow: Math.floor(Math.random() * 40) + 60,
-            sectorRotation: Math.floor(Math.random() * 35) + 65,
-            riskIndex: Math.floor(Math.random() * 30) + 40,
-            opportunityIndex: Math.floor(Math.random() * 25) + 75,
-            sentimentIndex: Math.floor(Math.random() * 30) + 70
-          }
-        };
-      };
-      
-      useEffect(() => {
-        const newData = generateData(date);
-        setData(newData);
-      }, []);
-      
-      useEffect(() => {
-        if (data && chartRef.current) {
-          if (chartInstance.current) {
-            chartInstance.current.destroy();
-          }
-          
-          const ctx = chartRef.current.getContext('2d');
-          chartInstance.current = new Chart(ctx, {
-            type: 'radar',
-            data: {
-              labels: ['市场热度', '资金流向', '板块轮动', '风险指数', '机会指数', '情绪指数'],
-              datasets: [{
-                label: '市场指标',
-                data: Object.values(data.sixDimensions),
-                backgroundColor: 'rgba(245, 158, 11, 0.2)',
-                borderColor: 'rgba(245, 158, 11, 1)',
-                borderWidth: 2,
-                pointBackgroundColor: 'rgba(245, 158, 11, 1)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgba(245, 158, 11, 1)'
-              }]
-            },
-            options: {
-              responsive: true,
-              maintainAspectRatio: false,
-              scales: {
-                r: {
-                  beginAtZero: true,
-                  max: 100,
-                  ticks: { stepSize: 20 }
-                }
-              }
-            }
-          });
-        }
-      }, [data]);
-      
-      const handleAnalyze = () => {
-        setData(generateData(date));
-      };
-      
-      if (!data) return <div className="p-8 text-center">加载中...</div>;
-      
-      return (
-        <div className="pt-20 pb-12 px-4 max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="section-title">📈 股票分析</h2>
-            <p className="section-subtitle">A股短线复盘智能分析系统</p>
-          </div>
-          
-          {/* Date Selector */}
-          <div className="card p-6 mb-8">
-            <div className="flex flex-wrap gap-4 items-center justify-center">
-              <label className="font-medium text-gray-700">选择日期：</label>
-              <input 
-                type="date" 
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="border border-gray-200 rounded-lg px-4 py-2"
-              />
-              <button onClick={handleAnalyze} className="btn-primary px-6 py-2">
-                🔍 分析
-              </button>
-            </div>
-          </div>
-          
-          {/* Radar Chart */}
-          <div className="card p-6 mb-8">
-            <h3 className="text-xl font-bold mb-4 text-center text-gray-800">📊 六大维度分析</h3>
-            <div className="h-80 md:h-96">
-              <canvas ref={chartRef}></canvas>
-            </div>
-          </div>
-          
-          {/* Six Dimensions Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-            {Object.entries(data.sixDimensions).map(([key, value]) => {
-              const labels = {
-                marketHeat: '市场热度',
-                capitalFlow: '资金流向',
-                sectorRotation: '板块轮动',
-                riskIndex: '风险指数',
-                opportunityIndex: '机会指数',
-                sentimentIndex: '情绪指数'
-              };
-              return (
-                <div key={key} className="card p-4 text-center">
-                  <h4 className="text-gray-600 text-sm mb-2">{labels[key]}</h4>
-                  <div className="stat-number text-3xl mb-2">{value}</div>
-                  <div className="progress-bar-modern">
-                    <div className="progress-fill-modern" style={{ width: `${value}%` }}></div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Hot Sectors & Trends */}
-          <div className="grid md:grid-cols-2 gap-6 mb-8">
-            <div className="card p-6 bg-gradient-to-br from-orange-50 to-amber-50">
-              <h3 className="text-xl font-bold mb-4 text-gray-800">🔥 热门板块</h3>
-              <div className="flex flex-wrap gap-2">
-                {data.hotSectors.map((sector, idx) => (
-                  <span key={idx} className="skill-badge">{sector}</span>
-                ))}
-              </div>
-              <h4 className="text-lg font-bold mt-6 mb-3 text-gray-800">📈 领涨个股</h4>
-              <div className="flex flex-wrap gap-2">
-                {data.topStocks.map((stock, idx) => (
-                  <span key={idx} className="bg-white px-3 py-1 rounded-full text-sm font-medium border border-gray-200">{stock}</span>
-                ))}
-              </div>
-            </div>
-            
-            <div className="card p-6 bg-gradient-to-br from-blue-50 to-cyan-50">
-              <h3 className="text-xl font-bold mb-4 text-gray-800">📊 市场趋势</h3>
-              <ul className="space-y-3">
-                {data.trends.map((trend, idx) => (
-                  <li key={idx} className="flex items-center gap-3 bg-white rounded-lg p-3">
-                    <span className="text-xl">{idx % 2 === 0 ? '📈' : '📉'}</span>
-                    <span className="font-medium text-gray-800">{trend}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          
-          {/* Recommendation */}
-          <div className="card p-8 text-center bg-gradient-to-r from-orange-100 to-amber-100">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">💡 投资建议</h3>
-            <p className="text-3xl font-bold hero-highlight mb-3">{data.recommendation}</p>
-            <div className="flex justify-center gap-4 mt-4">
-              <span className="bg-white px-4 py-2 rounded-full font-medium">风险等级：{data.riskLevel}</span>
-              <span className="bg-white px-4 py-2 rounded-full font-medium">情绪指数：{data.marketSentiment}</span>
-            </div>
-          </div>
-        </div>
-      );
-    };
-
-    // Tools Page
-    const ToolsPage = () => {
+    const Tools = () => {
       const [tomato, setTomato] = useState({ min: 25, sec: 0, running: false });
       const [quote, setQuote] = useState('');
       const [pomodoroCount, setPomodoroCount] = useState(0);
@@ -965,317 +1021,73 @@
       const resetTimer = () => {
         setTomato({ min: 25, sec: 0, running: false });
       };
-      
+
       return (
-        <div className="pt-20 pb-12 px-4 max-w-6xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="section-title">🎯 工具箱</h2>
-            <p className="section-subtitle">实用小工具集合，提升效率</p>
-          </div>
-          
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Tomato Timer */}
-            <div className="card p-6 bg-gradient-to-br from-red-50 to-orange-50">
-              <h3 className="text-xl font-bold mb-6 text-center text-gray-800">🍅 番茄工作法</h3>
-              <div className="text-center">
-                <div className={`text-6xl font-bold mb-6 font-mono ${tomato.running ? 'text-orange-600' : 'text-gray-800'}`}>
-                  {String(tomato.min).padStart(2, '0')}:{String(tomato.sec).padStart(2, '0')}
-                </div>
-                <div className="flex justify-center gap-3 mb-6">
-                  <button onClick={toggleTimer} className={`btn-primary px-6 py-2 ${tomato.running ? 'bg-yellow-500' : ''}`}>
-                    {tomato.running ? '⏸️ 暂停' : '▶️ 开始'}
-                  </button>
-                  <button onClick={resetTimer} className="btn-secondary px-6 py-2">
-                    🔄 重置
-                  </button>
-                </div>
-                <div className="bg-white rounded-xl p-4">
-                  <p className="text-gray-600 text-sm mb-1">今日完成番茄数</p>
-                  <p className="text-3xl font-bold text-orange-600">{pomodoroCount} 🍅</p>
-                </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '800px', margin: '0 auto' }}>
+          {/* Tomato Timer */}
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '16px', textAlign: 'center' }}>🍅 番茄工作法</h3>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '16px', color: tomato.running ? '#e17055' : '#1a1a1a', fontFamily: 'monospace' }}>
+                {String(tomato.min).padStart(2, '0')}:{String(tomato.sec).padStart(2, '0')}
               </div>
-            </div>
-            
-            {/* Daily Quote */}
-            <div className="card p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
-              <h3 className="text-xl font-bold mb-6 text-center text-gray-800">💭 每日一言</h3>
-              <div className="bg-white rounded-xl p-6 text-center min-h-[160px] flex flex-col justify-center">
-                <p className="text-xl font-medium text-gray-800 mb-4">{quote}</p>
-                <button onClick={() => setQuote(quotes[Math.floor(Math.random() * quotes.length)])} className="btn-primary px-4 py-2 text-sm mx-auto">
-                  🎲 换一句
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
+                <button onClick={toggleTimer} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: tomato.running ? '#fbbf24' : '#22c55e', color: 'white', fontWeight: 600, cursor: 'pointer' }}>
+                  {tomato.running ? '⏸️ 暂停' : '▶️ 开始'}
+                </button>
+                <button onClick={resetTimer} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer' }}>
+                  🔄 重置
                 </button>
               </div>
-            </div>
-            
-            {/* Skill Radar */}
-            <div className="card p-6 md:col-span-2">
-              <h3 className="text-xl font-bold mb-6 text-gray-800">🎯 技能雷达</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { skill: '数据分析', level: 90 },
-                  { skill: '产品设计', level: 85 },
-                  { skill: 'Python', level: 75 },
-                  { skill: 'SQL', level: 80 },
-                  { skill: 'Tableau', level: 70 },
-                  { skill: 'Axure', level: 75 },
-                  { skill: '数据治理', level: 85 },
-                  { skill: '项目管理', level: 80 }
-                ].map((item, idx) => (
-                  <div key={idx} className="bg-gray-50 rounded-xl p-4">
-                    <div className="flex justify-between mb-2">
-                      <span className="font-medium text-gray-800">{item.skill}</span>
-                      <span className="text-orange-600 font-bold">{item.level}%</span>
-                    </div>
-                    <div className="progress-bar-modern">
-                      <div className="progress-fill-modern" style={{ width: `${item.level}%` }}></div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {/* Health Tips */}
-            <div className="card p-6 md:col-span-2 bg-gradient-to-br from-green-50 to-teal-50">
-              <h3 className="text-xl font-bold mb-4 text-gray-800">🍃 健康小贴士</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-white rounded-xl p-4 text-center">
-                  <div className="text-3xl mb-2">🌙</div>
-                  <p className="font-bold text-gray-800">作息</p>
-                  <p className="text-sm text-gray-600">22:30前上床，保证7-8小时睡眠</p>
-                </div>
-                <div className="bg-white rounded-xl p-4 text-center">
-                  <div className="text-3xl mb-2">🍚</div>
-                  <p className="font-bold text-gray-800">饮食</p>
-                  <p className="text-sm text-gray-600">三餐规律，晚餐清淡少量</p>
-                </div>
-                <div className="bg-white rounded-xl p-4 text-center">
-                  <div className="text-3xl mb-2">🚶</div>
-                  <p className="font-bold text-gray-800">运动</p>
-                  <p className="text-sm text-gray-600">饭后百步走，每天泡脚15分钟</p>
-                </div>
+              <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px' }}>
+                <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '4px' }}>今日完成番茄数</p>
+                <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#e17055' }}>{pomodoroCount} 🍅</p>
               </div>
             </div>
           </div>
-        </div>
-      );
-    };
 
-    // About Page
-    const AboutPage = () => {
-      const profile = mockData.profile;
-      
-      return (
-        <div className="pt-20 pb-12 px-4 max-w-6xl mx-auto">
-          {/* Hero */}
-          <div className="text-center mb-12">
-            <div className="text-8xl mb-4">👨‍💻</div>
-            <h2 className="section-title">关于我</h2>
-            <p className="section-subtitle max-w-2xl mx-auto">{profile.summary}</p>
-          </div>
-          
-          {/* Education */}
-          <div className="card p-6 mb-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">🎓 教育背景</h3>
-            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6">
-              <h4 className="text-xl font-bold text-gray-800">{profile.education.school}</h4>
-              <p className="text-gray-600">{profile.education.major}</p>
-              <div className="flex flex-wrap gap-3 mt-3">
-                <span className="bg-white px-3 py-1 rounded-full text-sm font-medium">{profile.education.period}</span>
-                <span className="bg-white px-3 py-1 rounded-full text-sm font-medium">GPA: {profile.education.gpa}</span>
-              </div>
+          {/* Daily Quote */}
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '16px', textAlign: 'center' }}>💭 每日一言</h3>
+            <div style={{ background: '#f5f3f0', borderRadius: '12px', padding: '20px', minHeight: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: '16px' }}>
+              <p style={{ fontSize: '1.125rem', fontWeight: 600, textAlign: 'center' }}>{quote}</p>
             </div>
+            <button onClick={() => setQuote(quotes[Math.floor(Math.random() * quotes.length)])} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer' }}>
+              🎲 换一句
+            </button>
           </div>
-          
-          {/* Skills */}
-          <div className="card p-6 mb-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">🛠️ 技能栈</h3>
-            <div className="flex flex-wrap gap-2">
-              {profile.skills.map((skill, idx) => (
-                <span key={idx} className="skill-badge">{skill}</span>
-              ))}
-            </div>
-          </div>
-          
-          {/* Projects */}
-          <div className="card p-6 mb-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">🏆 重点项目</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              {profile.projects.map((proj, idx) => (
-                <div key={idx} className="bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl p-5">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="bg-orange-500 text-white px-2 py-1 rounded text-xs font-bold">{proj.award}</span>
+
+          {/* Skill Radar */}
+          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', gridColumn: 'span 2' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '16px' }}>🎯 技能雷达</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+              {[
+                { skill: '数据分析', level: 90 },
+                { skill: '产品设计', level: 85 },
+                { skill: 'Python', level: 75 },
+                { skill: 'SQL', level: 80 },
+                { skill: 'Tableau', level: 70 },
+                { skill: 'Axure', level: 75 },
+                { skill: '数据治理', level: 85 },
+                { skill: '项目管理', level: 80 }
+              ].map((item, idx) => (
+                <div key={idx} style={{ background: '#f5f3f0', borderRadius: '8px', padding: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <span style={{ fontWeight: 500 }}>{item.skill}</span>
+                    <span style={{ color: '#666' }}>{item.level}%</span>
                   </div>
-                  <h4 className="text-lg font-bold text-gray-800 mb-1">{proj.name}</h4>
-                  <p className="text-gray-500 text-sm mb-3">{proj.period}</p>
-                  <div className="flex flex-wrap gap-2">
-                    {proj.highlights.map((h, i) => (
-                      <span key={i} className="bg-white px-2 py-1 rounded-full text-xs font-medium">{h}</span>
-                    ))}
+                  <div style={{ height: '6px', background: '#e5e7eb', borderRadius: '3px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: '3px', background: 'linear-gradient(90deg, #f59e0b, #f97316)', width: `${item.level}%`, transition: 'width 0.5s' }}></div>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          
-          {/* Experience */}
-          <div className="card p-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">💼 工作经历</h3>
-            <div className="space-y-4">
-              {profile.experience.map((exp, idx) => (
-                <div key={idx} className="border-l-4 border-orange-400 pl-4 py-2">
-                  <div className="flex flex-wrap justify-between items-start gap-2 mb-1">
-                    <h4 className="text-lg font-bold text-gray-800">{exp.company}</h4>
-                    <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded">{exp.period}</span>
-                  </div>
-                  <p className="text-orange-600 font-medium mb-2">{exp.role}</p>
-                  <p className="text-gray-600 text-sm">{exp.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       );
     };
 
-    // Works Page
-    const WorksPage = () => {
-      const [filter, setFilter] = useState('all');
-      
-      const categories = ['all', '开发工具', 'Linux', 'Python', 'Java', '运维', 'AI', '企业管理'];
-      
-      const filteredPosts = filter === 'all' 
-        ? mockData.blogPosts 
-        : mockData.blogPosts.filter(post => post.category === filter);
-      
-      return (
-        <div className="pt-20 pb-12 px-4 max-w-6xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="section-title">✍️ 我的博客作品</h2>
-            <p className="section-subtitle">CSDN技术文章精选，分享学习与工作经验</p>
-          </div>
-          
-          {/* Filter */}
-          <div className="flex flex-wrap gap-2 justify-center mb-8">
-            {categories.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  filter === cat 
-                    ? 'bg-orange-500 text-white' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {cat === 'all' ? '全部' : cat}
-              </button>
-            ))}
-          </div>
-          
-          {/* Posts Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPosts.map(post => (
-              <div key={post.id} className="card p-5 hover:scale-[1.02] transition-transform cursor-pointer">
-                <div className="flex items-center justify-between mb-3">
-                  <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">
-                    {post.category}
-                  </span>
-                  <span className="text-gray-400 text-sm">{post.date}</span>
-                </div>
-                <h3 className="text-lg font-bold mb-2 text-gray-800 line-clamp-2">
-                  {post.title}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-2">{post.summary}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-500 text-sm">👁️ {post.views.toLocaleString()}</span>
-                  <a 
-                    href="https://blog.csdn.net/Mr_charm" 
-                    target="_blank" 
-                    className="text-orange-600 font-medium text-sm hover:underline"
-                  >
-                    阅读全文 →
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      );
-    };
-
-    // Main Diary Page
-    const DiaryPage = () => {
-      return (
-        <div>
-          <HeroSection />
-          <StatsSection />
-          <CTASection />
-          <AbilitiesSection />
-          <SkillsSection />
-          <ClawTeamSection />
-          <HowToUseSection />
-        </div>
-      );
-    };
-
-    // Footer
-    const Footer = () => {
-      return (
-        <footer className="bg-white border-t border-gray-100 py-12">
-          <div className="max-w-6xl mx-auto px-4 text-center">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-3xl">🐱</span>
-              <span className="font-bold text-xl text-gray-800">猫哥Claw养成日记</span>
-            </div>
-            <p className="text-gray-500 mb-4">记录AI助手的成长历程，见证技能的进化之路</p>
-            <div className="flex justify-center gap-6 mb-6">
-              <a href="https://blog.csdn.net/Mr_charm" target="_blank" className="text-gray-600 hover:text-orange-600 transition-colors">CSDN博客</a>
-              <a href="https://github.com/mrcharm" target="_blank" className="text-gray-600 hover:text-orange-600 transition-colors">GitHub</a>
-              <span className="text-gray-400">|</span>
-              <span className="text-gray-500">最后更新：2026-03-12</span>
-            </div>
-            <p className="text-gray-400 text-sm">Built with ❤️ by K嗨 🚀 & @catbot 🐱</p>
-          </div>
-        </footer>
-      );
-    };
-
-    // ==================== 主应用 ====================
-    const App = () => {
-      const [activeTab, setActiveTab] = useState('diary');
-      
-      // Scroll to top when tab changes
-      useEffect(() => {
-        window.scrollTo(0, 0);
-      }, [activeTab]);
-      
-      return (
-        <div className="min-h-screen" style={{ backgroundColor: 'var(--bg-color)' }}>
-          <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
-          
-          <main>
-            <div className={`tab-content ${activeTab === 'diary' ? 'active' : ''}`}>
-              <DiaryPage />
-            </div>
-            <div className={`tab-content ${activeTab === 'about' ? 'active' : ''}`}>
-              <AboutPage />
-            </div>
-            <div className={`tab-content ${activeTab === 'works' ? 'active' : ''}`}>
-              <WorksPage />
-            </div>
-            <div className={`tab-content ${activeTab === 'stocks' ? 'active' : ''}`}>
-              <StockAnalysisPage />
-            </div>
-            <div className={`tab-content ${activeTab === 'tools' ? 'active' : ''}`}>
-              <ToolsPage />
-            </div>
-          </main>
-          
-          <Footer />
-        </div>
-      );
-    };
-    
-    ReactDOM.render(<App />, document.getElementById('root'));
+    ReactDOM.render(<Tools />, document.getElementById('root'));
   </script>
 </body>
 </html>
