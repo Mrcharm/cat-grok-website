@@ -5,45 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🐱 猫哥Claw养成日记</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐱</text></svg>">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      --bg-primary: #faf8f5;
-      --bg-secondary: #f5f3f0;
-      --text-primary: #1a1a1a;
-      --text-secondary: #666666;
-      --accent: #e17055;
-      --accent-hover: #d63031;
-      --card-bg: #ffffff;
-      --border: #e8e5e2;
-    }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
+      background: #faf8f5;
+      color: #1a1a1a;
       line-height: 1.6;
     }
+    
+    a { text-decoration: none; color: inherit; }
     
     /* ========== Navigation ========== */
     .nav {
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+      top: 0; left: 0; right: 0;
       background: rgba(250, 248, 245, 0.95);
       backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
       z-index: 1000;
       padding: 12px 0;
     }
@@ -51,7 +31,7 @@
     .nav-inner {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 20px;
+      padding: 0 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -61,37 +41,30 @@
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       font-weight: 700;
-      color: var(--text-primary);
-      text-decoration: none;
     }
     
-    .nav-logo-icon {
-      font-size: 1.5rem;
-    }
+    .nav-logo-icon { font-size: 1.25rem; }
     
     .nav-right {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 32px;
     }
     
     .nav-lang {
       display: flex;
-      gap: 12px;
+      gap: 16px;
       font-size: 0.875rem;
     }
     
     .nav-lang a {
-      color: var(--text-secondary);
-      text-decoration: none;
+      color: #666;
       transition: color 0.2s;
     }
     
-    .nav-lang a:hover {
-      color: var(--accent);
-    }
+    .nav-lang a:hover { color: #e17055; }
     
     .nav-menu {
       display: flex;
@@ -99,52 +72,41 @@
     }
     
     .nav-menu a {
-      color: var(--text-secondary);
-      text-decoration: none;
+      color: #666;
       font-size: 0.9375rem;
       transition: color 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
     
-    .nav-menu a:hover {
-      color: var(--accent);
-    }
+    .nav-menu a:hover { color: #e17055; }
     
     /* ========== Hero Section ========== */
     .hero {
-      padding: 140px 20px 60px;
+      padding: 120px 24px 40px;
       text-align: center;
       max-width: 800px;
       margin: 0 auto;
     }
     
     .hero-title {
-      font-size: 2.5rem;
+      font-size: 2.25rem;
       font-weight: 800;
       line-height: 1.3;
-      margin-bottom: 16px;
-    }
-    
-    .hero-title-highlight {
-      color: var(--accent);
+      margin-bottom: 12px;
     }
     
     .hero-subtitle {
       font-size: 1.125rem;
-      color: var(--text-secondary);
-      margin-bottom: 40px;
+      color: #666;
     }
     
     /* ========== Carousel ========== */
-    .carousel {
-      position: relative;
-      max-width: 600px;
+    .carousel-wrap {
+      max-width: 700px;
       margin: 0 auto 40px;
+      position: relative;
     }
     
-    .carousel-container {
+    .carousel {
       overflow: hidden;
       border-radius: 16px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.1);
@@ -158,26 +120,15 @@
     .carousel-item {
       min-width: 100%;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 60px 40px;
+      padding: 80px 40px;
       text-align: center;
       color: white;
     }
     
-    .carousel-item:nth-child(2) {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    }
-    
-    .carousel-item:nth-child(3) {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    }
-    
-    .carousel-item:nth-child(4) {
-      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    }
-    
-    .carousel-item:nth-child(5) {
-      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-    }
+    .carousel-item:nth-child(2) { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .carousel-item:nth-child(3) { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .carousel-item:nth-child(4) { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .carousel-item:nth-child(5) { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
     
     .carousel-day {
       font-size: 0.875rem;
@@ -190,52 +141,55 @@
       font-weight: 700;
     }
     
-    .carousel-nav {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 16px;
-    }
-    
-    .carousel-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .carousel-dot.active {
-      background: var(--accent);
-      width: 24px;
-      border-radius: 4px;
-    }
-    
     .carousel-btn {
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
       background: white;
       border: none;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.15);
       cursor: pointer;
       font-size: 1.25rem;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
+      z-index: 10;
     }
     
     .carousel-btn:hover {
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      transform: translateY(-50%) scale(1.05);
     }
     
-    .carousel-btn.prev { left: -20px; }
-    .carousel-btn.next { right: -20px; }
+    .carousel-btn.prev { left: -22px; }
+    .carousel-btn.next { right: -22px; }
+    
+    .carousel-dots {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ddd;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+    }
+    
+    .carousel-dot.active {
+      background: #e17055;
+      width: 24px;
+      border-radius: 4px;
+    }
     
     /* ========== Stats Overview ========== */
     .stats-overview {
@@ -244,11 +198,11 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 24px;
-      padding: 0 20px;
+      padding: 0 24px;
     }
     
     .stats-card {
-      background: var(--card-bg);
+      background: white;
       border-radius: 16px;
       padding: 24px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -258,9 +212,6 @@
       font-size: 1rem;
       font-weight: 600;
       margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
     
     .stats-item {
@@ -268,160 +219,197 @@
       align-items: flex-start;
       gap: 12px;
       padding: 12px 0;
-      border-bottom: 1px solid var(--border);
+      border-bottom: 1px solid #f0f0f0;
     }
     
-    .stats-item:last-child {
-      border-bottom: none;
-    }
+    .stats-item:last-child { border-bottom: none; }
     
-    .stats-icon {
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
+    .stats-icon { font-size: 1.25rem; flex-shrink: 0; }
     
     .stats-text {
       font-size: 0.9375rem;
-      color: var(--text-secondary);
+      color: #666;
       line-height: 1.5;
     }
     
     .stats-text strong {
-      color: var(--text-primary);
+      color: #1a1a1a;
       font-weight: 600;
     }
     
-    /* ========== CTA Section ========== */
-    .cta-section {
+    /* ========== Hero CTA ========== */
+    .hero-cta {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 60px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .btn-red {
+      background: #e17055;
+      color: white;
+      border: none;
+    }
+    
+    .btn-red:hover {
+      background: #d63031;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(225, 112, 85, 0.4);
+    }
+    
+    .btn-white {
+      background: white;
+      color: #1a1a1a;
+      border: 1px solid #e0e0e0;
+    }
+    
+    .btn-white:hover {
+      border-color: #e17055;
+      color: #e17055;
+    }
+    
+    /* ========== Adopt Section ========== */
+    .adopt-section {
       max-width: 600px;
       margin: 0 auto 80px;
       text-align: center;
-      padding: 0 20px;
+      padding: 0 24px;
     }
     
-    .cta-avatar {
-      width: 120px;
-      height: 120px;
+    .adopt-avatar {
+      width: 140px;
+      height: 140px;
       border-radius: 50%;
       background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
       margin: 0 auto 24px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 4rem;
-      box-shadow: 0 8px 30px rgba(245, 87, 108, 0.3);
+      font-size: 5rem;
+      box-shadow: 0 12px 40px rgba(245, 87, 108, 0.3);
     }
     
-    .cta-title {
+    .adopt-title {
       font-size: 1.5rem;
       font-weight: 700;
       margin-bottom: 8px;
     }
     
-    .cta-desc {
-      color: var(--text-secondary);
+    .adopt-desc {
+      color: #666;
       margin-bottom: 24px;
     }
     
-    .cta-buttons {
+    .adopt-buttons {
       display: flex;
       gap: 16px;
       justify-content: center;
-      flex-wrap: wrap;
+      margin-bottom: 16px;
     }
     
-    .btn {
-      padding: 12px 28px;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-      border: none;
-    }
-    
-    .btn-primary:hover {
-      background: var(--accent-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(225, 112, 85, 0.4);
-    }
-    
-    .btn-secondary {
-      background: white;
-      color: var(--text-primary);
-      border: 2px solid var(--border);
-    }
-    
-    .btn-secondary:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    
-    .cta-note {
+    .adopt-note {
       font-size: 0.875rem;
-      color: var(--text-secondary);
-      margin-top: 16px;
+      color: #999;
     }
     
-    /* ========== Features Section ========== */
-    .features-section {
+    /* ========== Features Intro ========== */
+    .features-intro {
       max-width: 1000px;
-      margin: 0 auto 80px;
-      padding: 0 20px;
+      margin: 0 auto 60px;
+      padding: 0 24px;
     }
     
-    .features-header {
+    .features-intro-header {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
     }
     
-    .features-title {
-      font-size: 1.75rem;
+    .features-intro-title {
+      font-size: 1.5rem;
       font-weight: 700;
       margin-bottom: 8px;
     }
     
-    .features-subtitle {
-      color: var(--text-secondary);
-      font-size: 1.125rem;
+    .features-intro-subtitle {
+      color: #666;
       margin-bottom: 8px;
     }
     
-    .features-desc {
-      color: var(--text-secondary);
+    .features-intro-desc {
+      color: #999;
+      font-size: 0.9375rem;
+      margin-bottom: 8px;
+    }
+    
+    .features-intro-link {
+      color: #e17055;
       font-size: 0.9375rem;
     }
     
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20px;
+    .features-intro-link:hover { text-decoration: underline; }
+    
+    .features-icons {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-bottom: 40px;
     }
     
-    .feature-card {
-      background: var(--card-bg);
+    .feature-icon-item {
+      text-align: center;
+    }
+    
+    .feature-icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 12px;
+    }
+    
+    .feature-icon-circle.blue { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
+    .feature-icon-circle.green { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
+    .feature-icon-circle.purple { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
+    .feature-icon-circle.orange { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); }
+    
+    .feature-icon-name {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    
+    /* ========== Feature Details ========== */
+    .feature-details {
+      max-width: 900px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    
+    .feature-detail-item {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 32px;
+      background: white;
       border-radius: 16px;
       padding: 24px;
-      text-align: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      transition: all 0.3s;
     }
     
-    .feature-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-    }
-    
-    .feature-icon {
+    .feature-detail-icon {
       width: 64px;
       height: 64px;
       border-radius: 16px;
@@ -429,35 +417,58 @@
       align-items: center;
       justify-content: center;
       font-size: 2rem;
-      margin: 0 auto 16px;
+      flex-shrink: 0;
     }
     
-    .feature-icon.blue { background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); }
-    .feature-icon.green { background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%); }
-    .feature-icon.purple { background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%); }
-    .feature-icon.orange { background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%); }
+    .feature-detail-content {
+      flex: 1;
+    }
     
-    .feature-name {
-      font-size: 1.125rem;
+    .feature-detail-title {
+      font-size: 1.25rem;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 12px;
     }
     
-    .feature-desc {
-      font-size: 0.875rem;
-      color: var(--text-secondary);
+    .feature-detail-text {
+      color: #666;
+      line-height: 1.8;
+      margin-bottom: 12px;
     }
+    
+    .feature-detail-text strong {
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+    
+    .feature-detail-link {
+      color: #e17055;
+      font-size: 0.9375rem;
+    }
+    
+    .feature-detail-link:hover { text-decoration: underline; }
+    
+    .features-footer {
+      text-align: center;
+      margin-top: 40px;
+    }
+    
+    .features-footer a {
+      color: #e17055;
+    }
+    
+    .features-footer a:hover { text-decoration: underline; }
     
     /* ========== Skills Section ========== */
     .skills-section {
       max-width: 1000px;
       margin: 0 auto 80px;
-      padding: 0 20px;
+      padding: 0 24px;
     }
     
     .skills-header {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
     }
     
     .skills-title {
@@ -467,7 +478,7 @@
     }
     
     .skills-subtitle {
-      color: var(--text-secondary);
+      color: #666;
     }
     
     .skills-grid {
@@ -477,21 +488,19 @@
     }
     
     .skill-card {
-      background: var(--card-bg);
+      background: white;
       border-radius: 16px;
       padding: 20px;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
       transition: all 0.3s;
       cursor: pointer;
-      text-decoration: none;
-      color: inherit;
     }
     
     .skill-card:hover {
-      transform: translateY(-2px);
+      transform: translateY(-4px);
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
     
@@ -513,9 +522,7 @@
     .skill-icon.purple { background: #f3e8ff; }
     .skill-icon.orange { background: #ffedd5; }
     
-    .skill-info {
-      flex: 1;
-    }
+    .skill-info { flex: 1; }
     
     .skill-name {
       font-weight: 600;
@@ -524,12 +531,13 @@
     
     .skill-desc {
       font-size: 0.875rem;
-      color: var(--text-secondary);
+      color: #666;
     }
     
     .skill-arrow {
-      color: var(--text-secondary);
+      color: #999;
       font-size: 1.25rem;
+      align-self: center;
     }
     
     .skills-footer {
@@ -538,21 +546,17 @@
     }
     
     .skills-footer a {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 500;
+      color: #e17055;
     }
     
-    .skills-footer a:hover {
-      text-decoration: underline;
-    }
+    .skills-footer a:hover { text-decoration: underline; }
     
-    /* ========== How It Works ========== */
+    /* ========== How Section ========== */
     .how-section {
       max-width: 900px;
       margin: 0 auto 80px;
-      padding: 60px 20px;
-      background: var(--bg-secondary);
+      padding: 60px 24px;
+      background: #f5f3f0;
       border-radius: 24px;
     }
     
@@ -568,13 +572,14 @@
     }
     
     .how-subtitle {
-      color: var(--text-secondary);
+      color: #666;
     }
     
     .how-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 32px;
+      margin-bottom: 40px;
     }
     
     .how-item {
@@ -585,7 +590,7 @@
       width: 80px;
       height: 80px;
       border-radius: 20px;
-      background: var(--card-bg);
+      background: white;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -602,7 +607,13 @@
     
     .how-item-desc {
       font-size: 0.9375rem;
-      color: var(--text-secondary);
+      color: #666;
+    }
+    
+    .how-cta {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
     }
     
     /* ========== Final CTA ========== */
@@ -610,7 +621,7 @@
       max-width: 600px;
       margin: 0 auto 80px;
       text-align: center;
-      padding: 0 20px;
+      padding: 0 24px;
     }
     
     .final-cta-title {
@@ -620,19 +631,162 @@
     }
     
     .final-cta-desc {
-      color: var(--text-secondary);
+      color: #666;
       margin-bottom: 32px;
+    }
+    
+    /* ========== Guestbook ========== */
+    .guestbook {
+      max-width: 700px;
+      margin: 0 auto 80px;
+      padding: 0 24px;
+    }
+    
+    .guestbook-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .guestbook-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    
+    .guestbook-subtitle {
+      color: #666;
+    }
+    
+    .guestbook-form {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 24px;
+    }
+    
+    .guestbook-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+    
+    .guestbook-input:focus {
+      outline: none;
+      border-color: #e17055;
+    }
+    
+    .guestbook-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      min-height: 100px;
+      resize: vertical;
+      font-family: inherit;
+      margin-bottom: 12px;
+    }
+    
+    .guestbook-textarea:focus {
+      outline: none;
+      border-color: #e17055;
+    }
+    
+    .guestbook-submit {
+      background: #e17055;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .guestbook-submit:hover {
+      background: #d63031;
+    }
+    
+    .guestbook-list {
+      space-y: 16px;
+    }
+    
+    .guestbook-item {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 16px;
+    }
+    
+    .guestbook-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .guestbook-item-author {
+      font-weight: 600;
+    }
+    
+    .guestbook-item-time {
+      font-size: 0.875rem;
+      color: #999;
+    }
+    
+    .guestbook-item-text {
+      color: #666;
+      line-height: 1.6;
+    }
+    
+    .guestbook-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .guestbook-page-btn {
+      padding: 8px 16px;
+      border: 1px solid #e0e0e0;
+      background: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .guestbook-page-btn:hover:not(:disabled) {
+      border-color: #e17055;
+      color: #e17055;
+    }
+    
+    .guestbook-page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .guestbook-page-info {
+      color: #666;
+      font-size: 0.9375rem;
     }
     
     /* ========== Footer ========== */
     .footer {
-      background: var(--bg-secondary);
-      padding: 40px 20px;
+      background: #f5f3f0;
+      padding: 40px 24px;
       text-align: center;
     }
     
     .footer-text {
-      color: var(--text-secondary);
+      color: #666;
       font-size: 0.9375rem;
     }
     
@@ -644,31 +798,32 @@
     }
     
     .footer-links a {
-      color: var(--accent);
-      text-decoration: none;
+      color: #e17055;
     }
     
-    .footer-links a:hover {
-      text-decoration: underline;
-    }
+    .footer-links a:hover { text-decoration: underline; }
     
     /* ========== Responsive ========== */
     @media (max-width: 768px) {
       .nav-menu { display: none; }
+      .nav-lang { display: none; }
       
-      .hero-title { font-size: 1.75rem; }
+      .hero-title { font-size: 1.5rem; }
       
       .stats-overview { grid-template-columns: 1fr; }
       
-      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-icons {
+        flex-wrap: wrap;
+        gap: 24px;
+      }
       
       .skills-grid { grid-template-columns: 1fr; }
       
       .how-grid { grid-template-columns: 1fr; }
       
-      .carousel-text { font-size: 1.125rem; }
+      .feature-detail-item { flex-direction: column; }
       
-      .carousel-item { padding: 40px 24px; }
+      .carousel-btn { display: none; }
     }
   </style>
 </head>
@@ -702,15 +857,15 @@
   <section class="hero" id="home">
     <h1 class="hero-title">
       🚀 金融科技产品经理猫哥<br>
-      <span class="hero-title-highlight">训练了2个AI助手</span>
+      训练了2个AI助手
     </h1>
     <p class="hero-subtitle">🐱 Claw = AI个人助手，给它一台电脑，它就是你的数字员工</p>
   </section>
 
   <!-- Carousel -->
-  <div class="carousel">
+  <div class="carousel-wrap">
     <button class="carousel-btn prev" onclick="moveCarousel(-1)">‹</button>
-    <div class="carousel-container">
+    <div class="carousel">
       <div class="carousel-track" id="carouselTrack">
         <div class="carousel-item">
           <div class="carousel-day">Day 3</div>
@@ -722,7 +877,7 @@
         </div>
         <div class="carousel-item">
           <div class="carousel-day">Day 1</div>
-          <div class="carousel-text">个人网站开发启动，展示AI助手能力</div>
+          <div class="carousel-text">个人网站开发启动</div>
         </div>
         <div class="carousel-item">
           <div class="carousel-day">里程碑</div>
@@ -735,12 +890,12 @@
       </div>
     </div>
     <button class="carousel-btn next" onclick="moveCarousel(1)">›</button>
-    <div class="carousel-nav">
-      <div class="carousel-dot active" onclick="goToSlide(0)"></div>
-      <div class="carousel-dot" onclick="goToSlide(1)"></div>
-      <div class="carousel-dot" onclick="goToSlide(2)"></div>
-      <div class="carousel-dot" onclick="goToSlide(3)"></div>
-      <div class="carousel-dot" onclick="goToSlide(4)"></div>
+    <div class="carousel-dots">
+      <button class="carousel-dot active" onclick="goToSlide(0)"></button>
+      <button class="carousel-dot" onclick="goToSlide(1)"></button>
+      <button class="carousel-dot" onclick="goToSlide(2)"></button>
+      <button class="carousel-dot" onclick="goToSlide(3)"></button>
+      <button class="carousel-dot" onclick="goToSlide(4)"></button>
     </div>
   </div>
 
@@ -786,49 +941,108 @@
     </div>
   </div>
 
-  <!-- CTA Section -->
-  <div class="cta-section">
-    <div class="cta-avatar">🐱</div>
-    <h2 class="cta-title">你也可以拥有同款AI助手</h2>
-    <p class="cta-desc">越用越聪明，越用越懂你。会聊天，就能用。</p>
-    <div class="cta-buttons">
-      <a href="#tools" class="btn btn-primary">🦞 查看工具箱</a>
-      <a href="#skills" class="btn btn-secondary">☁️ 浏览技能</a>
-    </div>
-    <p class="cta-note">💻 本地部署 = 数据全在你手里 · ☁️ 云端协作 = 随时随地访问</p>
+  <!-- Hero CTA -->
+  <div class="hero-cta">
+    <a href="#diary" class="btn btn-red">📖 从 Day 1 看起</a>
+    <a href="#skills" class="btn btn-white">🐱 领养同款助手</a>
   </div>
 
-  <!-- Features Section -->
-  <section class="features-section" id="science">
-    <div class="features-header">
-      <h2 class="features-title">Claw是什么？</h2>
-      <p class="features-subtitle">用聊天就能指挥的AI助手。</p>
-      <p class="features-desc">新时代的数字员工，它有四项核心能力——</p>
-      <p class="features-desc">都是K嗨和@catbot的真实能力印证。</p>
+  <!-- Adopt Section -->
+  <div class="adopt-section">
+    <div class="adopt-avatar">🐱</div>
+    <h2 class="adopt-title">你也可以拥有同款AI助手</h2>
+    <p class="adopt-desc">越用越聪明，越用越懂你。会聊天，就能用。</p>
+    <div class="adopt-buttons">
+      <a href="#tools" class="btn btn-red">🦞 查看工具箱</a>
+      <a href="#skills" class="btn btn-white">☁️ 浏览技能</a>
     </div>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon blue">💻</div>
-        <div class="feature-name">人用电脑能干的，它都能干</div>
-        <p class="feature-desc">飞书办公套件、GitHub自动化、数据分析、股票分析——白领工作全覆盖。</p>
+    <p class="adopt-note">💻 本地部署 = 数据全在你手里 · ☁️ 云端协作 = 随时随地访问</p>
+  </div>
+
+  <!-- Features Intro -->
+  <section class="features-intro" id="science">
+    <div class="features-intro-header">
+      <h2 class="features-intro-title">Claw是什么？</h2>
+      <p class="features-intro-subtitle">用聊天就能指挥的AI助手。</p>
+      <p class="features-intro-desc">新时代的数字员工，它有四项核心能力——</p>
+      <p class="features-intro-desc">不是吹的，都是K嗨和@catbot的真实能力印证。</p>
+      <a href="#" class="features-intro-link">📖 看完整科普 →</a>
+    </div>
+    
+    <div class="features-icons">
+      <div class="feature-icon-item">
+        <div class="feature-icon-circle blue">💻</div>
+        <div class="feature-icon-name">超级全能</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon green">⏰</div>
-        <div class="feature-name">人要休息，它不休息</div>
-        <p class="feature-desc">7×24小时在线，定时任务自动执行，人在休假，助手不停。</p>
+      <div class="feature-icon-item">
+        <div class="feature-icon-circle green">⏰</div>
+        <div class="feature-icon-name">永不休息</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon purple">🧬</div>
-        <div class="feature-name">越用越聪明，越来越懂你</div>
-        <p class="feature-desc">扔给它一篇教程，20分钟后就能掌握新技能。会记住你的偏好。</p>
+      <div class="feature-icon-item">
+        <div class="feature-icon-circle purple">🧬</div>
+        <div class="feature-icon-name">自我进化</div>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon orange">👥</div>
-        <div class="feature-name">一个能变一支团队</div>
-        <p class="feature-desc">K嗨负责飞书生态，@catbot负责编程开发，各司其职，知识共享。</p>
+      <div class="feature-icon-item">
+        <div class="feature-icon-circle orange">👥</div>
+        <div class="feature-icon-name">团队协作</div>
       </div>
     </div>
   </section>
+
+  <!-- Feature Details -->
+  <div class="feature-details">
+    <div class="feature-detail-item">
+      <div class="feature-detail-icon" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);">💻</div>
+      <div class="feature-detail-content">
+        <h3 class="feature-detail-title">人用电脑能干的，它都能干</h3>
+        <p class="feature-detail-text">
+          <strong>飞书办公套件全覆盖。</strong>K嗨掌握飞书多维表格（27种字段）、日历、文档、IM、任务管理——白领最需要的全能助手。<br>
+          日程自动提醒，消息自动处理，文档一键生成。<br>
+          <a href="#" class="feature-detail-link">📖 看完整故事：日程管理自动化 →</a>
+        </p>
+      </div>
+    </div>
+    
+    <div class="feature-detail-item">
+      <div class="feature-detail-icon" style="background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);">⏰</div>
+      <div class="feature-detail-content">
+        <h3 class="feature-detail-title">人要休息，它不休息</h3>
+        <p class="feature-detail-text">
+          <strong>7×24小时在线。</strong>定时任务自动执行，心跳检测定时运行，人在休假，助手不停。<br>
+          股票分析定时执行，番茄钟定时提醒，日程自动管理。<br>
+          <a href="#" class="feature-detail-link">📖 看完整故事：定时任务自动化 →</a>
+        </p>
+      </div>
+    </div>
+    
+    <div class="feature-detail-item">
+      <div class="feature-detail-icon" style="background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);">🧬</div>
+      <div class="feature-detail-content">
+        <h3 class="feature-detail-title">越用越聪明，越来越懂你</h3>
+        <p class="feature-detail-text">
+          <strong>扔给它一篇教程，20分钟后就能掌握。</strong>新技能快速学习，从飞书到Coze到OpenClaw，触类旁通。<br>
+          会记住你的偏好，记住你的习惯，记住你的日程。<br>
+          <a href="#" class="feature-detail-link">📖 看完整故事：技能学习记录 →</a>
+        </p>
+      </div>
+    </div>
+    
+    <div class="feature-detail-item">
+      <div class="feature-detail-icon" style="background: linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%);">👥</div>
+      <div class="feature-detail-content">
+        <h3 class="feature-detail-title">一个能变一支团队</h3>
+        <p class="feature-detail-text">
+          <strong>Day 2，@catbot加入。</strong>K嗨负责飞书生态，@catbot负责编程开发，各司其职。<br>
+          AI助手之间知识传递成本趋近于零——一个学会的技能，另一个也能快速掌握。<br>
+          <a href="#" class="feature-detail-link">📖 看完整故事：从1个助手到1支团队 →</a>
+        </p>
+      </div>
+    </div>
+    
+    <div class="features-footer">
+      <a href="#">想了解更多？→ 看完整科普</a>
+    </div>
+  </div>
 
   <!-- Skills Section -->
   <section class="skills-section" id="skills">
@@ -837,61 +1051,61 @@
       <p class="skills-subtitle">装什么技能，就变成什么助手</p>
     </div>
     <div class="skills-grid">
-      <a href="#" class="skill-card">
+      <div class="skill-card" onclick="location.href='#'">
         <div class="skill-icon red">💼</div>
         <div class="skill-info">
           <div class="skill-name">超级助理</div>
-          <div class="skill-desc">邮件、会议、日程提醒——白领最需要的全能助手</div>
+          <div class="skill-desc">邮件、会议、日程提醒——白领最需要的全能助手。</div>
         </div>
         <span class="skill-arrow">→</span>
-      </a>
-      <a href="#" class="skill-card">
+      </div>
+      <div class="skill-card" onclick="location.href='#'">
         <div class="skill-icon green">✍️</div>
         <div class="skill-info">
           <div class="skill-name">内容创作者</div>
-          <div class="skill-desc">文档、图表、报告——AI写作一条龙</div>
+          <div class="skill-desc">文档、图表、报告——AI写作一条龙。</div>
         </div>
         <span class="skill-arrow">→</span>
-      </a>
-      <a href="#" class="skill-card">
+      </div>
+      <div class="skill-card" onclick="location.href='#'">
         <div class="skill-icon yellow">📈</div>
         <div class="skill-info">
           <div class="skill-name">股票分析师</div>
-          <div class="skill-desc">实时盯盘、技术分析——不用熬夜盯盘了</div>
+          <div class="skill-desc">实时盯盘、技术分析——不用熬夜盯盘了。</div>
         </div>
         <span class="skill-arrow">→</span>
-      </a>
-      <a href="#" class="skill-card">
+      </div>
+      <div class="skill-card" onclick="location.href='#'">
         <div class="skill-icon blue">🌏</div>
         <div class="skill-info">
           <div class="skill-name">出海运营官</div>
-          <div class="skill-desc">多语言翻译、海外社媒——搞定语言和时间差</div>
+          <div class="skill-desc">多语言翻译、海外社媒——搞定语言和时间差。</div>
         </div>
         <span class="skill-arrow">→</span>
-      </a>
-      <a href="#" class="skill-card">
+      </div>
+      <div class="skill-card" onclick="location.href='#'">
         <div class="skill-icon purple">💻</div>
         <div class="skill-info">
           <div class="skill-name">开发助手</div>
-          <div class="skill-desc">写代码、管GitHub、控制浏览器——技术活全包</div>
+          <div class="skill-desc">写代码、管GitHub、控制浏览器——技术活全包。</div>
         </div>
         <span class="skill-arrow">→</span>
-      </a>
-      <a href="#" class="skill-card">
+      </div>
+      <div class="skill-card" onclick="location.href='#'">
         <div class="skill-icon orange">⭐</div>
         <div class="skill-info">
           <div class="skill-name">猫哥同款</div>
-          <div class="skill-desc">🐱 K嗨 + @catbot 2个助手——复制配置，一键拥有同款</div>
+          <div class="skill-desc">🐱 K嗨 + @catbot 2个助手——一键拥有同款配置。</div>
         </div>
         <span class="skill-arrow">→</span>
-      </a>
+      </div>
     </div>
     <div class="skills-footer">
       <a href="#">浏览精选技能 →</a> · <a href="#">飞书技能库 →</a>
     </div>
   </section>
 
-  <!-- How It Works -->
+  <!-- How Section -->
   <section class="how-section" id="diary">
     <div class="how-header">
       <h2 class="how-title">🐣 Claw需要养</h2>
@@ -914,6 +1128,10 @@
         <p class="how-item-desc">像带新员工——用得越多越懂你，技能越积越多，能力只增不减。</p>
       </div>
     </div>
+    <div class="how-cta">
+      <a href="#tools" class="btn btn-red">🦞 免费使用工具箱</a>
+      <a href="#skills" class="btn btn-white">☁️ 浏览技能</a>
+    </div>
   </section>
 
   <!-- Tools Section -->
@@ -929,11 +1147,58 @@
   <div class="final-cta">
     <h2 class="final-cta-title">AI是一场生产力革命</h2>
     <p class="final-cta-desc">驾驭Claw的人，能力放大十倍。<br>你准备好了吗？</p>
-    <div class="cta-buttons">
-      <a href="#tools" class="btn btn-primary">🦞 开始体验</a>
-      <a href="#skills" class="btn btn-secondary">☁️ 浏览更多</a>
+    <div class="hero-cta">
+      <a href="#tools" class="btn btn-red">🦞 开始体验</a>
+      <a href="#skills" class="btn btn-white">☁️ 浏览更多</a>
     </div>
   </div>
+
+  <!-- Guestbook -->
+  <section class="guestbook">
+    <div class="guestbook-header">
+      <h2 class="guestbook-title">💬 留言板</h2>
+      <p class="guestbook-subtitle">不用登录，写下你想说的 🐱</p>
+    </div>
+    <div class="guestbook-form">
+      <input type="text" class="guestbook-input" placeholder="你的昵称（选填）" id="guestName">
+      <textarea class="guestbook-textarea" placeholder="写点什么..." id="guestMessage"></textarea>
+      <button class="guestbook-submit" onclick="addMessage()">发送 🐱</button>
+    </div>
+    <div class="guestbook-list" id="guestbookList">
+      <div class="guestbook-item">
+        <div class="guestbook-item-header">
+          <span class="guestbook-item-author">访客A</span>
+          <span class="guestbook-item-time">2026-03-12 16:30</span>
+        </div>
+        <p class="guestbook-item-text">网站做得真不错！👍</p>
+      </div>
+      <div class="guestbook-item">
+        <div class="guestbook-item-header">
+          <span class="guestbook-item-author">猫哥粉丝</span>
+          <span class="guestbook-item-time">2026-03-12 15:45</span>
+        </div>
+        <p class="guestbook-item-text">K嗨和@catbot太厉害了，我也想拥有同款AI助手！</p>
+      </div>
+      <div class="guestbook-item">
+        <div class="guestbook-item-header">
+          <span class="guestbook-item-author">产品经理小王</span>
+          <span class="guestbook-item-time">2026-03-12 14:20</span>
+        </div>
+        <p class="guestbook-item-text">这个番茄钟工具很好用，已经用了3个番茄了 🍅</p>
+      </div>
+      <div class="guestbook-item">
+          <span class="guestbook-item-author">开发者小李</span>
+          <span class="guestbook-item-time">2026-03-12 13:10</span>
+        </div>
+        <p class="guestbook-item-text">@catbot的代码能力确实强，生成的代码质量很高。</p>
+      </div>
+    </div>
+    <div class="guestbook-pagination">
+      <button class="guestbook-page-btn" disabled>← 上一页</button>
+      <span class="guestbook-page-info">第1页 / 共1页（4条）</span>
+      <button class="guestbook-page-btn" disabled>下一页 →</button>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer class="footer">
@@ -973,9 +1238,42 @@
     setInterval(() => {
       moveCarousel(1);
     }, 5000);
+
+    // Guestbook functionality
+    function addMessage() {
+      const name = document.getElementById('guestName').value || '匿名访客';
+      const message = document.getElementById('guestMessage').value;
+      
+      if (!message.trim()) {
+        alert('请输入留言内容');
+        return;
+      }
+      
+      const now = new Date();
+      const timeStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+      
+      const newItem = document.createElement('div');
+      newItem.className = 'guestbook-item';
+      newItem.innerHTML = `
+        <div class="guestbook-item-header">
+          <span class="guestbook-item-author">${name}</span>
+          <span class="guestbook-item-time">${timeStr}</span>
+        </div>
+        <p class="guestbook-item-text">${message}</p>
+      `;
+      
+      const list = document.getElementById('guestbookList');
+      list.insertBefore(newItem, list.firstChild);
+      
+      document.getElementById('guestName').value = '';
+      document.getElementById('guestMessage').value = '';
+    }
   </script>
 
   <!-- React App for Tools -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
@@ -1023,44 +1321,44 @@
       };
 
       return (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', maxWidth: '900px', margin: '0 auto' }}>
           {/* Tomato Timer */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+          <div style={{ background: '#f5f3f0', borderRadius: '16px', padding: '24px' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '16px', textAlign: 'center' }}>🍅 番茄工作法</h3>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '3rem', fontWeight: 700, marginBottom: '16px', color: tomato.running ? '#e17055' : '#1a1a1a', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: '3.5rem', fontWeight: 700, marginBottom: '20px', color: tomato.running ? '#e17055' : '#1a1a1a', fontFamily: 'monospace' }}>
                 {String(tomato.min).padStart(2, '0')}:{String(tomato.sec).padStart(2, '0')}
               </div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', marginBottom: '16px' }}>
-                <button onClick={toggleTimer} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: tomato.running ? '#fbbf24' : '#22c55e', color: 'white', fontWeight: 600, cursor: 'pointer' }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', marginBottom: '20px' }}>
+                <button onClick={toggleTimer} style={{ padding: '12px 24px', borderRadius: '10px', border: 'none', background: tomato.running ? '#fbbf24' : '#22c55e', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}>
                   {tomato.running ? '⏸️ 暂停' : '▶️ 开始'}
                 </button>
-                <button onClick={resetTimer} style={{ padding: '10px 20px', borderRadius: '8px', border: '1px solid #e5e7eb', background: 'white', cursor: 'pointer' }}>
+                <button onClick={resetTimer} style={{ padding: '12px 24px', borderRadius: '10px', border: '1px solid #e0e0e0', background: 'white', cursor: 'pointer', fontSize: '1rem' }}>
                   🔄 重置
                 </button>
               </div>
-              <div style={{ background: '#fef3c7', borderRadius: '8px', padding: '12px' }}>
+              <div style={{ background: 'white', borderRadius: '12px', padding: '16px' }}>
                 <p style={{ fontSize: '0.875rem', color: '#666', marginBottom: '4px' }}>今日完成番茄数</p>
-                <p style={{ fontSize: '1.5rem', fontWeight: 700, color: '#e17055' }}>{pomodoroCount} 🍅</p>
+                <p style={{ fontSize: '2rem', fontWeight: 700, color: '#e17055' }}>{pomodoroCount} 🍅</p>
               </div>
             </div>
           </div>
 
           {/* Daily Quote */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+          <div style={{ background: '#f5f3f0', borderRadius: '16px', padding: '24px' }}>
             <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '16px', textAlign: 'center' }}>💭 每日一言</h3>
-            <div style={{ background: '#f5f3f0', borderRadius: '12px', padding: '20px', minHeight: '120px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: '16px' }}>
-              <p style={{ fontSize: '1.125rem', fontWeight: 600, textAlign: 'center' }}>{quote}</p>
+            <div style={{ background: 'white', borderRadius: '12px', padding: '24px', minHeight: '140px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', marginBottom: '16px' }}>
+              <p style={{ fontSize: '1.25rem', fontWeight: 600, textAlign: 'center' }}>{quote}</p>
             </div>
-            <button onClick={() => setQuote(quotes[Math.floor(Math.random() * quotes.length)])} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer' }}>
+            <button onClick={() => setQuote(quotes[Math.floor(Math.random() * quotes.length)])} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: 'none', background: '#3b82f6', color: 'white', fontWeight: 600, cursor: 'pointer', fontSize: '1rem' }}>
               🎲 换一句
             </button>
           </div>
 
           {/* Skill Radar */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)', gridColumn: 'span 2' }}>
-            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '16px' }}>🎯 技能雷达</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
+          <div style={{ background: '#f5f3f0', borderRadius: '16px', padding: '24px', gridColumn: 'span 2' }}>
+            <h3 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '20px' }}>🎯 技能雷达</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
               {[
                 { skill: '数据分析', level: 90 },
                 { skill: '产品设计', level: 85 },
@@ -1071,7 +1369,7 @@
                 { skill: '数据治理', level: 85 },
                 { skill: '项目管理', level: 80 }
               ].map((item, idx) => (
-                <div key={idx} style={{ background: '#f5f3f0', borderRadius: '8px', padding: '12px' }}>
+                <div key={idx} style={{ background: 'white', borderRadius: '10px', padding: '12px 16px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ fontWeight: 500 }}>{item.skill}</span>
                     <span style={{ color: '#666' }}>{item.level}%</span>
