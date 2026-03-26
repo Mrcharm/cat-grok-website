@@ -1151,6 +1151,27 @@
             <div class="carousel-text">智能体调度体系升级，RAG+思维链+自监督架构落地</div>
           </div>
         </div>
+        <div class="carousel-item">
+          <div class="carousel-content">
+            <div class="carousel-emoji">💡</div>
+            <div class="carousel-day">2026.03.26</div>
+            <div class="carousel-text">战略思考框架上线，可扮演商业大佬深度提问理清思路</div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="carousel-content">
+            <div class="carousel-emoji">⌨️</div>
+            <div class="carousel-day">2026.03.22</div>
+            <div class="carousel-text">OpenCLI技能全团队部署，支持数十种网站自动化操作</div>
+          </div>
+        </div>
+        <div class="carousel-item">
+          <div class="carousel-content">
+            <div class="carousel-emoji">📈</div>
+            <div class="carousel-day">2026.03.20</div>
+            <div class="carousel-text">免费A股实时行情系统上线，《2%风控短线交易系统》发布</div>
+          </div>
+        </div>
       </div>
     </div>
     <button class="carousel-btn next" onclick="moveCarousel(1)">›</button>
@@ -1160,6 +1181,10 @@
       <button class="carousel-dot" onclick="goToSlide(2)"></button>
       <button class="carousel-dot" onclick="goToSlide(3)"></button>
       <button class="carousel-dot" onclick="goToSlide(4)"></button>
+      <button class="carousel-dot" onclick="goToSlide(5)"></button>
+      <button class="carousel-dot" onclick="goToSlide(6)"></button>
+      <button class="carousel-dot" onclick="goToSlide(7)"></button>
+      <button class="carousel-dot" onclick="goToSlide(8)"></button>
     </div>
   </div>
 
@@ -1615,7 +1640,7 @@
     let currentSlide = 0;
     const track = document.getElementById('carouselTrack');
     const dots = document.querySelectorAll('.carousel-dot');
-    const totalSlides = 5;
+    const totalSlides = 9;
 
     function updateCarousel() {
       track.style.transform = `translateX(-${currentSlide * 100}%)`;
