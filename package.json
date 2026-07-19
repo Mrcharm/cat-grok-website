@@ -1,0 +1,13 @@
+{
+  "name": "cat-grok-website",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "scripts": {
+    "test": "node --test"
+  },
+  "dependencies": {
+    "gray-matter": "4.0.3",
+    "markdown-it": "14.1.0"
+  }
+}
