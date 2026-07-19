@@ -217,15 +217,63 @@ function aboutPage({ profile }) {
 }
 
 function actionPage({ tasks }) {
-  const first = tasks[0];
+  const safeTasksJson = JSON.stringify(tasks).replaceAll('<', '\\u003c');
   return layout({
     title: '今日行动 · 猫哥',
     description: '猫哥的 30 天执行日历与行动看板。',
     depth: 1,
     active: 'action',
-    body: '<section class="page-hero"><h1>今日行动</h1><p>每天只推进一个可交付结果。</p></section>' +
-      '<section><p>' + escapeHtml(first.date) + ' · ' + escapeHtml(first.id.toUpperCase()) + '</p>' +
-      '<h2>' + escapeHtml(first.title) + '</h2><p>' + escapeHtml(first.deliverable) + '</p></section>'
+    pageClass: 'action-page',
+    body: '<section class="page-hero action-hero"><p>30 DAYS · LOCAL FIRST</p>' +
+      '<h1>今日行动</h1><p>每天至少 30 分钟，只推进一个能留下证据的结果。</p>' +
+      '<div class="action-privacy">🔒 清单、证据和复盘只保存在当前浏览器，不会上传到网站。</div></section>' +
+      '<section class="action-overview" aria-label="今日任务与本月进度">' +
+      '<article class="focus-card" id="today-task"><div class="focus-meta"><span id="today-date">正在定位今天</span>' +
+      '<b id="today-code">DAY</b></div><h2 id="today-title">载入今日任务…</h2>' +
+      '<p id="today-deliverable">准备好后，从一个 30 分钟行动开始。</p>' +
+      '<button class="button button-primary" id="open-today" type="button">打开执行策略</button></article>' +
+      '<aside class="action-progress"><span>30 天证据进度</span><strong><b id="done-count">0</b> / ' + tasks.length + '</strong>' +
+      '<div class="progress-track" role="progressbar" aria-label="30 天任务完成进度" aria-valuemin="0" aria-valuemax="' + tasks.length + '" aria-valuenow="0"><i id="progress-bar"></i></div>' +
+      '<p id="progress-text">完成任务后，进度会保存在本机。</p></aside></section>' +
+      '<section class="calendar-shell"><div class="section-kicker">CALENDAR</div>' +
+      '<div class="calendar-toolbar"><div><h2>30 天行动日历</h2><p id="calendar-summary">点击日期查看执行策略</p></div>' +
+      '<div class="calendar-nav"><button id="prev-month" type="button" aria-label="上个月">←</button>' +
+      '<strong id="calendar-month"></strong><button id="next-month" type="button" aria-label="下个月">→</button></div></div>' +
+      '<div class="weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>' +
+      '<div class="calendar-grid" id="calendar-grid"></div></section>' +
+      '<section class="kanban-shell"><div class="section-kicker">BOARD</div>' +
+      '<div class="section-intro"><h2>行动看板</h2><p>开始勾选或留下记录后，任务会进入“进行中”；满足验收条件后才算完成。</p></div>' +
+      '<div class="kanban"><section class="kanban-column"><h3>下一步 <span id="kanban-next-count">0</span></h3><div id="kanban-next"></div></section>' +
+      '<section class="kanban-column is-doing"><h3>进行中 <span id="kanban-doing-count">0</span></h3><div id="kanban-doing"></div></section>' +
+      '<section class="kanban-column is-complete"><h3>已完成 <span id="kanban-complete-count">0</span></h3><div id="kanban-complete"></div></section></div></section>' +
+      '<section class="backup-panel"><div><div class="section-kicker">LOCAL BACKUP</div><h2>备份本机进度</h2>' +
+      '<p>换设备或清理浏览器前，请先导出 JSON 文件。导入只接受本行动台生成的格式。</p>' +
+      '<p class="storage-warning" id="storage-warning" hidden></p></div>' +
+      '<div class="backup-controls"><button class="button button-secondary" id="export-progress" type="button">导出进度</button>' +
+      '<button class="button button-secondary" id="import-progress" type="button">导入进度</button>' +
+      '<input id="import-file" type="file" accept="application/json,.json" hidden>' +
+      '<button class="text-button danger" id="reset-progress" type="button">清空本机记录</button></div></section>' +
+      '<dialog class="task-dialog" id="task-dialog" aria-labelledby="dialog-title"><form method="dialog" class="dialog-close-row">' +
+      '<button class="dialog-close" id="dialog-close" value="close" aria-label="关闭任务">×</button></form>' +
+      '<div class="dialog-scroll"><p class="dialog-meta" id="dialog-meta"></p><h2 id="dialog-title"></h2>' +
+      '<div class="task-deliverable"><span>今日交付物</span><p id="task-deliverable"></p></div>' +
+      '<div class="task-context"><article><span>为什么做</span><p id="task-why"></p></article>' +
+      '<article><span>执行方法</span><p id="task-method"></p></article>' +
+      '<article><span>参考资料</span><div id="task-resources"></div></article>' +
+      '<article><span>完成标准</span><p id="task-completion"></p></article></div>' +
+      '<div class="timer-panel" id="timer"><div><span>专注计时</span><strong id="timer-display">30:00</strong></div>' +
+      '<button class="button button-primary" id="timer-button" type="button">开始 30 分钟</button>' +
+      '<button class="text-button" id="timer-reset" type="button">重置</button></div>' +
+      '<section class="task-checklist"><h3>三步 Checklist</h3><div id="task-checklist"></div></section>' +
+      '<label class="form-field" for="evidence"><span>结果证据 <b>必填，完成任务前请留下文件名、链接或一句可核验结果</b></span>' +
+      '<textarea id="evidence" rows="3" placeholder="例如：已保存《2031 职业画像.md》，包含 3 个结果指标。"></textarea></label>' +
+      '<label class="form-field" for="review"><span>今日复盘 <b>可选</b></span>' +
+      '<textarea id="review" rows="3" placeholder="今天最有价值的发现、卡点或下一步是什么？"></textarea></label>' +
+      '<div class="dialog-actions"><button class="button button-secondary" id="save-task" type="button">保存进度</button>' +
+      '<button class="button button-primary" id="complete-task" type="button">验收并完成</button></div></div></dialog>' +
+      '<div class="action-toast" id="action-toast" role="status" aria-live="polite"></div>' +
+      '<script type="application/json" id="action-data">' + safeTasksJson + '</script>' +
+      '<script type="module" src="../assets/js/action-page.js"></script>'
   });
 }
 
