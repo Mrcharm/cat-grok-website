@@ -56,6 +56,7 @@ function homePage({ profile, roadmap, posts, projects }) {
   return layout({
     title: '猫哥 · 向 2031 生长',
     description: '猫哥的职业、学习、生活与作品长期记录。',
+    canonicalPath: '',
     active: 'home',
     pageClass: 'home-page',
     body:
@@ -132,6 +133,7 @@ function timelinePage({ roadmap, timeline, profile }) {
   return layout({
     title: '人生轨迹 · 猫哥',
     description: '猫哥从 2026 走向 2031 的职业、学习与生活路线。',
+    canonicalPath: 'timeline/',
     depth: 1,
     active: 'timeline',
     body: '<section class="page-hero"><p>CAREER · LEARNING · LIFE</p>' +
@@ -163,6 +165,7 @@ function writingPage({ posts }) {
   return layout({
     title: '写作 · 猫哥',
     description: '猫哥关于职业、学习、生活和产业研究的精选公开记录。',
+    canonicalPath: 'writing/',
     depth: 1,
     active: 'writing',
     body: '<section class="page-hero"><p>SELECTED PUBLIC NOTES</p>' +
@@ -180,6 +183,7 @@ function projectsPage({ projects }) {
   return layout({
     title: '作品 · 猫哥',
     description: '猫哥的 AI 产品、智能体与长期实践作品档案。',
+    canonicalPath: 'projects/',
     depth: 1,
     active: 'projects',
     body: '<section class="page-hero"><h1>作品档案</h1><p>作品不是身份本身，而是每个阶段留下的证据。</p></section>' +
@@ -200,6 +204,7 @@ function aboutPage({ profile }) {
   return layout({
     title: '关于我 · 猫哥',
     description: '猫哥的能力组合、长期方向和公开入口。',
+    canonicalPath: 'about/',
     depth: 1,
     active: 'about',
     body: '<section class="page-hero"><p>ABOUT MR. CHARM</p><h1>关于我</h1><p>' +
@@ -221,6 +226,7 @@ function actionPage({ tasks }) {
   return layout({
     title: '今日行动 · 猫哥',
     description: '猫哥的 30 天执行日历与行动看板。',
+    canonicalPath: 'action/',
     depth: 1,
     active: 'action',
     pageClass: 'action-page',
@@ -330,6 +336,7 @@ function projectDetail(project, model) {
   return layout({
     title: project.title + ' · 猫哥作品',
     description: project.summary,
+    canonicalPath: 'projects/' + project.slug + '/',
     depth: 2,
     active: 'projects',
     body: '<article class="project-detail"><p>' + escapeHtml(project.category) + ' · ' +
