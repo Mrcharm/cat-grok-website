@@ -19,21 +19,92 @@ function homePage({ profile, roadmap, posts, projects }) {
   const featuredProjects = published(projects).slice(0, 3)
     .map(item => card(item, item.url))
     .join('');
+  const nowCards = [
+    ['职业', profile.current.career, '💼'],
+    ['学习', profile.current.learning, '🧠'],
+    ['生活', profile.current.life, '🌿'],
+    ['本月', profile.current.month, '🎯']
+  ].map(([label, value, icon]) => (
+    '<article><span aria-hidden="true">' + icon + '</span><p>' + escapeHtml(label) +
+    '</p><h3>' + escapeHtml(value) + '</h3></article>'
+  )).join('');
+  const lifeLines = profile.lifeLines.map((line, index) => (
+    '<article><span>0' + (index + 1) + '</span><h3>' + escapeHtml(line.title) +
+    '</h3><p>' + escapeHtml(line.summary) + '</p></article>'
+  )).join('');
+  const years = roadmap.years.map(item => (
+    '<article class="' + (item.status === 'active' ? 'active' : '') + '">' +
+    '<span>' + escapeHtml(item.stage) + '</span>' +
+    '<strong>' + escapeHtml(item.displayYear || item.year) + '</strong>' +
+    '<h3>' + escapeHtml(item.title) + '</h3>' +
+    '<p>' + escapeHtml(item.outcome) + '</p></article>'
+  )).join('');
+  const annualGoals = roadmap.annual.goals
+    .map(goal => '<li>' + escapeHtml(goal) + '</li>')
+    .join('');
+  const weekly = roadmap.weekly.map(item => (
+    '<article><span>' + escapeHtml(item.date) + '</span><h3>' +
+    escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.summary) +
+    '</p></article>'
+  )).join('');
+  const profileLinks = profile.links.map(link => (
+    '<a href="' + escapeHtml(link.url) +
+    '" target="_blank" rel="noopener noreferrer">' +
+    escapeHtml(link.label) + ' ↗</a>'
+  )).join('');
+
   return layout({
     title: '猫哥 · 向 2031 生长',
     description: '猫哥的职业、学习、生活与作品长期记录。',
     active: 'home',
     pageClass: 'home-page',
     body:
-      '<section class="page-hero"><p>2026 → 2031</p>' +
+      '<section class="page-hero home-hero">' +
+      '<div class="hero-copy"><p>2026 → 2031 · 公开成长现场</p>' +
       '<h1>你好，我是' + escapeHtml(profile.name) + '。</h1>' +
       '<p>' + escapeHtml(profile.tagline) + '</p>' +
-      '<p>' + escapeHtml(profile.role) + '</p></section>' +
-      '<section><h2>通往 2031</h2><p>' + escapeHtml(roadmap.northStar) + '</p></section>' +
-      '<section><h2>近期写作</h2><div class="archive-grid">' + recentPosts + '</div></section>' +
-      '<section><h2>作品档案</h2><div class="archive-grid">' + featuredProjects + '</div></section>' +
-      '<section><h2>今天做什么</h2><p>每天至少 30 分钟，把长期目标变成一项可交付动作。</p>' +
-      '<a href="action/">进入今日行动</a></section>'
+      '<p class="hero-role">' + escapeHtml(profile.role) + '</p>' +
+      '<div class="hero-actions"><a class="button button-primary" href="action/">开始今日 30 分钟</a>' +
+      '<a class="button button-secondary" href="writing/">阅读我的记录</a></div></div>' +
+      '<aside class="north-star-card"><span>2031 NORTH STAR</span>' +
+      '<strong>' + escapeHtml(roadmap.northStar) + '</strong>' +
+      '<p>' + escapeHtml(roadmap.principle) + '</p>' +
+      '<div><b>05</b><small>年长期记录</small><b>30′</b><small>每日最低投入</small></div>' +
+      '</aside></section>' +
+      '<section id="now" class="home-section"><div class="section-kicker">NOW</div>' +
+      '<div class="section-intro"><h2>此刻的我</h2><p>不等“准备好”再开始。先把当下真正投入的方向公开出来。</p></div>' +
+      '<div class="now-grid">' + nowCards + '</div></section>' +
+      '<section id="life-lines" class="home-section"><div class="section-kicker">THREE LINES</div>' +
+      '<div class="section-intro"><h2>职业、学习，也认真生活。</h2>' +
+      '<p>这三条线不是互相争夺时间，而是一起构成我想成为的人。</p></div>' +
+      '<div class="life-line-grid">' + lifeLines + '</div></section>' +
+      '<section id="roadmap" class="home-section"><div class="section-kicker">ROAD TO 2031</div>' +
+      '<div class="section-intro"><h2>五年目标，一步步留下证据。</h2>' +
+      '<p>' + escapeHtml(roadmap.northStar) + '</p></div>' +
+      '<div class="year-track">' + years + '</div>' +
+      '<div class="roadmap-detail"><article><span>' + escapeHtml(roadmap.annual.year) +
+      ' 年度目标</span><h3>' + escapeHtml(roadmap.annual.title) + '</h3><ul>' +
+      annualGoals + '</ul></article><article><span>本月重点</span><h3>' +
+      escapeHtml(roadmap.month.title) + '</h3><p>' + escapeHtml(roadmap.month.focus) +
+      '</p><a class="button button-primary" href="action/">查看 30 天计划</a></article></div>' +
+      '<div class="weekly-progress"><div><span>WEEKLY UPDATE</span><h3>每周精选进展</h3></div>' +
+      weekly + '</div></section>' +
+      '<section id="notes" class="home-section"><div class="section-kicker">NOTES</div>' +
+      '<div class="section-intro"><h2>近期记录</h2>' +
+      '<p>公开的是经过整理的版本：职业实践、学习认知、生活感悟和产业研究。</p></div>' +
+      '<div class="archive-grid">' + recentPosts + '</div>' +
+      '<a class="section-link" href="writing/">查看全部写作 →</a></section>' +
+      '<section id="featured-projects" class="home-section"><div class="section-kicker">WORKS</div>' +
+      '<div class="section-intro"><h2>作品档案</h2>' +
+      '<p>每个作品都记录问题、角色、方法、结果与仍然存在的限制。</p></div>' +
+      '<div class="archive-grid">' + featuredProjects + '</div>' +
+      '<a class="section-link" href="projects/">查看全部作品 →</a></section>' +
+      '<section id="home-about" class="home-section home-about"><div>' +
+      '<span class="cat-bubble" aria-hidden="true">🐱</span><div><div class="section-kicker">ABOUT</div>' +
+      '<h2>懂业务、数据与 AI，也愿意记录真实生活。</h2>' +
+      '<p>我的稀缺性不来自一个标签，而来自银行业务、数据平台、AI Agent 与产业研究的交叉。</p>' +
+      '<div class="profile-links">' + profileLinks + '<a href="about/">更多关于我 →</a></div>' +
+      '</div></div></section>'
   });
 }
 
