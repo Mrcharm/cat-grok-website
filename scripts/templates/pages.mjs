@@ -229,7 +229,56 @@ function actionPage({ tasks }) {
   });
 }
 
-function projectDetail(project) {
+const simpleArchiveItems = items => items.map(item => (
+  '<article><h3>' + escapeHtml(item.title || item.name) + '</h3>' +
+  (item.role ? '<span class="tag">' + escapeHtml(item.role) + '</span>' : '') +
+  '<p>' + escapeHtml(item.description) + '</p></article>'
+)).join('');
+
+function agentTeamArchive(agentTeam) {
+  const milestones = agentTeam.milestones.map(item => (
+    '<article><span aria-hidden="true">' + escapeHtml(item.emoji) + '</span>' +
+    '<div><small>' + escapeHtml(item.date) + '</small><h3>' +
+    escapeHtml(item.title) + '</h3></div></article>'
+  )).join('');
+  const articles = agentTeam.articles.map(item => {
+    const title = item.url
+      ? '<a href="' + escapeHtml(item.url) + '">' + escapeHtml(item.title) + ' ↗</a>'
+      : escapeHtml(item.title);
+    return '<article><span class="tag">' + escapeHtml(item.status) + '</span>' +
+      '<h3>' + title + '</h3><p>' + escapeHtml(item.description) + '</p></article>';
+  }).join('');
+  return '<div class="project-notice"><strong>这是一份历史作品档案</strong><p>' +
+    escapeHtml(agentTeam.intro) + '</p></div>' +
+    '<section class="project-section"><div class="section-kicker">MILESTONES</div>' +
+    '<h2>成长里程碑</h2><div class="milestone-grid">' + milestones + '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">TEAM</div>' +
+    '<h2>四位智能体成员</h2><div class="project-grid">' +
+    simpleArchiveItems(agentTeam.members) + '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">PRINCIPLES</div>' +
+    '<h2>团队理念</h2><div class="project-grid">' +
+    simpleArchiveItems(agentTeam.principles) + '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">WHAT IS CLAW</div>' +
+    '<h2>Claw 是什么</h2><p>原站用四个切面解释智能体能力；新站保留内容，并补充权限与审核边界。</p>' +
+    '<div class="project-grid">' + simpleArchiveItems(agentTeam.science) +
+    '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">ARCHIVE</div>' +
+    '<h2>阶段成果</h2><div class="project-grid">' +
+    simpleArchiveItems(agentTeam.achievements) + '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">SKILLS</div>' +
+    '<h2>技能与角色</h2><div class="project-grid">' +
+    simpleArchiveItems(agentTeam.skills) + '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">ARTICLES</div>' +
+    '<h2>实战文章</h2><div class="project-grid">' + articles + '</div></section>' +
+    '<section class="project-section"><div class="section-kicker">TOOLS</div>' +
+    '<h2>工具原型</h2><div class="project-grid">' +
+    simpleArchiveItems(agentTeam.tools) + '</div></section>';
+}
+
+function projectDetail(project, model) {
+  const archive = project.slug === 'agent-team'
+    ? agentTeamArchive(model.agentTeam)
+    : '';
   return layout({
     title: project.title + ' · 猫哥作品',
     description: project.summary,
@@ -237,7 +286,8 @@ function projectDetail(project) {
     active: 'projects',
     body: '<article class="project-detail"><p>' + escapeHtml(project.category) + ' · ' +
       escapeHtml(project.date) + '</p><h1>' + escapeHtml(project.title) + '</h1>' +
-      '<p>' + escapeHtml(project.summary) + '</p>' + project.bodyHtml + '</article>'
+      '<p>' + escapeHtml(project.summary) + '</p>' + project.bodyHtml +
+      archive + '</article>'
   });
 }
 
@@ -252,7 +302,7 @@ export function renderPages(model) {
   ]);
 
   for (const project of published(model.projects)) {
-    files.set('projects/' + project.slug + '/index.html', projectDetail(project));
+    files.set('projects/' + project.slug + '/index.html', projectDetail(project, model));
   }
   return files;
 }

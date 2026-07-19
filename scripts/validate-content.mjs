@@ -10,11 +10,12 @@ const requireText = (value, label, min = 1) => {
 };
 
 export async function loadAndValidateContent() {
-  const [profile, roadmap, tasks, timeline] = await Promise.all([
+  const [profile, roadmap, tasks, timeline, agentTeam] = await Promise.all([
     readJson('data/profile.json'),
     readJson('data/roadmap.json'),
     readJson('data/tasks.json'),
-    readJson('data/timeline.json')
+    readJson('data/timeline.json'),
+    readJson('data/agent-team.json')
   ]);
 
   if (profile.lifeLines?.length !== 3) {
@@ -65,7 +66,13 @@ export async function loadAndValidateContent() {
     }
   }
 
-  return { profile, roadmap, tasks, timeline };
+  for (const key of ['milestones', 'members', 'principles', 'achievements', 'science', 'skills', 'articles', 'tools']) {
+    if (!Array.isArray(agentTeam[key]) || agentTeam[key].length === 0) {
+      throw new Error('agentTeam.' + key + ' must not be empty');
+    }
+  }
+
+  return { profile, roadmap, tasks, timeline, agentTeam };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

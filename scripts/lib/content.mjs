@@ -24,8 +24,12 @@ export async function loadMarkdownCollection(directory) {
         throw new Error(directory + '/' + name + ' missing ' + field);
       }
     }
+    const normalizedDate = data.date instanceof Date
+      ? data.date.toISOString().slice(0, 10)
+      : String(data.date);
     return {
       ...data,
+      date: normalizedDate,
       source: name,
       bodyHtml: markdown.render(content),
       url: data.url || defaultBase + '/' + data.slug + '/'
