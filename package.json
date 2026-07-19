@@ -4,8 +4,11 @@
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
+    "build": "node scripts/build.mjs",
     "test": "node --test",
-    "validate": "node scripts/validate-content.mjs"
+    "validate": "node scripts/validate-content.mjs",
+    "smoke": "node scripts/smoke.mjs",
+    "check": "pnpm validate && pnpm test && pnpm build && pnpm smoke"
   },
   "dependencies": {
     "gray-matter": "4.0.3",

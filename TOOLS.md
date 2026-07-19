@@ -64,6 +64,10 @@ Token 保存在本地 `.env` 文件中，推送时会自动使用。该文件已
 - 包管理器：pnpm 11
 - 安装依赖：pnpm install
 - 运行测试：pnpm test
+- 校验内容：pnpm validate
+- 生成静态页面：pnpm build
+- 完整检查：pnpm check
+- 本地预览：在仓库根目录运行 python -m http.server 4173
 - 网站是静态站点，生成文件会提交到仓库并由 GitHub Pages 直接发布
 
 
