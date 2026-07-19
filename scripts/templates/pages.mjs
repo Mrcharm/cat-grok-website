@@ -108,11 +108,25 @@ function homePage({ profile, roadmap, posts, projects }) {
   });
 }
 
-function timelinePage({ roadmap }) {
+function timelinePage({ roadmap, timeline, profile }) {
+  const lineNames = Object.fromEntries(profile.lifeLines.map(item => [item.id, item.title]));
+  const entries = timeline.map(item => {
+    const links = item.links.map(link => (
+      '<a href="' + escapeHtml(link.url) + '">' + escapeHtml(link.label) + ' →</a>'
+    )).join('');
+    return '<article class="timeline-entry" data-line="' + escapeHtml(item.line) + '">' +
+      '<div><span>' + escapeHtml(item.date) + '</span><b>' +
+      escapeHtml(lineNames[item.line]) + '</b></div>' +
+      '<div><h2>' + escapeHtml(item.title) + '</h2><p>' +
+      escapeHtml(item.insight) + '</p><div class="entry-links">' + links +
+      '</div></div></article>';
+  }).join('');
   const years = roadmap.years.map(item => (
-    '<article id="' + (item.year === 2031 ? 'roadmap-2031' : 'year-' + item.year) + '">' +
-    '<p>' + escapeHtml(item.stage) + '</p>' +
-    '<h2>' + escapeHtml(item.displayYear || item.year) + ' · ' + escapeHtml(item.title) + '</h2>' +
+    '<article class="future-card" id="' +
+    (item.year === 2031 ? 'roadmap-2031' : 'year-' + item.year) + '">' +
+    '<p>目标 · ' + escapeHtml(item.stage) + '</p>' +
+    '<h2>' + escapeHtml(item.displayYear || item.year) + ' · ' +
+    escapeHtml(item.title) + '</h2>' +
     '<p>' + escapeHtml(item.outcome) + '</p></article>'
   )).join('');
   return layout({
@@ -120,8 +134,24 @@ function timelinePage({ roadmap }) {
     description: '猫哥从 2026 走向 2031 的职业、学习与生活路线。',
     depth: 1,
     active: 'timeline',
-    body: '<section class="page-hero"><h1>人生轨迹</h1><p>路线会调整，证据会留下。</p></section>' +
-      '<section class="timeline-list">' + years + '</section>'
+    body: '<section class="page-hero"><p>CAREER · LEARNING · LIFE</p>' +
+      '<h1>人生轨迹</h1><p>事实与目标分开记录。路线会调整，已经留下的证据不会消失。</p></section>' +
+      '<section class="timeline-lines"><div class="section-kicker">THREE LINES</div>' +
+      '<div class="section-intro"><h2>三条人生线，一起向前。</h2>' +
+      '<p>职业成长、学习认知和生活体验都值得被认真记录。</p></div>' +
+      '<div class="life-line-legend">' + profile.lifeLines.map((line, index) => (
+        '<article><span>0' + (index + 1) + '</span><h3>' +
+        escapeHtml(line.title) + '</h3><p>' + escapeHtml(line.summary) +
+        '</p></article>'
+      )).join('') + '</div></section>' +
+      '<section><div class="section-kicker">WHAT HAPPENED</div>' +
+      '<div class="section-intro"><h2>已经发生的节点</h2>' +
+      '<p>只记录经过确认、适合公开的事实和当时获得的认知。</p></div>' +
+      '<div class="timeline-events">' + entries + '</div></section>' +
+      '<section><div class="section-kicker">WHAT IS NEXT</div>' +
+      '<div class="section-intro"><h2>未来路线</h2>' +
+      '<p>以下内容是目标，不把愿望写成已经取得的成绩。</p></div>' +
+      '<div class="timeline-list">' + years + '</div></section>'
   });
 }
 
@@ -135,8 +165,11 @@ function writingPage({ posts }) {
     description: '猫哥关于职业、学习、生活和产业研究的精选公开记录。',
     depth: 1,
     active: 'writing',
-    body: '<section class="page-hero"><h1>写作</h1><p>写清问题、证据、取舍和仍然不知道的部分。</p></section>' +
-      '<section class="archive-grid">' + items + '</section>'
+    body: '<section class="page-hero"><p>SELECTED PUBLIC NOTES</p>' +
+      '<h1>写作</h1><p>写清问题、证据、取舍和仍然不知道的部分。</p></section>' +
+      '<section><div class="writing-categories"><span>职业与产品</span>' +
+      '<span>学习与认知</span><span>生活与关系</span><span>产业研究</span></div>' +
+      '<div class="archive-grid">' + items + '</div></section>'
   });
 }
 
@@ -159,13 +192,27 @@ function aboutPage({ profile }) {
     '<article><h2>' + escapeHtml(item.title) + '</h2><p>' +
     escapeHtml(item.description) + '</p></article>'
   )).join('');
+  const links = profile.links.map(link => (
+    '<a class="button button-secondary" href="' + escapeHtml(link.url) +
+    '" target="_blank" rel="noopener noreferrer">' +
+    escapeHtml(link.label) + ' ↗</a>'
+  )).join('');
   return layout({
     title: '关于我 · 猫哥',
     description: '猫哥的能力组合、长期方向和公开入口。',
     depth: 1,
     active: 'about',
-    body: '<section class="page-hero"><h1>关于我</h1><p>' + escapeHtml(profile.role) + '</p></section>' +
-      '<section class="archive-grid">' + strengths + '</section>'
+    body: '<section class="page-hero"><p>ABOUT MR. CHARM</p><h1>关于我</h1><p>' +
+      escapeHtml(profile.role) + '</p></section>' +
+      '<section class="about-story"><div class="section-kicker">MY COMBINATION</div>' +
+      '<div class="section-intro"><h2>我不是一个单一标签。</h2>' +
+      '<p>我关心大型组织里的复杂数据工作，怎样被 AI 更可靠地理解、生成、检查与交付。</p></div>' +
+      '<div class="archive-grid">' + strengths + '</div></section>' +
+      '<section class="about-principles"><div><span class="cat-bubble" aria-hidden="true">🐱</span>' +
+      '<div><div class="section-kicker">WHAT I BELIEVE</div>' +
+      '<h2>不等成为专家再输出，也不靠输出假装成为专家。</h2>' +
+      '<p>每一次公开记录，都应该比动笔前更接近事实；每一个作品，都应该说清价值、证据和限制。</p>' +
+      '<div class="hero-actions">' + links + '</div></div></div></section>'
   });
 }
 

@@ -10,10 +10,11 @@ const requireText = (value, label, min = 1) => {
 };
 
 export async function loadAndValidateContent() {
-  const [profile, roadmap, tasks] = await Promise.all([
+  const [profile, roadmap, tasks, timeline] = await Promise.all([
     readJson('data/profile.json'),
     readJson('data/roadmap.json'),
-    readJson('data/tasks.json')
+    readJson('data/tasks.json'),
+    readJson('data/timeline.json')
   ]);
 
   if (profile.lifeLines?.length !== 3) {
@@ -51,7 +52,20 @@ export async function loadAndValidateContent() {
     }
   }
 
-  return { profile, roadmap, tasks };
+  const lines = new Set(['career', 'learning', 'life']);
+  for (const entry of timeline) {
+    requireText(entry.date, 'timeline.date');
+    requireText(entry.title, 'timeline.title');
+    requireText(entry.insight, 'timeline.insight');
+    if (!lines.has(entry.line)) {
+      throw new Error(entry.title + ' has invalid timeline line');
+    }
+    if (!['fact', 'goal'].includes(entry.kind)) {
+      throw new Error(entry.title + ' has invalid timeline kind');
+    }
+  }
+
+  return { profile, roadmap, tasks, timeline };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

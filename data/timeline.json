@@ -1,0 +1,67 @@
+[
+  {
+    "date": "2026-03",
+    "line": "career",
+    "kind": "fact",
+    "title": "把智能体团队实践整理为公开作品",
+    "insight": "第一次系统记录协调器、专业助手和多任务调度的搭建过程。",
+    "links": [
+      {
+        "label": "查看作品",
+        "url": "../projects/agent-team/"
+      }
+    ]
+  },
+  {
+    "date": "2026-03",
+    "line": "learning",
+    "kind": "fact",
+    "title": "从单点工具转向研究可审核工作流",
+    "insight": "开始关注任务拆解、知识引用、结果检核和统一交付，而不只关注模型能力。",
+    "links": [
+      {
+        "label": "飞书 Agent 实践",
+        "url": "../blog/feishu-agent-build-guide.html"
+      }
+    ]
+  },
+  {
+    "date": "2026-07",
+    "line": "career",
+    "kind": "fact",
+    "title": "启动个人生命档案站",
+    "insight": "公司的项目经验只有被整理成公开方法和作品，才会成为个人长期资产。",
+    "links": [
+      {
+        "label": "查看作品档案",
+        "url": "../projects/"
+      }
+    ]
+  },
+  {
+    "date": "2026-07",
+    "line": "learning",
+    "kind": "fact",
+    "title": "建立 AI 系统设计学习主线",
+    "insight": "把 RAG、Agent、MCP、评估和安全治理组织成架构决策与可运行实验。",
+    "links": [
+      {
+        "label": "查看 30 天计划",
+        "url": "../action/"
+      }
+    ]
+  },
+  {
+    "date": "2026-07",
+    "line": "life",
+    "kind": "fact",
+    "title": "把稳定生活结构纳入五年目标",
+    "insight": "身体、重要关系和稳定节奏不是事业之外的附加项，而是长期创造的基础设施。",
+    "links": [
+      {
+        "label": "查看今日行动",
+        "url": "../action/"
+      }
+    ]
+  }
+]
