@@ -1,0 +1,58 @@
+{
+  "name": "猫哥",
+  "englishName": "Mr. Charm",
+  "tagline": "把经历沉淀成作品，把判断变成系统，把生活过成长期主义。",
+  "role": "银行数据、AI 产品与智能体实践交叉地带的产品经理",
+  "location": "厦门",
+  "current": {
+    "career": "企业数据研发 AI Agent 与 AI 产品系统设计",
+    "learning": "RAG、Agent、MCP、评估与安全治理",
+    "life": "身体、重要关系和稳定节奏",
+    "month": "完成四类复利资产的第一个可验证闭环"
+  },
+  "lifeLines": [
+    {
+      "id": "career",
+      "title": "职业成长",
+      "summary": "从执行型产品经理走向拥有作品、观点和行业影响力的人。"
+    },
+    {
+      "id": "learning",
+      "title": "学习认知",
+      "summary": "用架构决策、实验和写作积累 AI 系统设计能力。"
+    },
+    {
+      "id": "life",
+      "title": "生活体验",
+      "summary": "让身体、关系和稳定节奏支撑长期创造。"
+    }
+  ],
+  "strengths": [
+    {
+      "title": "银行与数据平台",
+      "description": "理解企业数据研发流程、治理边界与真实协作成本。"
+    },
+    {
+      "title": "AI 产品设计",
+      "description": "从需求、知识、生成、检核、人审到留痕设计产品闭环。"
+    },
+    {
+      "title": "Agent 系统实践",
+      "description": "持续研究工作流、多智能体、RAG、MCP 与评估体系。"
+    },
+    {
+      "title": "产业研究",
+      "description": "质疑热门叙事，用订单、利润、现金流与拥挤度验证判断。"
+    }
+  ],
+  "links": [
+    {
+      "label": "CSDN",
+      "url": "https://blog.csdn.net/Mr_charm"
+    },
+    {
+      "label": "GitHub",
+      "url": "https://github.com/mrcharm"
+    }
+  ]
+}

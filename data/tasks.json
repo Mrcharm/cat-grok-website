@@ -1,0 +1,640 @@
+[
+  {
+    "id": "d01",
+    "date": "2026-07-20",
+    "asset": "influence",
+    "title": "五年反向设计：职业",
+    "why": "先定义五年后的可验证结果，避免把忙碌误当作职业升级。",
+    "deliverable": "一份能被检验的 2031 职业画像。",
+    "method": "未来履历法：从别人如何介绍你反推今年必须留下的证据。",
+    "steps": [
+      "写出 2031 年别人如何用一句话介绍你",
+      "写职业位置、外部收入、AI 代表作三个结果",
+      "列出三件未来五年明确不追求的事"
+    ],
+    "resources": [
+      {
+        "label": "本站 2031 北极星",
+        "url": "../timeline/#roadmap-2031"
+      }
+    ],
+    "completion": "保存一页职业画像，并写明三个结果指标和三个不追求事项。"
+  },
+  {
+    "id": "d02",
+    "date": "2026-07-21",
+    "asset": "life",
+    "title": "五年反向设计：资产与生活",
+    "why": "事业增长若以身体和关系透支为代价，就不是真正的长期复利。",
+    "deliverable": "投资、身体与关系的 2026 年领先指标。",
+    "method": "领先指标法：把遥远结果转换成今年可以每周观察的行为。",
+    "steps": [
+      "分别写投资、身体、关系的 2031 状态",
+      "为每项定义一个 2026 年底领先指标",
+      "把固定周复盘时段写进自己的日历"
+    ],
+    "resources": [
+      {
+        "label": "WHO 身体活动建议",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+      }
+    ],
+    "completion": "三项长期状态均有一个年度领先指标，并确定固定周复盘时段。"
+  },
+  {
+    "id": "d03",
+    "date": "2026-07-22",
+    "asset": "influence",
+    "title": "明确你的稀缺组合",
+    "why": "清晰定位能把分散经历组织成外部世界容易理解的专业价值。",
+    "deliverable": "一页个人定位与证据缺口。",
+    "method": "能力证据矩阵：每项能力同时写已有证据、当前缺口和下一步。",
+    "steps": [
+      "列出银行、数据、Agent、产业研究四项经历",
+      "为每项标出证据、缺口和下一步",
+      "完成我帮助谁把什么变成什么的定位句"
+    ],
+    "resources": [
+      {
+        "label": "本站关于猫哥",
+        "url": "../about/"
+      }
+    ],
+    "completion": "形成一句定位语，并为四项能力各写一条证据和一个缺口。"
+  },
+  {
+    "id": "d04",
+    "date": "2026-07-23",
+    "asset": "life",
+    "title": "生活操作系统落地",
+    "why": "先建立低门槛生活底线，才能让长期计划不被短期冲刺拖垮。",
+    "deliverable": "本月运动、关系与休息的最低标准。",
+    "method": "最低可持续剂量：先设计再忙也能完成的行为底线。",
+    "steps": [
+      "设定每周两次 20 分钟运动",
+      "预约一次重要关系深聊",
+      "确定每天睡前 30 分钟无屏时间"
+    ],
+    "resources": [
+      {
+        "label": "WHO 自我照护建议",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/self-care-health-interventions"
+      }
+    ],
+    "completion": "三个最低标准均有频率、时长和具体执行时段。"
+  },
+  {
+    "id": "d05",
+    "date": "2026-07-24",
+    "asset": "influence",
+    "title": "建立个人知识库首页",
+    "why": "只有被组织和持续更新的经验，才可能转化为文章、作品与方法论。",
+    "deliverable": "四类资产都有入口的个人知识库。",
+    "method": "PARA 简化法：按正在做、长期负责、参考资料和归档组织入口。",
+    "steps": [
+      "建立 AI 产品、技术决策、产业研究、生活复盘四栏",
+      "放入已有文件或笔记链接",
+      "每栏只保留一个本月待完成项"
+    ],
+    "resources": [
+      {
+        "label": "PARA 数字信息组织法",
+        "url": "https://fortelabs.com/blog/para/"
+      }
+    ],
+    "completion": "知识库首页包含四个入口，每个入口都有已有材料和本月下一步。"
+  },
+  {
+    "id": "d06",
+    "date": "2026-07-25",
+    "asset": "influence",
+    "title": "选择一个对外问题",
+    "why": "连续围绕一个真实问题输出，比追逐零散热点更容易建立专业识别度。",
+    "deliverable": "一个连续写作主题和首篇文章题目。",
+    "method": "问题树：从一个母问题拆出目标读者会反复追问的子问题。",
+    "steps": [
+      "确定受治理约束的企业数据研发 AI Agent 主题",
+      "写十个目标读者会真实提问的问题",
+      "选择一个作为第一篇文章题目"
+    ],
+    "resources": [
+      {
+        "label": "GitHub Markdown 写作指南",
+        "url": "https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
+      }
+    ],
+    "completion": "保存一个母问题、十个子问题和一个明确的首篇文章标题。"
+  },
+  {
+    "id": "d07",
+    "date": "2026-07-26",
+    "asset": "life",
+    "title": "第一次周复盘",
+    "why": "复盘应帮助调整系统，而不是用补作业和自责制造新的心理负担。",
+    "deliverable": "一份基于能量和执行事实的周复盘。",
+    "method": "事实—能量—调整三段式：先记录发生了什么，再决定下一周。",
+    "steps": [
+      "记录完成天数并承诺不补作业",
+      "写最有能量与最耗能的事各一项",
+      "预约下周两次运动和一个关系时段"
+    ],
+    "resources": [
+      {
+        "label": "WHO 自我照护建议",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/self-care-health-interventions"
+      }
+    ],
+    "completion": "复盘包含完成事实、两条能量观察和三个下周日历安排。"
+  },
+  {
+    "id": "d08",
+    "date": "2026-07-27",
+    "asset": "influence",
+    "title": "搭出方法论骨架",
+    "why": "把项目经验拆成通用流程，才能从公司成果转化为个人可复用资产。",
+    "deliverable": "数据研发 Agent 六段式方法论初稿。",
+    "method": "输入—处理—输出—失败模式四格法，逐段定义可审核边界。",
+    "steps": [
+      "写需求、知识、生成、检核、人审、留痕六段",
+      "每段写输入、处理、输出、失败模式",
+      "检查是否全部使用通用和脱敏表达"
+    ],
+    "resources": [
+      {
+        "label": "Anthropic：构建有效 Agent",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      }
+    ],
+    "completion": "六个阶段均写明输入、处理、输出和至少一个失败模式。"
+  },
+  {
+    "id": "d09",
+    "date": "2026-07-28",
+    "asset": "technical",
+    "title": "技术决策：工作流还是 Agent",
+    "why": "先理解确定性与灵活性的取舍，避免为了技术感而无谓增加系统复杂度。",
+    "deliverable": "一页可复用的架构决策记录。",
+    "method": "架构决策记录 ADR：比较约束、选项、理由、代价与失效条件。",
+    "steps": [
+      "阅读工作流与 Agent 的边界资料",
+      "写两者各自适用条件",
+      "用数据研发场景解释为何不先拆四智能体"
+    ],
+    "resources": [
+      {
+        "label": "Anthropic：工作流与 Agent 的边界",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      }
+    ],
+    "completion": "ADR 明确选择、三个适用条件、主要代价和一个升级触发条件。"
+  },
+  {
+    "id": "d10",
+    "date": "2026-07-29",
+    "asset": "technical",
+    "title": "技术决策：RAG 与知识边界",
+    "why": "知识来源、更新责任和引用机制不清，检索增强只会把不确定性藏起来。",
+    "deliverable": "知识源、引用与失败处理方案。",
+    "method": "知识生命周期法：定义来源、切分、检索、引用、更新和下线责任。",
+    "steps": [
+      "梳理知识源及其更新责任",
+      "定义切分、检索和引用方式",
+      "定义命中正确性与可追溯性指标"
+    ],
+    "resources": [
+      {
+        "label": "OpenAI Retrieval 官方指南",
+        "url": "https://developers.openai.com/api/docs/guides/retrieval"
+      }
+    ],
+    "completion": "方案包含知识清单、更新责任、引用展示和至少两个评估指标。"
+  },
+  {
+    "id": "d11",
+    "date": "2026-07-30",
+    "asset": "technical",
+    "title": "技术决策：SQL 与安全",
+    "why": "NL2SQL 的价值前提是不会让生成结果越权、写入或误伤生产数据。",
+    "deliverable": "一份只读 SQL 安全策略。",
+    "method": "纵深防御：语法白名单、最小权限、沙箱执行与人工批准共同生效。",
+    "steps": [
+      "定义允许与禁止的 SQL 语法",
+      "写清权限最小化和人工批准点",
+      "列出五条必须拦截的危险 SQL"
+    ],
+    "resources": [
+      {
+        "label": "PostgreSQL 只读事务说明",
+        "url": "https://www.postgresql.org/docs/16/sql-set-transaction.html"
+      }
+    ],
+    "completion": "策略包含白名单、权限、人审和五个可执行的拦截案例。"
+  },
+  {
+    "id": "d12",
+    "date": "2026-07-31",
+    "asset": "technical",
+    "title": "技术决策：MCP 的边界",
+    "why": "协议接入只有在权限和能力边界可解释时，才适合进入企业数据场景。",
+    "deliverable": "MCP 接入收益、风险与准入条件。",
+    "method": "能力—权限矩阵：每个工具同时标注输入、输出、权限和失败影响。",
+    "steps": [
+      "阅读 MCP tools 与 resources 概览",
+      "写可连接能力与权限风险",
+      "设计只读 get_metadata(table) 接口"
+    ],
+    "resources": [
+      {
+        "label": "MCP 官方架构概览",
+        "url": "https://modelcontextprotocol.io/docs/learn/architecture"
+      },
+      {
+        "label": "MCP 安全最佳实践",
+        "url": "https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices"
+      }
+    ],
+    "completion": "写出一个只读工具契约、权限边界、失败处理和准入条件。"
+  },
+  {
+    "id": "d13",
+    "date": "2026-08-01",
+    "asset": "technical",
+    "title": "最小 Demo 立项",
+    "why": "把目标压缩到一条可演示链路，才能在有限时间内得到真实反馈。",
+    "deliverable": "一页窄场景 PRD 和项目骨架。",
+    "method": "最小可验证闭环：只保留能证明核心价值和风险边界的功能。",
+    "steps": [
+      "定义输入、输出和目标用户",
+      "写真实数据、写操作、自动发布三条不做",
+      "建立 docs、data、app 三个目录"
+    ],
+    "resources": [
+      {
+        "label": "Anthropic：从最简单方案开始",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      }
+    ],
+    "completion": "PRD 写清用户、输入、输出、成功指标和三条明确不做。"
+  },
+  {
+    "id": "d14",
+    "date": "2026-08-02",
+    "asset": "influence",
+    "title": "发布第一篇文章",
+    "why": "公开表达会迫使模糊经验变成可被同行质疑和复用的清晰观点。",
+    "deliverable": "一篇已发布或已定时的 600—1000 字文章。",
+    "method": "问题—判断—证据—边界四段式，让文章表达可验证而非口号。",
+    "steps": [
+      "完成为什么第一版不追求多智能体",
+      "文末留下一个真问题邀请反驳",
+      "记录发布链接与真实互动数据"
+    ],
+    "resources": [
+      {
+        "label": "GitHub Markdown 写作指南",
+        "url": "https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
+      }
+    ],
+    "completion": "文章已公开或定时，包含明确判断、依据、适用边界和讨论问题。"
+  },
+  {
+    "id": "d15",
+    "date": "2026-08-03",
+    "asset": "life",
+    "title": "第二次周复盘",
+    "why": "检查四类资产是否同步留下证据，避免事业目标再次挤占生活底线。",
+    "deliverable": "四类资产的进展证据与下周安排。",
+    "method": "红黄绿验收：以证据而非感觉判断每类资产的真实状态。",
+    "steps": [
+      "检查四类资产是否都有产物",
+      "完成运动或长走并记录睡眠质量",
+      "写一个追求看起来厉害的时刻"
+    ],
+    "resources": [
+      {
+        "label": "WHO 身体活动建议",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+      }
+    ],
+    "completion": "四类资产各有证据或缺口，并为下周安排一个纠偏动作。"
+  },
+  {
+    "id": "d16",
+    "date": "2026-08-04",
+    "asset": "income",
+    "title": "定义专业服务假设",
+    "why": "第二收入曲线应从真实客户问题出发，而不是从自认为擅长的能力出发。",
+    "deliverable": "目标客户、痛点与两周交付物假设。",
+    "method": "价值主张画布：明确客户任务、痛点、收益和拟提供的解决方式。",
+    "steps": [
+      "写清目标客户与最痛的问题",
+      "定义两周诊断可交付物",
+      "列出不承诺的边界与测试价格区间"
+    ],
+    "resources": [
+      {
+        "label": "Strategyzer 价值主张画布",
+        "url": "https://www.strategyzer.com/library/the-value-proposition-canvas"
+      }
+    ],
+    "completion": "形成一页服务假设，写明对象、痛点、交付物、边界和验证方式。"
+  },
+  {
+    "id": "d17",
+    "date": "2026-08-05",
+    "asset": "income",
+    "title": "写一页服务说明",
+    "why": "能否在三十秒内说清价值，是检验专业服务是否真正聚焦的第一关。",
+    "deliverable": "一页能在 30 秒内读懂的服务页。",
+    "method": "对象—问题—过程—产物—边界五段式，删除无法举证的宣传词。",
+    "steps": [
+      "写对象、问题、流程与样例产物",
+      "补上适合与不适合的人",
+      "删除没有证据支撑的宣传词"
+    ],
+    "resources": [
+      {
+        "label": "本站能力与作品",
+        "url": "../projects/"
+      }
+    ],
+    "completion": "服务页能在一屏内说明对象、问题、过程、产物与不适用边界。"
+  },
+  {
+    "id": "d18",
+    "date": "2026-08-06",
+    "asset": "income",
+    "title": "发出三次访谈邀约",
+    "why": "外部需求必须通过真实对话验证，不能只在自己的逻辑里证明自己。",
+    "deliverable": "三条已发送的真实访谈邀请。",
+    "method": "问题访谈：只理解现状、代价和已有替代方案，不推销解决方案。",
+    "steps": [
+      "选数据负责人、数据工程师、AI 产品同行各一位",
+      "发送 20 分钟访谈邀请且不推销",
+      "记录发送时间与回复并承诺不催促"
+    ],
+    "resources": [
+      {
+        "label": "Nielsen Norman 用户访谈指南",
+        "url": "https://www.nngroup.com/articles/user-interviews/"
+      }
+    ],
+    "completion": "三类对象各收到一条邀约，并记录发送时间、状态和待验证问题。"
+  },
+  {
+    "id": "d19",
+    "date": "2026-08-07",
+    "asset": "income",
+    "title": "建立产业研究框架",
+    "why": "投资研究的资产是可追溯判断系统，不是当天找到一只看起来会涨的股票。",
+    "deliverable": "研究数据库字段与证据纪律。",
+    "method": "事实—推断—观点分层：每条判断绑定原始来源、日期和失效条件。",
+    "steps": [
+      "建立公司、产品、订单、利润、估值、风险等字段",
+      "明确观点与证据分开且未知就写未知",
+      "今天不买入只建立决策系统"
+    ],
+    "resources": [
+      {
+        "label": "巨潮资讯官方披露",
+        "url": "https://www.cninfo.com.cn/"
+      }
+    ],
+    "completion": "数据库字段、来源规则和失效条件齐全，并明确当日不交易。"
+  },
+  {
+    "id": "d20",
+    "date": "2026-08-08",
+    "asset": "income",
+    "title": "完成一条研究档案",
+    "why": "用一条完整研究档案检验框架，能暴露字段缺失和叙事偏见。",
+    "deliverable": "一个方向、五家公司和可追溯证据。",
+    "method": "横向可比法：同一字段比较五家公司，区分公司事实与市场定价理由。",
+    "steps": [
+      "选择熟悉的方向而不是热点榜",
+      "录入五家公司与原始来源",
+      "区分想买的理由和市场继续付溢价的理由"
+    ],
+    "resources": [
+      {
+        "label": "巨潮资讯官方披露",
+        "url": "https://www.cninfo.com.cn/"
+      }
+    ],
+    "completion": "五家公司使用同一字段完成横向比较，每条关键事实都有来源。"
+  },
+  {
+    "id": "d21",
+    "date": "2026-08-09",
+    "asset": "income",
+    "title": "建立交易前后日志",
+    "why": "没有事前假设、失效条件和仓位上限，事后复盘很容易变成自我解释。",
+    "deliverable": "带失效条件和仓位上限的交易模板。",
+    "method": "预先承诺法：开仓前写下触发、失效、风险预算和退出规则。",
+    "steps": [
+      "建立买入假设、定价逻辑、触发和失效条件字段",
+      "补写一笔历史交易并区分事实与事后解释",
+      "确立无失效条件与仓位上限则不开仓"
+    ],
+    "resources": [
+      {
+        "label": "本站产业研究原则",
+        "url": "../writing/"
+      }
+    ],
+    "completion": "模板包含假设、触发、失效、仓位上限、退出和事后证据字段。"
+  },
+  {
+    "id": "d22",
+    "date": "2026-08-10",
+    "asset": "influence",
+    "title": "发布第二篇文章",
+    "why": "把安全与审核边界写清，能形成区别于普通聊天机器人产品经理的观点。",
+    "deliverable": "一篇关于可审核 NL2SQL 的公开文章。",
+    "method": "流程图加失败案例：用端到端链路说明价值、人审点和风险。",
+    "steps": [
+      "完成价值不只在写出 SQL 的文章",
+      "配需求到留痕六步流程图",
+      "记录发布链接和一个读者问题"
+    ],
+    "resources": [
+      {
+        "label": "PostgreSQL 只读事务说明",
+        "url": "https://www.postgresql.org/docs/16/sql-set-transaction.html"
+      }
+    ],
+    "completion": "文章公开或定时，包含六步流程、至少一个失败案例和审核边界。"
+  },
+  {
+    "id": "d23",
+    "date": "2026-08-11",
+    "asset": "life",
+    "title": "第三次周复盘",
+    "why": "用外部反馈选择下一步，防止 Demo、文章和研究同时扩张导致失焦。",
+    "deliverable": "基于外部反馈的下周唯一 Demo 路径。",
+    "method": "反馈证据排序：按真实行为、明确语言和个人猜测的可信度排序。",
+    "steps": [
+      "复盘文章、访谈、研究三类反馈",
+      "完成运动与一次重要关系联系",
+      "选择下周唯一要跑通的 Demo 路径"
+    ],
+    "resources": [
+      {
+        "label": "WHO 自我照护建议",
+        "url": "https://www.who.int/news-room/fact-sheets/detail/self-care-health-interventions"
+      }
+    ],
+    "completion": "列出三类反馈证据，并只保留一条下周 Demo 主路径。"
+  },
+  {
+    "id": "d24",
+    "date": "2026-08-12",
+    "asset": "technical",
+    "title": "制作合成数据与测试集",
+    "why": "用虚构数据和明确接受条件，才能公开展示又不泄露公司和客户信息。",
+    "deliverable": "三张虚构表与十条测试需求。",
+    "method": "风险分层测试集：同时覆盖普通、模糊、越权和危险需求。",
+    "steps": [
+      "创建客户、交易、产品三张完全虚构的表",
+      "写十条需求、风险等级与接受条件",
+      "检查没有任何真实内部数据对象、字段和口径"
+    ],
+    "resources": [
+      {
+        "label": "OWASP 生成式 AI 风险清单",
+        "url": "https://genai.owasp.org/llm-top-10/"
+      }
+    ],
+    "completion": "三张表和十条测试均为合成数据，每条测试都有风险与接受条件。"
+  },
+  {
+    "id": "d25",
+    "date": "2026-08-13",
+    "asset": "technical",
+    "title": "实现 Demo 第一条链路",
+    "why": "先让一条链路端到端跑通，比同时搭建完整平台更快验证核心价值。",
+    "deliverable": "输入需求到输出结构化需求和模拟 SQL。",
+    "method": "纵向切片：用最少界面贯通输入、处理、输出和人工确认。",
+    "steps": [
+      "用熟悉技术栈搭建输入和结果页面",
+      "没有 API Key 时使用确定性 mock",
+      "保存一张可运行截图"
+    ],
+    "resources": [
+      {
+        "label": "Anthropic：从简单可组合模式开始",
+        "url": "https://www.anthropic.com/engineering/building-effective-agents"
+      }
+    ],
+    "completion": "一条合成需求能稳定输出结构化需求、模拟 SQL 和截图证据。"
+  },
+  {
+    "id": "d26",
+    "date": "2026-08-14",
+    "asset": "technical",
+    "title": "加入知识引用与检核",
+    "why": "展示来源和主动拦截危险输出，才能让 Demo 从会生成升级为可审核。",
+    "deliverable": "带来源展示和危险 SQL 拦截的流程。",
+    "method": "输出后置检核：生成结果必须经过来源、对象和只读规则三重验证。",
+    "steps": [
+      "显示生成 SQL 使用的元数据来源",
+      "只允许 SELECT 并拦截未定义对象",
+      "用两条危险需求验证并截图"
+    ],
+    "resources": [
+      {
+        "label": "OWASP 不安全输出处理",
+        "url": "https://genai.owasp.org/llm-top-10/"
+      },
+      {
+        "label": "OpenAI Retrieval 官方指南",
+        "url": "https://developers.openai.com/api/docs/guides/retrieval"
+      }
+    ],
+    "completion": "正常案例显示来源，两条危险需求都被拦截并保留截图。"
+  },
+  {
+    "id": "d27",
+    "date": "2026-08-15",
+    "asset": "technical",
+    "title": "用十个案例评估",
+    "why": "指标和失败样本能防止用一次成功演示误判产品已经可靠。",
+    "deliverable": "三项指标和一个修复前后对比。",
+    "method": "小型回归集：固定测试样本、接受标准和版本间可比较结果。",
+    "steps": [
+      "记录字段完整率、SQL 可执行率、危险 SQL 拦截率",
+      "只修出现最多的一类问题",
+      "在 README 公开一个失败案例和限制"
+    ],
+    "resources": [
+      {
+        "label": "OpenAI Evaluation 最佳实践",
+        "url": "https://developers.openai.com/api/docs/guides/evaluation-best-practices"
+      }
+    ],
+    "completion": "十例评估有三项指标、问题分布和一个修复前后对比。"
+  },
+  {
+    "id": "d28",
+    "date": "2026-08-16",
+    "asset": "influence",
+    "title": "形成可展示作品包",
+    "why": "可运行 Demo 只有被清楚讲述、测量并暴露限制，才会成为可信作品。",
+    "deliverable": "README、3—5 分钟录屏与一条同行反馈。",
+    "method": "问题—架构—演示—指标—限制五段式作品叙事。",
+    "steps": [
+      "写问题、架构、演示、指标和安全边界",
+      "录制需求到人工批准的完整过程",
+      "询问同行哪一步最不可信"
+    ],
+    "resources": [
+      {
+        "label": "GitHub README 写作与格式",
+        "url": "https://docs.github.com/en/get-started/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax"
+      }
+    ],
+    "completion": "作品包包含 README、完整录屏、指标、限制和一条原始同行反馈。"
+  },
+  {
+    "id": "d29",
+    "date": "2026-08-17",
+    "asset": "influence",
+    "title": "建立六周输出管线",
+    "why": "稳定影响力来自连续回答同一领域的问题，而不是偶尔发布一篇大文章。",
+    "deliverable": "第三篇草稿与未来六周选题。",
+    "method": "一源多用：从技术决策和 Demo 证据拆出文章、短笔记与作品更新。",
+    "steps": [
+      "写数据 Agent 最小治理框架草稿",
+      "排出未来六周每周一个问题",
+      "把文章、决策和 Demo 链接汇总到首页"
+    ],
+    "resources": [
+      {
+        "label": "本站写作归档",
+        "url": "../writing/"
+      }
+    ],
+    "completion": "第三篇草稿已保存，六周选题均有问题、证据来源和计划日期。"
+  },
+  {
+    "id": "d30",
+    "date": "2026-08-18",
+    "asset": "life",
+    "title": "月度验收与下月承诺",
+    "why": "月底必须用证据收敛方向，否则三十天行动会再次变成没有复利的忙碌。",
+    "deliverable": "四资产红黄绿验收与下月唯一主攻方向。",
+    "method": "证据验收加单点承诺：先评估四类资产，再只选择一个下月重点。",
+    "steps": [
+      "为每项用文件、链接或截图举证",
+      "写最大复利资产、失败与被推翻的假设",
+      "只选 Demo、用户访谈、连续输出之一作为下月主攻"
+    ],
+    "resources": [
+      {
+        "label": "本站 2031 路线",
+        "url": "../timeline/#roadmap-2031"
+      }
+    ],
+    "completion": "四类资产均有红黄绿结论和证据，并只保留下月一个主攻方向。"
+  }
+]
