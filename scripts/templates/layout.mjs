@@ -33,14 +33,16 @@ export function layout({
     '<meta name="description" content="' + escapeHtml(description) + '">' +
     '<meta name="theme-color" content="#eaf5ff">' +
     '<title>' + escapeHtml(title) + '</title>' +
-    '<link rel="stylesheet" href="' + root + 'styles.css">' +
+    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css">' +
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
     '<header class="site-header">' +
     '<a class="brand" href="' + root + 'index.html">🐱 <strong>猫哥</strong></a>' +
-    '<nav id="site-nav" aria-label="主导航">' + nav + '</nav>' +
+    '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
+    '<nav id="site-nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
     '</header>' +
     '<main id="main">' + body + '</main>' +
     '<footer><strong>猫哥 · 向 2031 生长</strong><span>精选公开，长期更新。</span></footer>' +
+    '<script type="module" src="' + root + 'assets/js/site.js"></script>' +
     '</body></html>';
 }
