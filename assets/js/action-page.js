@@ -306,10 +306,14 @@ export function initActionPage(root = document, options = {}) {
   byId('export-progress').addEventListener('click', () => {
     const blob = new Blob([store.exportState()], { type: 'application/json' });
     const link = root.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    const objectUrl = URL.createObjectURL(blob);
+    link.href = objectUrl;
     link.download = 'mrcharm-growth-' + localDateISO() + '.json';
+    link.hidden = true;
+    root.body.append(link);
     link.click();
-    URL.revokeObjectURL(link.href);
+    link.remove();
+    globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
     toast('进度备份已导出。');
   });
   byId('import-progress').addEventListener('click', () => byId('import-file').click());

@@ -56,6 +56,21 @@ test('导入拒绝未知任务 ID', () => {
   );
 });
 
+test('导入不能绕过完成证据与清单约束', () => {
+  const store = createActionStore({ storage: memory(), key: 'test', tasks });
+  assert.throws(() => store.importState(JSON.stringify({
+    version: 2,
+    tasks: {
+      d01: {
+        checks: [true, false, true],
+        evidence: '',
+        review: '',
+        done: true
+      }
+    }
+  })), /completed task must include all checks and evidence/);
+});
+
 test('没有完成三步并留下证据时不能完成任务', () => {
   const store = createActionStore({ storage: memory(), key: 'test', tasks });
   assert.throws(() => store.completeTask('d01', {

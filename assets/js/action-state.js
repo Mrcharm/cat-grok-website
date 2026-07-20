@@ -6,11 +6,17 @@ const normalizeValue = (id, value, tasks) => {
   if (!Array.isArray(value.checks) || value.checks.length !== task.steps.length) {
     throw new Error('invalid checks for ' + id);
   }
+  const checks = value.checks.map(Boolean);
+  const evidence = String(value.evidence || '');
+  const done = Boolean(value.done);
+  if (done && (!checks.every(Boolean) || !evidence.trim())) {
+    throw new Error('completed task must include all checks and evidence: ' + id);
+  }
   return {
-    checks: value.checks.map(Boolean),
-    evidence: String(value.evidence || ''),
+    checks,
+    evidence,
     review: String(value.review || ''),
-    done: Boolean(value.done)
+    done
   };
 };
 
