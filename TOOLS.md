@@ -1,83 +1,37 @@
-# TOOLS.md - Local Notes
+# 猫哥个人站维护说明
 
-Skills define _how_ tools work. This file is for _your_ specifics — the stuff that's unique to your setup.
+这是一个直接发布到 GitHub Pages 的静态网站。公开页面由结构化数据、Markdown 内容和模板生成，生成后的 HTML 一并提交到仓库。
 
-## What Goes Here
+## 本地环境
 
-Things like:
+- Node.js 20 或更高版本
+- pnpm 11
+- Python 3（仅用于启动本地静态服务器）
 
-- Camera names and locations
-- SSH hosts and aliases
-- Preferred voices for TTS
-- Speaker/room names
-- Device nicknames
-- Anything environment-specific
+## 常用命令
 
-## Examples
-
-```markdown
-### Cameras
-
-- living-room → Main area, 180° wide angle
-- front-door → Entrance, motion-triggered
-
-### SSH
-
-- home-server → 192.168.1.100, user: admin
-
-### TTS
-
-- Preferred voice: "Nova" (warm, slightly British)
-- Default speaker: Kitchen HomePod
+```text
+pnpm install
+pnpm validate
+pnpm test
+pnpm build
+pnpm check
+python -m http.server 4173
 ```
 
-## Why Separate?
+本地预览地址为 `http://127.0.0.1:4173/`。
 
-Skills are shared. Your setup is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.
+## 内容入口
 
----
+- `data/profile.json`：个人定位、当前状态和公开链接
+- `data/roadmap.json`：2026—2031 路线图
+- `data/tasks.json`：30 天固定任务、方法、资料和完成标准
+- `data/timeline.json`：职业、学习与生活的已确认节点
+- `content/posts/`：公开写作源文件
+- `content/projects/`：作品档案源文件
 
-## 用户信息
+更新源文件后运行 `pnpm check`，确认测试和静态构建全部通过，再提交生成页面。
 
-### 基本信息
-- **姓名**: 谢呈文（猫哥）
-- **当前地址**: 厦门
-- **时区**: Asia/Shanghai
+## 隐私边界
 
-## GitHub 配置
-
-### 个人网站仓库
-- **仓库地址**: https://github.com/mrcharm/cat-grok-website.git
-- **网站地址**: https://mrcharm.github.io/cat-grok-website/
-- **Token**: 存储在 `.env` 文件中（已加入 .gitignore，不会上传到GitHub）
-- **默认分支**: main
-- **部署方式**: GitHub Pages (Deploy from a branch)
-
-**Token 使用方法**:
-Token 保存在本地 `.env` 文件中，推送时会自动使用。该文件已被 .gitignore 保护，不会泄露到 GitHub。
-
-**后续所有网站改动都使用此仓库**
-
-## 本地构建
-
-- Node.js：20 或更高版本
-- 包管理器：pnpm 11
-- 安装依赖：pnpm install
-- 运行测试：pnpm test
-- 校验内容：pnpm validate
-- 生成静态页面：pnpm build
-- 完整检查：pnpm check
-- 本地预览：在仓库根目录运行 python -m http.server 4173
-- 网站是静态站点，生成文件会提交到仓库并由 GitHub Pages 直接发布
-
-
-
-
-
-## Browser
-
-When you use browser capabilities, you MUST append the browser preview URL at the end of your reply:
-
-`🖥️ [点击预览](https://code.coze.cn/browser/7615510988498141184)`
-
-IMPORTANT: The browser preview link is fixed and cannot be modified in any part.
+不要提交访问令牌、账号凭证、客户或公司内部信息、真实业务数据、私人行动证据和本机环境说明。行动页的清单、证据和复盘只存储在访问者自己的浏览器中。
