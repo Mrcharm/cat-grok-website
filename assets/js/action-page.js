@@ -6,6 +6,14 @@ export function localDateISO(date = new Date()) {
   return date.getFullYear() + '-' + pad(date.getMonth() + 1) + '-' + pad(date.getDate());
 }
 
+export function weekEndingFridayISO(date = new Date()) {
+  const value = new Date(date);
+  const day = value.getDay();
+  const offset = day === 0 ? 5 : day === 6 ? -1 : 5 - day;
+  value.setDate(value.getDate() + offset);
+  return localDateISO(value);
+}
+
 export function buildMonthCells(year, month, tasks, todayIso, doneIds = new Set()) {
   const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -97,14 +105,6 @@ export function initActionPage(root = document, options = {}) {
     link.click();
     link.remove();
     globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
-  };
-
-  const fridayFor = date => {
-    const value = new Date(date);
-    const day = value.getDay();
-    const offset = day >= 1 && day <= 4 ? 5 - day : day === 5 ? 0 : day === 6 ? -1 : -2;
-    value.setDate(value.getDate() + offset);
-    return localDateISO(value);
   };
 
   const renderTimer = () => {
@@ -332,7 +332,7 @@ export function initActionPage(root = document, options = {}) {
     toast('进度备份已导出。');
   });
   byId('export-weekly').addEventListener('click', () => {
-    const weekEnding = fridayFor(now);
+    const weekEnding = weekEndingFridayISO(now);
     const json = store.exportWeeklyPublic(weekEnding);
     if (JSON.parse(json).items.length === 0) {
       toast('本周还没有已完成且标记为可公开的素材。');

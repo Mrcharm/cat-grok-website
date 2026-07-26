@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSite } from '../scripts/build.mjs';
-import { buildMonthCells, localDateISO } from '../assets/js/action-page.js';
+import { buildMonthCells, localDateISO, weekEndingFridayISO } from '../assets/js/action-page.js';
 
 test('行动页包含完整执行闭环', async () => {
   const html = (await buildSite({ write: false })).get('action/index.html');
@@ -55,4 +55,11 @@ test('月历以周一开始并补齐整周', () => {
   assert.equal(taskCell.day, 20);
   assert.equal(taskCell.today, true);
   assert.equal(taskCell.done, true);
+});
+
+test('周报日期在周日至周四指向即将到来的周五', () => {
+  assert.equal(weekEndingFridayISO(new Date(2026, 6, 26)), '2026-07-31');
+  assert.equal(weekEndingFridayISO(new Date(2026, 6, 30)), '2026-07-31');
+  assert.equal(weekEndingFridayISO(new Date(2026, 6, 31)), '2026-07-31');
+  assert.equal(weekEndingFridayISO(new Date(2026, 7, 1)), '2026-07-31');
 });
