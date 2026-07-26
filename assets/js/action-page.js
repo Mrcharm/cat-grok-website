@@ -39,10 +39,10 @@ const parsePageTasks = root => {
 };
 
 const assetLabels = {
-  influence: '行业影响力',
-  technical: 'AI 系统能力',
-  income: '第二收入与投资系统',
-  life: '生活底盘'
+  foundation: 'AI 系统判断',
+  product: '产品发现与评估',
+  delivery: '企业 Demo 交付',
+  influence: '作品与职业证据'
 };
 
 export function initActionPage(root = document, options = {}) {
@@ -82,8 +82,30 @@ export function initActionPage(root = document, options = {}) {
       .map(input => input.checked),
     evidence: byId('evidence').value,
     review: byId('review').value,
+    publicNote: byId('public-note').value,
     done: activeTask ? store.getTaskState(activeTask.id).done : false
   });
+
+  const downloadJson = (json, filename) => {
+    const blob = new Blob([json], { type: 'application/json' });
+    const link = root.createElement('a');
+    const objectUrl = URL.createObjectURL(blob);
+    link.href = objectUrl;
+    link.download = filename;
+    link.hidden = true;
+    root.body.append(link);
+    link.click();
+    link.remove();
+    globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+  };
+
+  const fridayFor = date => {
+    const value = new Date(date);
+    const day = value.getDay();
+    const offset = day >= 1 && day <= 4 ? 5 - day : day === 5 ? 0 : day === 6 ? -1 : -2;
+    value.setDate(value.getDate() + offset);
+    return localDateISO(value);
+  };
 
   const renderTimer = () => {
     byId('timer-display').textContent = pad(Math.floor(secondsLeft / 60)) + ':' + pad(secondsLeft % 60);
@@ -103,7 +125,7 @@ export function initActionPage(root = document, options = {}) {
     const progress = byId('progress-bar').parentElement;
     progress.setAttribute('aria-valuenow', String(complete));
     byId('progress-text').textContent = complete === tasks.length
-      ? '30 天证据已集齐。请做月度验收，并选择下月唯一主攻方向。'
+      ? '90 天证据已集齐。请完成最终答辩，并根据真实反馈决定下一个 90 天。'
       : '还剩 ' + (tasks.length - complete) + ' 个证据，不补作业，只继续下一步。';
   };
 
@@ -119,7 +141,7 @@ export function initActionPage(root = document, options = {}) {
       return;
     }
     byId('today-date').textContent = focus.date === todayIso ? '今天 · ' + focus.date : '当前下一步 · ' + focus.date;
-    byId('today-code').textContent = focus.id.toUpperCase();
+    byId('today-code').textContent = 'DAY ' + String(focus.dayNumber || '').padStart(3, '0');
     byId('today-title').textContent = focus.title;
     byId('today-deliverable').textContent = focus.deliverable;
     button.hidden = false;
@@ -131,7 +153,7 @@ export function initActionPage(root = document, options = {}) {
     button.type = 'button';
     button.className = 'task-card ' + className;
     button.dataset.taskId = task.id;
-    button.innerHTML = '<small>' + task.id.toUpperCase() + ' · ' + task.date.slice(5) + ' · ' +
+    button.innerHTML = '<small>DAY ' + String(task.dayNumber || '').padStart(3, '0') + ' · ' + task.date.slice(5) + ' · ' +
       (assetLabels[task.asset] || task.asset) + '</small><strong></strong><span></span>';
     button.querySelector('strong').textContent = task.title;
     button.querySelector('span').textContent = task.deliverable;
@@ -195,7 +217,8 @@ export function initActionPage(root = document, options = {}) {
     activeTask = task;
     lastTrigger = trigger || root.activeElement;
     const value = store.getTaskState(task.id);
-    byId('dialog-meta').textContent = task.date + ' · ' + task.id.toUpperCase() + ' · ' + (assetLabels[task.asset] || task.asset);
+    byId('dialog-meta').textContent = task.date + ' · DAY ' +
+      String(task.dayNumber || '').padStart(3, '0') + ' · ' + task.weekTitle;
     byId('dialog-title').textContent = task.title;
     byId('task-deliverable').textContent = task.deliverable;
     byId('task-why').textContent = task.why;
@@ -221,6 +244,7 @@ export function initActionPage(root = document, options = {}) {
     }));
     byId('evidence').value = value.evidence;
     byId('review').value = value.review;
+    byId('public-note').value = value.publicNote;
     byId('complete-task').textContent = value.done ? '已完成 · 更新记录' : '验收并完成';
     secondsLeft = 30 * 60;
     stopTimer();
@@ -304,17 +328,18 @@ export function initActionPage(root = document, options = {}) {
   });
 
   byId('export-progress').addEventListener('click', () => {
-    const blob = new Blob([store.exportState()], { type: 'application/json' });
-    const link = root.createElement('a');
-    const objectUrl = URL.createObjectURL(blob);
-    link.href = objectUrl;
-    link.download = 'mrcharm-growth-' + localDateISO() + '.json';
-    link.hidden = true;
-    root.body.append(link);
-    link.click();
-    link.remove();
-    globalThis.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+    downloadJson(store.exportState(), 'mrcharm-growth-private-' + localDateISO() + '.json');
     toast('进度备份已导出。');
+  });
+  byId('export-weekly').addEventListener('click', () => {
+    const weekEnding = fridayFor(now);
+    const json = store.exportWeeklyPublic(weekEnding);
+    if (JSON.parse(json).items.length === 0) {
+      toast('本周还没有已完成且标记为可公开的素材。');
+      return;
+    }
+    downloadJson(json, 'mrcharm-weekly-public-' + weekEnding + '.json');
+    toast('本周公开素材已导出，可交给周五自动任务发布。');
   });
   byId('import-progress').addEventListener('click', () => byId('import-file').click());
   byId('import-file').addEventListener('change', async event => {

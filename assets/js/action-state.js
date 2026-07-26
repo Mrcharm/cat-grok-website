@@ -1,4 +1,5 @@
-const freshState = () => ({ version: 2, tasks: {} });
+const STATE_VERSION = 3;
+const freshState = () => ({ version: STATE_VERSION, tasks: {} });
 
 const normalizeValue = (id, value, tasks) => {
   const task = tasks.find(item => item.id === id);
@@ -16,13 +17,14 @@ const normalizeValue = (id, value, tasks) => {
     checks,
     evidence,
     review: String(value.review || ''),
+    publicNote: String(value.publicNote || ''),
     done
   };
 };
 
 function validateImportedState(json, ids, tasks) {
   const parsed = typeof json === 'string' ? JSON.parse(json) : json;
-  if (parsed?.version !== 2 || !parsed.tasks || typeof parsed.tasks !== 'object') {
+  if (![2, STATE_VERSION].includes(parsed?.version) || !parsed.tasks || typeof parsed.tasks !== 'object') {
     throw new Error('invalid state version or tasks');
   }
   const normalized = {};
@@ -30,7 +32,7 @@ function validateImportedState(json, ids, tasks) {
     if (!ids.has(id)) throw new Error('unknown task: ' + id);
     normalized[id] = normalizeValue(id, value, tasks);
   }
-  return { version: 2, tasks: normalized };
+  return { version: STATE_VERSION, tasks: normalized };
 }
 
 function migrateLegacyState(raw, ids, tasks) {
@@ -49,6 +51,7 @@ function migrateLegacyState(raw, ids, tasks) {
         : task.steps.map(() => false),
       evidence: value.evidence,
       review: value.review,
+      publicNote: value.publicNote,
       done: value.done
     }, tasks);
   }
@@ -87,6 +90,7 @@ export function createActionStore({
     checks: task.steps.map(() => false),
     evidence: '',
     review: '',
+    publicNote: '',
     done: false
   });
   let { state, corruptRaw } = readState(storage, key, legacyKey, ids, tasks);
@@ -134,6 +138,35 @@ export function createActionStore({
 
     exportState() {
       return JSON.stringify(state, null, 2);
+    },
+
+    exportWeeklyPublic(weekEnding) {
+      const end = new Date(weekEnding + 'T12:00:00');
+      if (Number.isNaN(end.getTime())) throw new Error('invalid week ending');
+      const start = new Date(end);
+      const mondayOffset = (end.getDay() + 6) % 7;
+      start.setDate(end.getDate() - mondayOffset);
+      const iso = date => date.getFullYear() + '-' +
+        String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+      const startIso = iso(start);
+      const items = tasks
+        .filter(task => task.date >= startIso && task.date <= weekEnding)
+        .map(task => ({ task, value: this.getTaskState(task.id) }))
+        .filter(({ value }) => value.done && value.publicNote.trim())
+        .map(({ task, value }) => ({
+          id: task.id,
+          date: task.date,
+          title: task.title,
+          phaseTitle: task.phaseTitle || '',
+          publicNote: value.publicNote.trim()
+        }));
+      return JSON.stringify({
+        schema: 'mrcharm-weekly-public-v1',
+        weekEnding,
+        generatedAt: new Date().toISOString(),
+        items
+      }, null, 2);
     },
 
     importState(json) {

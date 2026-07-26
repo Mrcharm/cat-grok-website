@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
+import { expandLearningPlan } from './lib/learning-plan.mjs';
 
 const readJson = async file => JSON.parse(await readFile(file, 'utf8'));
 
@@ -10,13 +11,14 @@ const requireText = (value, label, min = 1) => {
 };
 
 export async function loadAndValidateContent() {
-  const [profile, roadmap, tasks, timeline, agentTeam] = await Promise.all([
+  const [profile, roadmap, learningPlan, timeline, agentTeam] = await Promise.all([
     readJson('data/profile.json'),
     readJson('data/roadmap.json'),
-    readJson('data/tasks.json'),
+    readJson('data/learning-plan.json'),
     readJson('data/timeline.json'),
     readJson('data/agent-team.json')
   ]);
+  const tasks = expandLearningPlan(learningPlan);
 
   if (profile.lifeLines?.length !== 3) {
     throw new Error('profile.lifeLines must contain 3 items');
@@ -24,12 +26,12 @@ export async function loadAndValidateContent() {
   if (roadmap.years?.length !== 5) {
     throw new Error('roadmap.years must contain 5 stages');
   }
-  if (!Array.isArray(tasks) || tasks.length !== 30) {
-    throw new Error('tasks must contain 30 items');
+  if (!Array.isArray(tasks) || tasks.length !== 90) {
+    throw new Error('learning plan must contain 90 items');
   }
 
   const ids = new Set();
-  const assets = new Set(['influence', 'income', 'technical', 'life']);
+  const assets = new Set(['foundation', 'product', 'delivery', 'influence']);
   for (const task of tasks) {
     if (ids.has(task.id)) throw new Error('duplicate task id: ' + task.id);
     ids.add(task.id);
@@ -41,6 +43,8 @@ export async function loadAndValidateContent() {
     requireText(task.deliverable, 'task.deliverable', 8);
     requireText(task.method, 'task.method', 8);
     requireText(task.completion, 'task.completion', 8);
+    requireText(task.phaseTitle, 'task.phaseTitle', 4);
+    requireText(task.weekTitle, 'task.weekTitle', 4);
     if (!Array.isArray(task.steps) || task.steps.length !== 3) {
       throw new Error(task.id + ' must have 3 steps');
     }
@@ -72,10 +76,10 @@ export async function loadAndValidateContent() {
     }
   }
 
-  return { profile, roadmap, tasks, timeline, agentTeam };
+  return { profile, roadmap, learningPlan, tasks, timeline, agentTeam };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await loadAndValidateContent();
-  console.log('content: profile, roadmap and 30 tasks are valid');
+  console.log('content: profile, roadmap and 90 learning tasks are valid');
 }

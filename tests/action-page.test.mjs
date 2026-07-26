@@ -20,9 +20,19 @@ test('行动页包含完整执行闭环', async () => {
     'kanban-complete',
     'export-progress',
     'import-progress'
+    ,'phase-progress'
+    ,'public-note'
+    ,'export-weekly'
   ]) {
     assert.match(html, new RegExp('id="' + id + '"'));
   }
+});
+
+test('行动页明确是 90 天 AI 产品经理训练而不是 30 天泛计划', async () => {
+  const html = (await buildSite({ write: false })).get('action/index.html');
+  assert.match(html, /90 天 AI 产品经理成长计划/);
+  assert.match(html, /每天 30 分钟/);
+  assert.doesNotMatch(html, /30 天行动日历/);
 });
 
 test('任务 JSON 以 application/json 注入而不是拼接可执行代码', async () => {

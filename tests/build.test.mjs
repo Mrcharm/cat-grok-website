@@ -25,3 +25,11 @@ test('所有生成页面使用相对根路径且有唯一主标题', async () =>
     assert.doesNotMatch(html, /href="\/assets\//, path);
   }
 });
+
+test('本地发布文章会生成可访问的详情页', async () => {
+  const files = await buildSite({ write: false });
+  const localPublishedPosts = [...files.keys()].filter(path => (
+    path.startsWith('writing/') && path !== 'writing/index.html'
+  ));
+  assert.ok(localPublishedPosts.length >= 1);
+});

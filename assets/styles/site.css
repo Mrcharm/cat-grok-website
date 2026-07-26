@@ -1045,6 +1045,7 @@ footer strong {
 
 .focus-card,
 .action-progress,
+.phase-progress,
 .calendar-shell,
 .kanban-shell,
 .backup-panel {
@@ -1052,6 +1053,50 @@ footer strong {
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, .9);
   box-shadow: var(--shadow);
+}
+
+.phase-progress {
+  padding: 30px 34px;
+}
+
+.phase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.phase-grid article {
+  display: flex;
+  gap: 12px;
+  min-height: 190px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: linear-gradient(160deg, #fff, var(--sky-50));
+}
+
+.phase-grid article > span {
+  color: var(--blue-400);
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.phase-grid h3 {
+  margin: 5px 0 8px;
+  font-size: 17px;
+}
+
+.phase-grid p {
+  margin: 0;
+  color: var(--ink-600);
+  font-size: 13px;
+}
+
+.phase-grid small {
+  display: inline-block;
+  margin-top: 12px;
+  color: var(--blue-700);
+  font-weight: 800;
 }
 
 .focus-card {
@@ -1350,6 +1395,16 @@ button.calendar-day {
   max-width: 670px;
   margin: 0;
   color: var(--ink-600);
+}
+
+.weekly-export-panel {
+  border-color: rgba(22, 119, 210, .28);
+  background: linear-gradient(120deg, rgba(234, 245, 255, .96), rgba(255, 255, 255, .96));
+}
+
+.public-note-field textarea {
+  border-color: rgba(22, 119, 210, .35);
+  background: #f4faff;
 }
 
 .backup-controls {
@@ -1743,6 +1798,7 @@ button.calendar-day {
   }
 
   .action-overview,
+  .phase-grid,
   .kanban,
   .task-context {
     grid-template-columns: 1fr;

@@ -87,7 +87,7 @@ function homePage({ profile, roadmap, posts, projects }) {
       ' 年度目标</span><h3>' + escapeHtml(roadmap.annual.title) + '</h3><ul>' +
       annualGoals + '</ul></article><article><span>本月重点</span><h3>' +
       escapeHtml(roadmap.month.title) + '</h3><p>' + escapeHtml(roadmap.month.focus) +
-      '</p><a class="button button-primary" href="action/">查看 30 天计划</a></article></div>' +
+      '</p><a class="button button-primary" href="action/">查看 90 天计划</a></article></div>' +
       '<div class="weekly-progress"><div><span>WEEKLY UPDATE</span><h3>每周精选进展</h3></div>' +
       weekly + '</div></section>' +
       '<section id="notes" class="home-section"><div class="section-kicker">NOTES</div>' +
@@ -176,6 +176,20 @@ function writingPage({ posts }) {
   });
 }
 
+function postDetail(post) {
+  return layout({
+    title: post.title + ' · 猫哥写作',
+    description: post.summary,
+    canonicalPath: 'writing/' + post.slug + '/',
+    depth: 2,
+    active: 'writing',
+    body: '<article class="project-detail writing-detail"><p>' +
+      escapeHtml(post.category || '记录') + ' · ' + escapeHtml(post.date) +
+      '</p><h1>' + escapeHtml(post.title) + '</h1><p>' +
+      escapeHtml(post.summary) + '</p>' + post.bodyHtml + '</article>'
+  });
+}
+
 function projectsPage({ projects }) {
   const items = published(projects)
     .map(item => card(item, '../' + item.url))
@@ -221,39 +235,52 @@ function aboutPage({ profile }) {
   });
 }
 
-function actionPage({ tasks }) {
+function actionPage({ tasks, learningPlan }) {
   const safeTasksJson = JSON.stringify(tasks).replaceAll('<', '\\u003c');
+  const phases = learningPlan.phases.map((phase, index) => {
+    const count = phase.weeks.reduce((total, week) => total + week.sessions.length, 0);
+    return '<article><span>0' + (index + 1) + '</span><div><h3>' +
+      escapeHtml(phase.title.replace(/^阶段\S+\s*·\s*/, '')) + '</h3><p>' +
+      escapeHtml(phase.goal) + '</p><small>' + count + ' 天</small></div></article>';
+  }).join('');
   return layout({
-    title: '今日行动 · 猫哥',
-    description: '猫哥的 30 天执行日历与行动看板。',
+    title: '90 天 AI 产品经理成长计划 · 猫哥',
+    description: '猫哥的 90 天 AI 产品经理学习日历、逐日任务与本地打卡。',
     canonicalPath: 'action/',
     depth: 1,
     active: 'action',
     pageClass: 'action-page',
-    body: '<section class="page-hero action-hero"><p>30 DAYS · LOCAL FIRST</p>' +
-      '<h1>今日行动</h1><p>每天至少 30 分钟，只推进一个能留下证据的结果。</p>' +
-      '<div class="action-privacy">🔒 清单、证据和复盘只保存在当前浏览器，不会上传到网站。</div></section>' +
+    body: '<section class="page-hero action-hero"><p>90 DAYS · AI PRODUCT MANAGER</p>' +
+      '<h1>90 天 AI 产品经理成长计划</h1><p>每天 30 分钟：读一个关键概念，解决一个产品问题，留下一个可验证产物。</p>' +
+      '<div class="action-privacy">🔒 打卡、证据和私人复盘只保存在当前浏览器；只有你单独填写并导出的“可公开周报素材”会用于周报。</div></section>' +
       '<section class="action-overview" aria-label="今日任务与本月进度">' +
       '<article class="focus-card" id="today-task"><div class="focus-meta"><span id="today-date">正在定位今天</span>' +
       '<b id="today-code">DAY</b></div><h2 id="today-title">载入今日任务…</h2>' +
       '<p id="today-deliverable">准备好后，从一个 30 分钟行动开始。</p>' +
       '<button class="button button-primary" id="open-today" type="button">打开执行策略</button></article>' +
-      '<aside class="action-progress"><span>30 天证据进度</span><strong><b id="done-count">0</b> / ' + tasks.length + '</strong>' +
-      '<div class="progress-track" role="progressbar" aria-label="30 天任务完成进度" aria-valuemin="0" aria-valuemax="' + tasks.length + '" aria-valuenow="0"><i id="progress-bar"></i></div>' +
+      '<aside class="action-progress"><span>90 天作品证据</span><strong><b id="done-count">0</b> / ' + tasks.length + '</strong>' +
+      '<div class="progress-track" role="progressbar" aria-label="90 天学习任务完成进度" aria-valuemin="0" aria-valuemax="' + tasks.length + '" aria-valuenow="0"><i id="progress-bar"></i></div>' +
       '<p id="progress-text">完成任务后，进度会保存在本机。</p></aside></section>' +
+      '<section class="phase-progress" id="phase-progress"><div class="section-kicker">FOUR PHASES</div>' +
+      '<div class="section-intro"><h2>不是背术语，而是形成四类职业证据。</h2>' +
+      '<p>系统判断 → 产品发现与评估 → 企业 Demo → 作品与职业表达。</p></div><div class="phase-grid">' +
+      phases + '</div></section>' +
       '<section class="calendar-shell"><div class="section-kicker">CALENDAR</div>' +
-      '<div class="calendar-toolbar"><div><h2>30 天行动日历</h2><p id="calendar-summary">点击日期查看执行策略</p></div>' +
+      '<div class="calendar-toolbar"><div><h2>90 天学习日历</h2><p id="calendar-summary">点击日期查看 30 分钟执行策略</p></div>' +
       '<div class="calendar-nav"><button id="prev-month" type="button" aria-label="上个月">←</button>' +
       '<strong id="calendar-month"></strong><button id="next-month" type="button" aria-label="下个月">→</button></div></div>' +
       '<div class="weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>' +
       '<div class="calendar-grid" id="calendar-grid"></div></section>' +
       '<section class="kanban-shell"><div class="section-kicker">BOARD</div>' +
-      '<div class="section-intro"><h2>行动看板</h2><p>开始勾选或留下记录后，任务会进入“进行中”；满足验收条件后才算完成。</p></div>' +
+      '<div class="section-intro"><h2>学习证据看板</h2><p>看过不算完成；三步执行、结果证据和验收标准同时满足，才进入“已完成”。</p></div>' +
       '<div class="kanban"><section class="kanban-column"><h3>下一步 <span id="kanban-next-count">0</span></h3><div id="kanban-next"></div></section>' +
       '<section class="kanban-column is-doing"><h3>进行中 <span id="kanban-doing-count">0</span></h3><div id="kanban-doing"></div></section>' +
       '<section class="kanban-column is-complete"><h3>已完成 <span id="kanban-complete-count">0</span></h3><div id="kanban-complete"></div></section></div></section>' +
+      '<section class="backup-panel weekly-export-panel"><div><div class="section-kicker">FRIDAY WEEKLY</div><h2>整理本周公开素材</h2>' +
+      '<p>每周五下班前点击导出。文件只含你主动填写的“可公开周报素材”；没有公开素材时不会生成文件。</p></div>' +
+      '<div class="backup-controls"><button class="button button-primary" id="export-weekly" type="button">导出本周公开素材</button></div></section>' +
       '<section class="backup-panel"><div><div class="section-kicker">LOCAL BACKUP</div><h2>备份本机进度</h2>' +
-      '<p>换设备或清理浏览器前，请先导出 JSON 文件。导入只接受本行动台生成的格式。</p>' +
+      '<p>换设备或清理浏览器前，请先导出完整备份。这个文件含私人记录，不要公开上传。</p>' +
       '<p class="storage-warning" id="storage-warning" hidden></p></div>' +
       '<div class="backup-controls"><button class="button button-secondary" id="export-progress" type="button">导出进度</button>' +
       '<button class="button button-secondary" id="import-progress" type="button">导入进度</button>' +
@@ -275,6 +302,8 @@ function actionPage({ tasks }) {
       '<textarea id="evidence" rows="3" placeholder="例如：已保存《2031 职业画像.md》，包含 3 个结果指标。"></textarea></label>' +
       '<label class="form-field" for="review"><span>今日复盘 <b>可选</b></span>' +
       '<textarea id="review" rows="3" placeholder="今天最有价值的发现、卡点或下一步是什么？"></textarea></label>' +
+      '<label class="form-field public-note-field" for="public-note"><span>可公开周报素材 <b>可选，仅在你点击“导出本周公开素材”时进入周报文件</b></span>' +
+      '<textarea id="public-note" rows="3" placeholder="只写适合公开的事实，例如：完成工作流与 Agent 选型表，补充了两个不使用 Agent 的反例。"></textarea></label>' +
       '<div class="dialog-actions"><button class="button button-secondary" id="save-task" type="button">保存进度</button>' +
       '<button class="button button-primary" id="complete-task" type="button">验收并完成</button></div></div></dialog>' +
       '<div class="action-toast" id="action-toast" role="status" aria-live="polite"></div>' +
@@ -358,6 +387,11 @@ export function renderPages(model) {
 
   for (const project of published(model.projects)) {
     files.set('projects/' + project.slug + '/index.html', projectDetail(project, model));
+  }
+  for (const post of published(model.posts)) {
+    if (post.url === 'writing/' + post.slug + '/') {
+      files.set('writing/' + post.slug + '/index.html', postDetail(post));
+    }
   }
   return files;
 }

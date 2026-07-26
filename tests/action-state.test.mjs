@@ -24,6 +24,7 @@ test('损坏状态安全回退为空状态并保留原始内容', () => {
     checks: [false, false, false],
     evidence: '',
     review: '',
+    publicNote: '',
     done: false
   });
   assert.equal(store.getRecoveryPayload(), '{bad json');
@@ -96,4 +97,22 @@ test('旧版数字 ID 进度迁移到 v2 字符串 ID', () => {
   assert.equal(store.getTaskState('d01').done, true);
   assert.equal(store.getTaskState('d01').evidence, '截图');
   assert.equal(storage.getItem('legacy'), null);
+});
+
+test('周报导出只包含主动填写的公开素材，不泄露证据和私人复盘', () => {
+  const store = createActionStore({ storage: memory(), key: 'test', tasks });
+  store.saveTask('d01', {
+    checks: [true, true, true],
+    evidence: '内部项目截图和文件路径',
+    review: '只给自己看的复盘',
+    publicNote: '完成 AI 产品机会判断表，明确先做工作流而不是 Agent。',
+    done: true
+  });
+  const exported = JSON.parse(store.exportWeeklyPublic('2026-07-24'));
+  assert.equal(exported.items.length, 1);
+  assert.equal(exported.items[0].publicNote, '完成 AI 产品机会判断表，明确先做工作流而不是 Agent。');
+  for (const key of ['evidence', 'review', 'checks']) {
+    assert.equal(key in exported.items[0], false);
+  }
+  assert.doesNotMatch(JSON.stringify(exported), /内部项目截图|只给自己看的复盘/);
 });

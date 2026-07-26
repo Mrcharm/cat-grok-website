@@ -6,6 +6,7 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test",
+    "weekly:generate": "node scripts/generate-weekly-report.mjs",
     "validate": "node scripts/validate-content.mjs",
     "smoke": "node scripts/smoke.mjs",
     "check": "pnpm validate && pnpm test && pnpm build && pnpm smoke"

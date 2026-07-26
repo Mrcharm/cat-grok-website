@@ -13,11 +13,11 @@ test('路线图覆盖 2026 到 2031', async () => {
   assert.equal(roadmap.years.at(-1).year, 2031);
 });
 
-test('30 条任务都有执行策略和资料', async () => {
+test('90 条任务都有执行策略和资料', async () => {
   const { tasks } = await loadAndValidateContent();
-  assert.equal(tasks.length, 30);
+  assert.equal(tasks.length, 90);
   for (const task of tasks) {
-    assert.match(task.id, /^d\d{2}$/);
+    assert.match(task.id, /^ai\d{3}$/);
     assert.ok(task.why.length >= 12);
     assert.equal(task.steps.length, 3);
     assert.ok(task.method.length >= 8);
