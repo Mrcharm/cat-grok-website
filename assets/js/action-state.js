@@ -81,8 +81,8 @@ function readState(storage, key, legacyKey, ids, tasks) {
 
 export function createActionStore({
   storage,
-  key = 'mrcharm-growth-state-v2',
-  legacyKey = 'mrcharm-growth-state-v1',
+  key = 'mrcharm-ai-learning-state-v1',
+  legacyKey = null,
   tasks
 }) {
   const ids = new Set(tasks.map(task => task.id));
@@ -144,8 +144,7 @@ export function createActionStore({
       const end = new Date(weekEnding + 'T12:00:00');
       if (Number.isNaN(end.getTime())) throw new Error('invalid week ending');
       const start = new Date(end);
-      const mondayOffset = (end.getDay() + 6) % 7;
-      start.setDate(end.getDate() - mondayOffset);
+      start.setDate(end.getDate() - 6);
       const iso = date => date.getFullYear() + '-' +
         String(date.getMonth() + 1).padStart(2, '0') + '-' +
         String(date.getDate()).padStart(2, '0');

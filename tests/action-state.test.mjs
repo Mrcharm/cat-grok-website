@@ -116,3 +116,22 @@ test('周报导出只包含主动填写的公开素材，不泄露证据和私�
   }
   assert.doesNotMatch(JSON.stringify(exported), /内部项目截图|只给自己看的复盘/);
 });
+
+test('周五周报覆盖此前六天，包含周末的每日学习', () => {
+  const weeklyTasks = [
+    { id: 'sat', date: '2026-07-25', title: '周六任务', phaseTitle: '阶段', steps: ['a'] },
+    { id: 'sun', date: '2026-07-26', title: '周日任务', phaseTitle: '阶段', steps: ['a'] },
+    { id: 'fri', date: '2026-07-31', title: '周五任务', phaseTitle: '阶段', steps: ['a'] }
+  ];
+  const store = createActionStore({ storage: memory(), key: 'weekly', tasks: weeklyTasks });
+  for (const task of weeklyTasks) {
+    store.saveTask(task.id, {
+      checks: [true],
+      evidence: '证据',
+      publicNote: task.title + '公开记录',
+      done: true
+    });
+  }
+  const exported = JSON.parse(store.exportWeeklyPublic('2026-07-31'));
+  assert.deepEqual(exported.items.map(item => item.id), ['sat', 'sun', 'fri']);
+});
