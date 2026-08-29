@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="作品集 — 数据可视化、AI 应用、研发平台与产品设计项目。">
+<meta name="theme-color" content="#03050a">
+<title>作品集 · 猫哥 JARVIS</title>
+<link rel="stylesheet" href="../assets/styles/site.css">
+<style>
+.portfolio-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px}
+.portfolio-item{
+  position:relative;border:1px solid var(--jarvis-line);border-radius:var(--radius);
+  overflow:hidden;transition:.3s;cursor:pointer;background:var(--jarvis-panel);
+}
+.portfolio-item::before{
+  content:"";position:absolute;top:0;left:0;width:100%;height:3px;
+  background:linear-gradient(90deg,var(--jarvis-cyan),var(--jarvis-blue));opacity:0;transition:.3s;z-index:2;
+}
+.portfolio-item:hover{border-color:rgba(56,225,255,.25)}
+.portfolio-item:hover::before{opacity:1}
+.portfolio-item:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+
+.portfolio-thumb{
+  aspect-ratio:16/10;background:linear-gradient(135deg,var(--jarvis-panel2),var(--jarvis-bg));
+  display:flex;align-items:center;justify-content:center;font-size:48px;
+  position:relative;overflow:hidden;
+}
+.portfolio-thumb::after{
+  content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(3,5,10,.8) 100%);
+}
+.portfolio-info{padding:20px 22px 22px}
+.portfolio-info h3{font-size:17px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.portfolio-info p{font-size:13.5px;color:var(--jarvis-dim);line-height:1.55;margin-bottom:12px}
+.portfolio-meta{display:flex;gap:8px;flex-wrap:wrap}
+.portfolio-tag{font-size:11px;padding:3px 10px;border-radius:6px;background:var(--jarvis-panel2);color:var(--jarvis-dim);border:1px solid rgba(27,42,68,.5);font-family:var(--font-mono)}
+.portfolio-tag.highlight{background:rgba(56,225,255,.08);color:var(--jarvis-cyan);border-color:rgba(56,225,255,.2)}
+
+.portfolio-link{
+  display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-size:13px;color:var(--jarvis-blue);font-weight:600;transition:.2s;
+}
+.portfolio-link:hover{color:var(--jarvis-cyan)}
+
+/* Placeholder state */
+.portfolio-item.placeholder{opacity:.7;cursor:default}
+.portfolio-item.placeholder .portfolio-thumb{font-size:32px}
+.portfolio-item.placeholder:hover{transform:none;box-shadow:none;border-color:var(--jarvis-line)}
+.portfolio-item.placeholder:hover::before{opacity:0}
+
+@media(max-width:860px){
+  .portfolio-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+  <a class="brand" href="../index.html"><span class="brand-dot">◉</span> <strong>猫哥 · JARVIS</strong></a>
+  <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>
+  <nav id="site-nav" data-open="false" aria-label="主导航">
+    <a href="../index.html">首页</a>
+    <a href="../articles/">文章</a>
+    <a href="../skills/">技能</a>
+    <a href="../portfolio/" aria-current="page">作品集</a>
+  </nav>
+</header>
+
+<main id="main">
+<div class="page-wrap">
+  <section class="page-hero">
+    <p class="kicker">PORTFOLIO · SELECTED WORKS</p>
+    <h1>作品集</h1>
+    <p>数据可视化、AI 应用、研发平台与产品设计——我做过的一些东西。</p>
+  </section>
+
+  <div class="portfolio-grid">
+    <article class="portfolio-item">
+      <div class="portfolio-thumb">🎯</div>
+      <div class="portfolio-info">
+        <h3>JARVIS 陪伴系统</h3>
+        <p>一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。这是我对"AI 不只是工具"这一信念的实践。</p>
+        <div class="portfolio-meta">
+          <span class="portfolio-tag highlight">Three.js</span>
+          <span class="portfolio-tag">Web Speech API</span>
+          <span class="portfolio-tag">产品原型</span>
+        </div>
+        <a class="portfolio-link" href="../index.html">查看项目 →</a>
+      </div>
+    </article>
+
+    <article class="portfolio-item">
+      <div class="portfolio-thumb">📊</div>
+      <div class="portfolio-info">
+        <h3>数据血缘与知识图谱平台</h3>
+        <p>从烟囱式数据架构到全行统一血缘图谱的设计与落地。涵盖元数据采集、影响分析、链路追踪与可视化探索。</p>
+        <div class="portfolio-meta">
+          <span class="portfolio-tag highlight">数据治理</span>
+          <span class="portfolio-tag">知识图谱</span>
+          <span class="portfolio-tag">可视化</span>
+        </div>
+        <span class="portfolio-link" style="color:var(--jarvis-dim)">截图与文档整理中</span>
+      </div>
+    </article>
+
+    <article class="portfolio-item">
+      <div class="portfolio-thumb">🤖</div>
+      <div class="portfolio-info">
+        <h3>AI 数据研发 Copilot</h3>
+        <p>自然语言到 SQL 的智能转换系统，覆盖需求澄清、证据收集、SQL 生成、校验规则与文档输出全链路。</p>
+        <div class="portfolio-meta">
+          <span class="portfolio-tag highlight">NL2SQL</span>
+          <span class="portfolio-tag">AI 产品</span>
+          <span class="portfolio-tag">B 端设计</span>
+        </div>
+        <span class="portfolio-link" style="color:var(--jarvis-dim)">脱敏文档整理中</span>
+      </div>
+    </article>
+
+    <article class="portfolio-item placeholder">
+      <div class="portfolio-thumb">⏳</div>
+      <div class="portfolio-info">
+        <h3>更多项目</h3>
+        <p>AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。</p>
+        <div class="portfolio-meta">
+          <span class="portfolio-tag">AI 应用</span>
+          <span class="portfolio-tag">研发平台</span>
+          <span class="portfolio-tag">数据大屏</span>
+        </div>
+        <span class="portfolio-link" style="color:var(--jarvis-dim)">敬请期待</span>
+      </div>
+    </article>
+  </div>
+</div>
+</main>
+
+<footer>
+  <p><strong>猫哥 · JARVIS</strong> — 向 2031 生长</p>
+</footer>
+
+<script type="module" src="../assets/js/site.js"></script>
+</body>
+</html>

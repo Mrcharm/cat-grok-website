@@ -1,0 +1,67 @@
+{
+  "categories": [
+    {
+      "id": "work",
+      "icon": "🔧",
+      "title": "工作 · ETL-SQL 数据研发平台",
+      "skills": [
+        {
+          "name": "etl-sql-create",
+          "badge": "SQL生成",
+          "description": "自然语言/结构化输入 → 自动生成 ETL SQL 创建语句。支持 PostgreSQL 方言，含证据不足时的修复流程。",
+          "tags": ["PostgreSQL", "NL2SQL", "ETL"],
+          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-sql-create"
+        },
+        {
+          "name": "etl-requirement-clarify",
+          "badge": "需求澄清",
+          "description": "接收 Excel/JSON/自然语言混合需求输入，输出结构化需求卡片。支持接口响应式澄清与多轮追问。",
+          "tags": ["需求分析", "Excel解析", "多轮对话"],
+          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-requirement-clarify"
+        },
+        {
+          "name": "etl-evidence-collect",
+          "badge": "证据收集",
+          "description": "按需收集 ETL 开发各阶段证据（检查点、规划、简单查询、失败补充），支持白名单路由与空结果确认。",
+          "tags": ["证据管理", "白名单", "状态机"],
+          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-evidence-collect"
+        },
+        {
+          "name": "etl-md-write",
+          "badge": "文档写入",
+          "description": "将执行结果写入 Markdown 记录文件（检查计划记录、证据检查点、SQL 计划记录）。含模板映射与源 JSON 规范。",
+          "tags": ["Markdown", "模板引擎", "记录系统"],
+          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-md-write"
+        },
+        {
+          "name": "etl-check-ruler",
+          "badge": "校验规则",
+          "description": "对生成的 SQL 进行多维度校验：API 高风险输出检测、静态规则兜底、通过标准判定。保障数据安全底线。",
+          "tags": ["校验", "安全", "静态分析"],
+          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-check-ruler"
+        }
+      ]
+    },
+    {
+      "id": "stock",
+      "icon": "📈",
+      "title": "股票 · 复盘分析",
+      "comingSoon": "a-fupan-skill 技能包正在整理中...",
+      "skills": []
+    },
+    {
+      "id": "write",
+      "icon": "✍️",
+      "title": "写作 · 辅助工具",
+      "comingSoon": "write-downskill 技能包正在整理中...",
+      "skills": []
+    },
+    {
+      "id": "life",
+      "icon": "🌱",
+      "title": "生活 · 效率工具",
+      "comingSoon": "生活类技能包规划中...",
+      "skills": []
+    }
+  ]
+}

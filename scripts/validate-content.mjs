@@ -11,12 +11,10 @@ const requireText = (value, label, min = 1) => {
 };
 
 export async function loadAndValidateContent() {
-  const [profile, roadmap, learningPlan, timeline, agentTeam] = await Promise.all([
+  const [profile, roadmap, learningPlan] = await Promise.all([
     readJson('data/profile.json'),
     readJson('data/roadmap.json'),
-    readJson('data/learning-plan.json'),
-    readJson('data/timeline.json'),
-    readJson('data/agent-team.json')
+    readJson('data/learning-plan.json')
   ]);
   const tasks = expandLearningPlan(learningPlan);
 
@@ -57,26 +55,7 @@ export async function loadAndValidateContent() {
     }
   }
 
-  const lines = new Set(['career', 'learning', 'life']);
-  for (const entry of timeline) {
-    requireText(entry.date, 'timeline.date');
-    requireText(entry.title, 'timeline.title');
-    requireText(entry.insight, 'timeline.insight');
-    if (!lines.has(entry.line)) {
-      throw new Error(entry.title + ' has invalid timeline line');
-    }
-    if (!['fact', 'goal'].includes(entry.kind)) {
-      throw new Error(entry.title + ' has invalid timeline kind');
-    }
-  }
-
-  for (const key of ['milestones', 'members', 'principles', 'achievements', 'science', 'skills', 'articles', 'tools']) {
-    if (!Array.isArray(agentTeam[key]) || agentTeam[key].length === 0) {
-      throw new Error('agentTeam.' + key + ' must not be empty');
-    }
-  }
-
-  return { profile, roadmap, learningPlan, tasks, timeline, agentTeam };
+  return { profile, roadmap, learningPlan, tasks };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
