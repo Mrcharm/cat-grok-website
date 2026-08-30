@@ -21,6 +21,85 @@ export function routeKey(url) {
   return ROUTES.get(routePath(url)) || null;
 }
 
+const PLAYLIST_URL = 'https://music.163.com/outchain/player?type=0&id=885054268&auto=1&height=66';
+const SESSION_UNLOCKED = 'jarvis-music-unlocked';
+const SESSION_MUTED = 'jarvis-music-muted';
+
+export function createMusicController({
+  root = document,
+  storage = sessionStorage,
+  schedule = setTimeout,
+  cancel = clearTimeout
+} = {}) {
+  const panel = root.querySelector('#music-panel');
+  const button = root.querySelector('.music-btn');
+  const unlockButton = root.querySelector('.music-unlock');
+  if (!panel || !button || !unlockButton) {
+    return { start() {}, toggle() {}, unlock() {}, destroy() {} };
+  }
+
+  let promptTimer = null;
+
+  function frame() {
+    return panel.querySelector('iframe');
+  }
+
+  function replaceFrame(src = PLAYLIST_URL) {
+    const current = frame();
+    const next = current.cloneNode(false);
+    next.src = src;
+    current.replaceWith(next);
+    return next;
+  }
+
+  function unlock() {
+    replaceFrame();
+    storage.setItem(SESSION_UNLOCKED, '1');
+    storage.removeItem(SESSION_MUTED);
+    unlockButton.hidden = true;
+    panel.classList.add('open');
+    button.setAttribute('aria-expanded', 'true');
+  }
+
+  function toggle(open = button.getAttribute('aria-expanded') !== 'true') {
+    if (open) {
+      unlock();
+      return;
+    }
+    storage.setItem(SESSION_MUTED, '1');
+    panel.classList.remove('open');
+    button.setAttribute('aria-expanded', 'false');
+    unlockButton.hidden = true;
+    frame().src = 'about:blank';
+  }
+
+  const handleToggle = () => toggle();
+  const handleUnlock = () => unlock();
+
+  function start() {
+    button.addEventListener('click', handleToggle);
+    unlockButton.addEventListener('click', handleUnlock);
+    if (storage.getItem(SESSION_MUTED) === '1') {
+      toggle(false);
+      return;
+    }
+    frame().src = PLAYLIST_URL;
+    panel.classList.add('open');
+    button.setAttribute('aria-expanded', 'true');
+    if (storage.getItem(SESSION_UNLOCKED) !== '1') {
+      promptTimer = schedule(() => { unlockButton.hidden = false; }, 1500);
+    }
+  }
+
+  function destroy() {
+    if (promptTimer !== null) cancel(promptTimer);
+    button.removeEventListener('click', handleToggle);
+    unlockButton.removeEventListener('click', handleUnlock);
+  }
+
+  return { start, toggle, unlock, destroy };
+}
+
 export function initSiteNavigation(root = document, view = window) {
   const button = root.querySelector('.menu-button');
   const nav = root.querySelector('#site-nav');
@@ -176,5 +255,5 @@ export function createSiteNavigator({
 if (typeof document !== 'undefined') {
   initSiteNavigation();
   createSiteNavigator().start();
+  createMusicController().start();
 }
-

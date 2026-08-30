@@ -86,6 +86,10 @@ img{max-width:100%}
   opacity:0;transform:translateY(-10px);pointer-events:none;transition:.25s ease;
 }
 .music-panel.open{opacity:1;transform:translateY(0);pointer-events:auto}
+.music-unlock{display:block;width:100%;padding:8px 12px;border-top:1px solid rgba(56,225,255,.15);color:var(--jarvis-cyan);background:rgba(3,5,10,.92);font:11px var(--font-mono)}
+.music-unlock[hidden]{display:none}
+.music-external{display:block;padding:5px 12px;color:var(--jarvis-dim);font-size:11px;text-align:right}
+.music-external:hover{color:var(--jarvis-cyan)}
 
 /* Mobile nav open state — constrained to mobile breakpoint */
 @media(max-width:640px){
