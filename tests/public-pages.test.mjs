@@ -2,22 +2,21 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildSite } from '../scripts/build.mjs';
 
-test('人生轨迹覆盖三条主线并包含未来路线', async () => {
-  const html = (await buildSite({ write: false })).get('timeline/index.html');
-  for (const text of ['职业成长', '学习认知', '生活体验', '2031']) {
-    assert.match(html, new RegExp(text));
-  }
+test('文章页展示技术文章与分类筛选', async () => {
+  const html = (await buildSite({ write: false })).get('articles/index.html');
+  assert.match(html, /技术文章/);
+  assert.match(html, /data-cat="all"/);
 });
 
-test('写作页只公开 published 内容', async () => {
-  const html = (await buildSite({ write: false })).get('writing/index.html');
-  assert.match(html, /飞书智能体搭建全流程/);
-  assert.doesNotMatch(html, /为什么企业数据 Agent 的第一版不应该追求多智能体/);
+test('技能页展示技能库和下载入口', async () => {
+  const html = (await buildSite({ write: false })).get('skills/index.html');
+  assert.match(html, /技能库/);
+  assert.match(html, /下载 SKILL\.md/);
 });
 
-test('关于页说明能力组合而不是虚构履历', async () => {
-  const html = (await buildSite({ write: false })).get('about/index.html');
-  for (const text of ['银行与数据平台', 'AI 产品设计', 'Agent 系统实践', '产业研究']) {
-    assert.match(html, new RegExp(text));
-  }
+test('作品集明确展示代表项目', async () => {
+  const html = (await buildSite({ write: false })).get('portfolio/index.html');
+  assert.match(html, /作品集/);
+  assert.match(html, /JARVIS 陪伴系统/);
 });
+

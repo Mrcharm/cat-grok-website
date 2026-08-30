@@ -5,6 +5,44 @@ export const escapeHtml = value => String(value)
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&#039;');
 
+export const NAV_ITEMS = [
+  ['home', '首页', 'index.html'],
+  ['articles', '文章', 'articles/'],
+  ['skills', '技能', 'skills/'],
+  ['portfolio', '作品集', 'portfolio/']
+];
+
+export const NETEASE_PLAYLIST_ID = '885054268';
+export const NETEASE_PLAYER_URL =
+  'https://music.163.com/outchain/player?type=0&amp;id=' +
+  NETEASE_PLAYLIST_ID +
+  '&amp;auto=1&amp;height=66';
+
+export function persistentShell({ depth = 0, active = 'home' } = {}) {
+  const root = '../'.repeat(depth);
+  const nav = NAV_ITEMS.map(([id, label, path]) => (
+    '<a href="' + root + path + '" data-route="' + id + '"' +
+    (active === id ? ' aria-current="page"' : '') +
+    '>' + label + '</a>'
+  )).join('');
+
+  return '<header class="site-header">' +
+    '<a class="brand" href="' + root + 'index.html">' +
+    '<span class="brand-mark" aria-hidden="true"></span>' +
+    '<span>MR.C <b>JARVIS</b></span></a>' +
+    '<div class="topbar-right">' +
+    '<nav id="site-nav" class="nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
+    '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
+    '<button class="music-btn" type="button" aria-label="音乐" aria-expanded="true" aria-controls="music-panel">' +
+    '<span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>音乐</span></button>' +
+    '</div></header>' +
+    '<aside class="music-panel open" id="music-panel" aria-label="背景音乐">' +
+    '<iframe title="网易云音乐歌单播放器" width="330" height="86" src="' + NETEASE_PLAYER_URL + '"></iframe>' +
+    '<button class="music-unlock" type="button" hidden>没听到音乐？点击开启</button>' +
+    '<a class="music-external" href="https://music.163.com/#/playlist?id=' + NETEASE_PLAYLIST_ID +
+    '" target="_blank" rel="noopener noreferrer">在网易云打开</a></aside>';
+}
+
 export function layout({
   title,
   description,
@@ -17,16 +55,6 @@ export function layout({
   const root = '../'.repeat(depth);
   const siteRoot = 'https://mrcharm.github.io/cat-grok-website/';
   const canonical = siteRoot + canonicalPath;
-  const nav = [
-    ['home', '首页', root + 'index.html'],
-    ['articles', '文章', root + 'articles/'],
-    ['skills', '技能', root + 'skills/'],
-    ['action', '学习日记', root + 'action/']
-  ].map(([id, label, href]) => (
-    '<a href="' + href + '"' +
-    (active === id ? ' aria-current="page"' : '') +
-    '>' + label + '</a>'
-  )).join('');
 
   return '<!doctype html><html lang="zh-CN"><head>' +
     '<meta charset="utf-8">' +
@@ -52,11 +80,7 @@ export function layout({
     '<link rel="stylesheet" href="' + root + 'assets/styles/site.css">' +
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
-    '<header class="site-header">' +
-    '<a class="brand" href="' + root + 'index.html">🤖 <strong>猫哥 · JARVIS</strong></a>' +
-    '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
-    '<nav id="site-nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
-    '</header>' +
+    persistentShell({ depth, active }) +
     '<main id="main">' + body + '</main>' +
     '<footer><strong>猫哥 · JARVIS</strong><span>AI 陪伴系统 · 静态生成</span></footer>' +
     '<script type="module" src="' + root + 'assets/js/site.js"></script>' +
