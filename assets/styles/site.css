@@ -57,6 +57,33 @@ img{max-width:100%}
 .nav a:hover{color:var(--jarvis-cyan);border-color:rgba(56,225,255,.15)}
 .nav a[aria-current]{color:var(--jarvis-cyan);border-color:rgba(56,225,255,.35);box-shadow:inset 0 0 10px rgba(56,225,255,.06)}
 .menu-button{display:none;padding:8px 12px;color:var(--jarvis-dim);font-size:18px}
+.topbar-right{display:flex;align-items:center;gap:14px}
+
+/* Music toggle — shared with homepage */
+.music-btn{
+  display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;
+  border:1px solid rgba(56,225,255,.15);color:var(--jarvis-dim);font-family:var(--font-mono);font-size:11px;
+  letter-spacing:1px;transition:.2s;cursor:pointer;
+}
+.music-btn:hover{border-color:rgba(56,225,255,.3);color:var(--jarvis-cyan)}
+.music-btn.playing{color:var(--jarvis-cyan);border-color:rgba(56,225,255,.3);box-shadow:0 0 12px rgba(56,225,255,.1)}
+.music-btn .bar{display:flex;align-items:flex-end;gap:2px;height:12px}
+.music-btn .bar i{width:2px;background:var(--jarvis-cyan);border-radius:1px;animation:soundBar 1s ease-in-out infinite}
+.music-btn .bar i:nth-child(1){height:4px;animation-delay:0s}
+.music-btn .bar i:nth-child(2){height:8px;animation-delay:.2s}
+.music-btn .bar i:nth-child(3){height:6px;animation-delay:.4s}
+.music-btn .bar i:nth-child(4){height:10px;animation-delay:.1s}
+.music-btn:not(.playing) .bar i{animation:none;height:3px !important;background:rgba(107,130,153,.5)}
+@keyframes soundBar{0%,100%{height:3px}50%{height:12px}}
+
+/* Netease playlist panel */
+.music-panel{
+  position:fixed;top:64px;right:28px;z-index:60;border-radius:12px;overflow:hidden;
+  border:1px solid rgba(56,225,255,.2);box-shadow:0 12px 40px rgba(0,0,0,.55);
+  background:rgba(10,18,32,.92);
+  opacity:0;transform:translateY(-10px);pointer-events:none;transition:.25s ease;
+}
+.music-panel.open{opacity:1;transform:translateY(0);pointer-events:auto}
 
 /* Mobile nav open state — constrained to mobile breakpoint */
 @media(max-width:640px){
@@ -65,6 +92,9 @@ img{max-width:100%}
     background:rgba(3,5,10,.95);backdrop-filter:blur(16px);padding:12px;gap:4px;
     border-bottom:1px solid var(--jarvis-line);
   }
+  .music-btn span{display:none}
+  .music-panel{right:12px;left:12px}
+  .music-panel iframe{width:100%}
 }
 
 /* ===== Footer ===== */

@@ -56,14 +56,23 @@
 <a class="skip-link" href="#main">跳到主要内容</a>
 <header class="site-header">
   <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span><span>MR.C <b>JARVIS</b></span></a>
-  <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>
-  <nav id="site-nav" data-open="false" aria-label="主导航">
-    <a href="../index.html">首页</a>
-    <a href="../articles/">文章</a>
-    <a href="../skills/">技能</a>
-    <a href="../portfolio/" aria-current="page">作品集</a>
-  </nav>
+  <div class="topbar-right">
+    <nav id="site-nav" data-open="false" aria-label="主导航">
+      <a href="../index.html">首页</a>
+      <a href="../articles/">文章</a>
+      <a href="../skills/">技能</a>
+      <a href="../portfolio/" aria-current="page">作品集</a>
+    </nav>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>
+    <button class="music-btn" id="musicBtn" type="button" title="单击展开歌单播放器 · 双击打开网易云">
+      <span class="bar"><i></i><i></i><i></i><i></i></span>
+      <span>音乐</span>
+    </button>
+  </div>
 </header>
+<div class="music-panel" id="musicPanel" aria-hidden="true">
+  <iframe id="neteaseFrame" title="网易云音乐歌单播放器" frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" data-src="https://music.163.com/outchain/player?type=0&id=885054268&auto=0&height=66"></iframe>
+</div>
 
 <main id="main">
 <div class="page-wrap">
