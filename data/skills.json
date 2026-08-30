@@ -1,66 +1,65 @@
 {
+  "version": "3.0",
+  "updated": "2026-08-30",
   "categories": [
     {
       "id": "work",
-      "icon": "🔧",
-      "title": "工作 · ETL-SQL 数据研发平台",
+      "icon": "🗄️",
+      "title": "SQL 生成 · ETL 全链路",
+      "description": "需求澄清 → 取证 → SQL 生成 → 文档记录 → 安全检核 的 ETL 开发链路，五个 Agent Skill 协同工作。",
+      "download": "downloads/etl-sql-skills-3.0.zip",
       "skills": [
         {
           "name": "etl-sql-create",
           "badge": "SQL生成",
-          "description": "自然语言/结构化输入 → 自动生成 ETL SQL 创建语句。支持 PostgreSQL 方言，含证据不足时的修复流程。",
-          "tags": ["PostgreSQL", "NL2SQL", "ETL"],
-          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-sql-create"
+          "description": "把已满足 SQL 准入的结构化事实（evidence_card / direct_input）转换为可检核的 SQL 草案；已有草案时按用户反馈或检核问题定向修订。默认 PostgreSQL 方言。",
+          "tags": ["PostgreSQL", "NL2SQL", "ETL", "草案修订"]
         },
         {
           "name": "etl-requirement-clarify",
           "badge": "需求澄清",
-          "description": "接收 Excel/JSON/自然语言混合需求输入，输出结构化需求卡片。支持接口响应式澄清与多轮追问。",
-          "tags": ["需求分析", "Excel解析", "多轮对话"],
-          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-requirement-clarify"
+          "description": "把自然语言、JSON、Excel 或已有设计的混合需求转译为标准 ETL 需求澄清卡片，区分已确认内容、待用户确认事项与后续取证事项。多来源冲突时保留候选，不静默覆盖。",
+          "tags": ["需求分析", "Excel解析", "多来源合并"]
         },
         {
           "name": "etl-evidence-collect",
           "badge": "证据收集",
-          "description": "按需收集 ETL 开发各阶段证据（检查点、规划、简单查询、失败补充），支持白名单路由与空结果确认。",
-          "tags": ["证据管理", "白名单", "状态机"],
-          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-evidence-collect"
+          "description": "把取证事项转换为受控查询计划，调用批准的数据库查询工具，把结果汇总为唯一结构化 evidence_card。每轮最多执行 3 个独立待查项，支持检查点续跑。",
+          "tags": ["证据管理", "查询规划", "白名单路由"]
         },
         {
           "name": "etl-md-write",
           "badge": "文档写入",
-          "description": "将执行结果写入 Markdown 记录文件（检查计划记录、证据检查点、SQL 计划记录）。含模板映射与源 JSON 规范。",
-          "tags": ["Markdown", "模板引擎", "记录系统"],
-          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-md-write"
+          "description": "将各阶段产出写入或更新 PLAN.md 与 RECORD.md，并调用 publishArtifact 展示。按模板渲染章节，已有章节原位替换，重复写入幂等。",
+          "tags": ["Markdown", "模板渲染", "幂等写入"]
         },
         {
           "name": "etl-check-ruler",
           "badge": "校验规则",
-          "description": "对生成的 SQL 进行多维度校验：API 高风险输出检测、静态规则兜底、通过标准判定。保障数据安全底线。",
-          "tags": ["校验", "安全", "静态分析"],
-          "source": "E:\\谢呈文\\tosql\\最终版本\\ETL-SQL\\ETL-SQL\\2.0\\etl-check-ruler"
+          "description": "检核 SQL 并只返回高危与超高危问题；平台工具不可用时按固定静态规则兜底。不执行 SQL、不改写 SQL，不把「工具不可用」解释成「SQL 通过」。",
+          "tags": ["安全检核", "静态兜底", "风险映射"]
         }
       ]
     },
     {
-      "id": "stock",
-      "icon": "📈",
-      "title": "股票 · 复盘分析",
-      "comingSoon": "a-fupan-skill 技能包正在整理中...",
+      "id": "product",
+      "icon": "🎨",
+      "title": "产品设计",
+      "comingSoon": "AI 产品需求澄清框架整理中...",
       "skills": []
     },
     {
       "id": "write",
       "icon": "✍️",
-      "title": "写作 · 辅助工具",
-      "comingSoon": "write-downskill 技能包正在整理中...",
+      "title": "写作",
+      "comingSoon": "技术文章写作助手整理中...",
       "skills": []
     },
     {
-      "id": "life",
-      "icon": "🌱",
-      "title": "生活 · 效率工具",
-      "comingSoon": "生活类技能包规划中...",
+      "id": "stock",
+      "icon": "📈",
+      "title": "股票分析",
+      "comingSoon": "A 股每日复盘模板整理中...",
       "skills": []
     }
   ]

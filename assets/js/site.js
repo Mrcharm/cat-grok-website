@@ -274,8 +274,41 @@ export function createSiteNavigator({
   return { start, navigate, destroy };
 }
 
+// Skill downloads — event delegation so dynamically rendered cards work too
+export function initSkillDownloads() {
+  const base = location.pathname.includes('/cat-grok-website')
+    ? '/cat-grok-website/'
+    : '/';
+  const zipUrl = base + 'downloads/etl-sql-skills-3.0.zip';
+
+  document.addEventListener('click', (event) => {
+    const target = event.target;
+    if (!target || typeof target.closest !== 'function') return;
+
+    const skillBtn = target.closest('.dl-btn[data-skill]');
+    if (skillBtn) {
+      event.preventDefault();
+      const name = skillBtn.getAttribute('data-skill');
+      window.open(base + 'content/skills/' + name + '/SKILL.md', '_blank');
+      return;
+    }
+
+    const zipBtn = target.closest('.dl-btn[data-zip]');
+    if (zipBtn) {
+      event.preventDefault();
+      const link = document.createElement('a');
+      link.href = zipUrl;
+      link.download = 'etl-sql-skills-3.0.zip';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+  });
+}
+
 if (typeof document !== 'undefined') {
   initSiteNavigation();
+  initSkillDownloads();
   createSiteNavigator().start();
   createMusicController().start();
 }
