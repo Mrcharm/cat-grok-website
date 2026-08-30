@@ -43,6 +43,7 @@ a{color:inherit;text-decoration:none}
 .brand-mark{width:24px;height:24px;border-radius:50%;position:relative;background:radial-gradient(circle,var(--cyan) 0%,transparent 70%);box-shadow:0 0 14px var(--cyan-soft)}
 .brand-mark::after{content:"";position:absolute;inset:5px;border-radius:50%;background:var(--bg);border:1px solid var(--cyan-soft)}
 .brand b{color:var(--cyan);margin-left:4px}
+.topbar-right{display:flex;align-items:center;gap:14px}
 .topnav{display:flex;gap:4px}
 .topnav a{padding:7px 13px;border-radius:8px;font-size:12px;font-family:var(--font-mono);color:var(--text-dim);letter-spacing:1px;text-transform:uppercase;border:1px solid transparent;transition:.2s}
 .topnav a:hover{color:var(--cyan);border-color:rgba(56,225,255,.15)}
@@ -65,25 +66,29 @@ a{color:inherit;text-decoration:none}
 .music-btn:not(.playing) .bar i{animation:none;height:3px !important;background:var(--text-faint)}
 @keyframes soundBar{0%,100%{height:3px}50%{height:12px}}
 
+/* Netease playlist panel */
+.music-panel{
+  position:fixed;top:64px;right:28px;z-index:60;border-radius:12px;overflow:hidden;
+  border:1px solid rgba(56,225,255,.2);box-shadow:0 12px 40px rgba(0,0,0,.55);
+  background:rgba(10,18,32,.92);
+  opacity:0;transform:translateY(-10px);pointer-events:none;transition:.25s ease;
+}
+.music-panel.open{opacity:1;transform:translateY(0);pointer-events:auto}
+
 /* ===== Fullscreen canvas ===== */
 #coreCanvas{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:1}
 
-/* ===== Hero text ===== */
+/* ===== Hero text (top-left) ===== */
 .hero{
-  position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  pointer-events:none;padding:0 24px;
-}
-.hero-title{
-  font-size:clamp(32px,6vw,64px);font-weight:700;letter-spacing:-1px;
-  background:linear-gradient(135deg,var(--text) 0%,var(--cyan) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  margin-bottom:16px;text-align:center;line-height:1.15;
+  position:fixed;top:92px;left:40px;z-index:10;display:flex;flex-direction:column;align-items:flex-start;
+  pointer-events:none;max-width:520px;
 }
 .hero-subtitle{
-  font-size:clamp(14px,2vw,18px);color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;
-  font-family:var(--font-mono);margin-bottom:40px;text-align:center;
+  font-size:clamp(13px,1.6vw,16px);color:var(--text-dim);letter-spacing:2px;text-transform:uppercase;
+  font-family:var(--font-mono);margin-bottom:24px;text-align:left;
 }
 .hero-mission{
-  font-size:clamp(15px,2vw,20px);color:var(--text-dim);text-align:center;max-width:560px;
+  font-size:clamp(14px,1.8vw,18px);color:var(--text-dim);text-align:left;max-width:480px;
   line-height:2;letter-spacing:.5px;
 }
 .hero-mission .done{color:var(--green);font-weight:500}
@@ -91,9 +96,8 @@ a{color:inherit;text-decoration:none}
 .hero-mission .closing{color:var(--text-faint);font-size:clamp(12px,1.6vw,15px);margin-top:12px;font-style:italic;display:block}
 
 /* Entrance animations */
-.hero-title{opacity:0;animation:fadeUp .8s ease .3s forwards}
-.hero-subtitle{opacity:0;animation:fadeUp .8s ease .6s forwards}
-.hero-mission{opacity:0;animation:fadeUp .8s ease .9s forwards}
+.hero-subtitle{opacity:0;animation:fadeUp .8s ease .4s forwards}
+.hero-mission{opacity:0;animation:fadeUp .8s ease .8s forwards}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
 /* ===== Bottom voice dock ===== */
@@ -149,11 +153,13 @@ a{color:inherit;text-decoration:none}
 
 @media(max-width:640px){
   .topnav{display:none}
-  .hero-title{font-size:28px}
-  .hero-mission{font-size:14px}
+  .hero{top:76px;left:20px;right:20px;max-width:none}
+  .hero-mission{font-size:13.5px}
   .dock-input{width:200px}
   .voice-dock{bottom:16px;padding:10px 14px}
   .music-btn span{display:none}
+  .music-panel{right:12px;left:12px}
+  .music-panel iframe{width:100%}
 }
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
@@ -167,24 +173,30 @@ a{color:inherit;text-decoration:none}
     <span class="brand-mark" aria-hidden="true"></span>
     <span>MR.C <b>JARVIS</b></span>
   </a>
-  <nav class="topnav" aria-label="主导航">
-    <a href="index.html" class="on">首页</a>
-    <a href="articles/">文章</a>
-    <a href="skills/">技能</a>
-    <a href="portfolio/">作品集</a>
-  </nav>
-  <button class="music-btn" id="musicBtn" type="button" title="播放/暂停背景音乐">
-    <span class="bar"><i></i><i></i><i></i><i></i></span>
-    <span>音乐</span>
-  </button>
+  <div class="topbar-right">
+    <nav class="topnav" aria-label="主导航">
+      <a href="index.html" class="on">首页</a>
+      <a href="articles/">文章</a>
+      <a href="skills/">技能</a>
+      <a href="portfolio/">作品集</a>
+    </nav>
+    <button class="music-btn" id="musicBtn" type="button" title="单击展开歌单播放器 · 双击打开网易云">
+      <span class="bar"><i></i><i></i><i></i><i></i></span>
+      <span>音乐</span>
+    </button>
+  </div>
 </header>
+
+<!-- Netease playlist player (supports track switching) -->
+<div class="music-panel" id="musicPanel" aria-hidden="true">
+  <iframe id="neteaseFrame" title="网易云音乐歌单播放器" frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" src=""></iframe>
+</div>
 
 <!-- Fullscreen Three.js canvas -->
 <canvas id="coreCanvas" aria-label="AI 核心 3D 粒子球体"></canvas>
 
 <!-- Hero text -->
 <div class="hero" aria-label="JARVIS 陪伴系统">
-  <h1 class="hero-title">JARVIS</h1>
   <p class="hero-subtitle">AI Companion · 猫哥的陪伴系统</p>
   <p class="hero-mission">
     陪你说过的每一句话，<span class="done">已完成</span><br>
@@ -206,9 +218,6 @@ a{color:inherit;text-decoration:none}
   </button>
   <button class="send-btn" id="sendBtn" type="button">发送</button>
 </div>
-
-<!-- Background music -->
-<audio id="bgMusic" loop crossorigin="anonymous"></audio>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
@@ -416,54 +425,37 @@ setTimeout(()=>{
   speak('你好，我是 JARVIS。你的 AI 陪伴者。');
 },2000);
 
-// ============ BACKGROUND MUSIC ============
+// ============ BACKGROUND MUSIC (Netease official playlist player) ============
 const musicBtn=document.getElementById('musicBtn');
-const bgMusic=document.getElementById('bgMusic');
-let musicPlaying=false;
+const musicPanel=document.getElementById('musicPanel');
+const neteaseFrame=document.getElementById('neteaseFrame');
 
-// Netease Cloud Music playlist embed via iframe API workaround
-// Using a public Netease playlist - user can replace with their own
-const NETEASE_PLAYLIST_ID='885054268'; // 用户的网易云歌单
-// To use your own playlist: replace with your Netease playlist ID
-// Get it from: https://music.163.com/#/playlist?id=YOUR_ID
+// 用户的网易云歌单 ID：885054268
+// 官方外链播放器自带播放/暂停/切歌/列表，直接播歌单里的歌
+const NETEASE_PLAYLIST_ID='885054268';
+const NETEASE_SRC='https://music.163.com/outchain/player?type=0&id='+NETEASE_PLAYLIST_ID+'&auto=0&height=66';
 
-function initMusic(){
-  // Try to load via Netease iframe API
-  // Since direct audio URL from Netease requires auth, we use a fallback approach:
-  // 1. If user has Netease Music app/web open, we can't directly control it
-  // 2. We provide a button that opens the playlist in a new tab
-  // 3. For embedded playback, we use a proxy service or fallback to a generic chill track
-
-  // Fallback: use a royalty-free ambient track for the "atmosphere"
-  // User should replace this with their own hosted audio or Netease VIP API
-  bgMusic.src='https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=ambient-piano-amp-strings-10711.mp3';
-  bgMusic.volume=0.3;
-}
-
+let panelOpen=false;
 musicBtn.addEventListener('click',()=>{
-  if(!bgMusic.src)initMusic();
-  if(musicPlaying){
-    bgMusic.pause();
-    musicPlaying=false;
-    musicBtn.classList.remove('playing');
+  panelOpen=!panelOpen;
+  if(panelOpen){
+    if(!neteaseFrame.src)neteaseFrame.src=NETEASE_SRC; // lazy load on first open
+    musicPanel.classList.add('open');
+    musicPanel.setAttribute('aria-hidden','false');
+    musicBtn.classList.add('playing');
   }else{
-    bgMusic.play().then(()=>{
-      musicPlaying=true;
-      musicBtn.classList.add('playing');
-    }).catch(e=>{
-      // Autoplay blocked - show hint
-      showToast('<span style="color:var(--amber)">提示</span><br>浏览器阻止了自动播放。请再次点击音乐按钮。');
-    });
+    musicPanel.classList.remove('open');
+    musicPanel.setAttribute('aria-hidden','true');
+    musicBtn.classList.remove('playing');
   }
 });
 
-// Double-click to open Netease playlist
+// Double-click to open full playlist page on Netease
 musicBtn.addEventListener('dblclick',()=>{
   window.open('https://music.163.com/#/playlist?id='+NETEASE_PLAYLIST_ID,'_blank');
 });
 
-// Tooltip for music button
-musicBtn.title='单击播放/暂停 · 双击打开网易云歌单';
+musicBtn.title='单击展开/收起歌单播放器（可切歌）· 双击打开网易云歌单';
 </script>
 </body>
 </html>
