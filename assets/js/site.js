@@ -1,67 +1,180 @@
-export function initSiteNavigation(root = document) {
+import { createPageLifecycle } from './page-lifecycle.js';
+
+const ROUTES = new Map([
+  ['/', 'home'],
+  ['/index.html', 'home'],
+  ['/articles/', 'articles'],
+  ['/skills/', 'skills'],
+  ['/portfolio/', 'portfolio']
+]);
+
+function routePath(url) {
+  let path = new URL(url, 'https://local.invalid/').pathname;
+  const projectRoot = '/cat-grok-website';
+  if (path === projectRoot) path = '/';
+  else if (path.startsWith(projectRoot + '/')) path = path.slice(projectRoot.length);
+  if (!path.startsWith('/')) path = '/' + path;
+  return path;
+}
+
+export function routeKey(url) {
+  return ROUTES.get(routePath(url)) || null;
+}
+
+export function initSiteNavigation(root = document, view = window) {
   const button = root.querySelector('.menu-button');
   const nav = root.querySelector('#site-nav');
-  if (!button || !nav) return;
+  if (!button || !nav) return () => {};
 
-  // Toggle mobile menu
-  button.addEventListener('click', () => {
+  const toggle = () => {
     const open = button.getAttribute('aria-expanded') === 'true';
     button.setAttribute('aria-expanded', String(!open));
     nav.dataset.open = String(!open);
-  });
-
-  // Close mobile menu on nav link click (only when in mobile mode)
-  nav.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      // Only collapse if we're actually in mobile mode (menu button is visible)
-      const menuIsVisible = window.getComputedStyle(button).display !== 'none';
-      if (menuIsVisible) {
-        button.setAttribute('aria-expanded', 'false');
-        nav.dataset.open = 'false';
-      }
-    });
-  });
-
-  // Close mobile menu on window resize to desktop
-  window.addEventListener('resize', () => {
-    const menuIsVisible = window.getComputedStyle(button).display !== 'none';
-    if (!menuIsVisible) {
+  };
+  const closeMobile = () => {
+    if (view.getComputedStyle(button).display !== 'none') {
       button.setAttribute('aria-expanded', 'false');
       nav.dataset.open = 'false';
     }
+  };
+  const resize = () => {
+    if (view.getComputedStyle(button).display === 'none') {
+      button.setAttribute('aria-expanded', 'false');
+      nav.dataset.open = 'false';
+    }
+  };
+
+  button.addEventListener('click', toggle);
+  nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMobile));
+  view.addEventListener('resize', resize);
+
+  return () => {
+    button.removeEventListener?.('click', toggle);
+    nav.querySelectorAll('a').forEach(link => link.removeEventListener?.('click', closeMobile));
+    view.removeEventListener?.('resize', resize);
+  };
+}
+
+function parseBrowserPage(html, url) {
+  const next = new DOMParser().parseFromString(html, 'text/html');
+  const main = next.querySelector('main');
+  if (!main) throw new Error('missing main');
+  return {
+    main,
+    title: next.title,
+    description: next.querySelector('meta[name="description"]')?.content || '',
+    canonical: next.querySelector('link[rel="canonical"]')?.href || url,
+    bodyClass: next.body.className,
+    route: routeKey(url)
+  };
+}
+
+function renderBrowserPage(page, root = document) {
+  root.querySelector('main').replaceWith(page.main);
+  root.title = page.title;
+  root.body.className = page.bodyClass;
+  const description = root.querySelector('meta[name="description"]');
+  if (description) description.content = page.description;
+  const canonical = root.querySelector('link[rel="canonical"]');
+  if (canonical) canonical.href = page.canonical;
+  root.querySelectorAll('#site-nav a').forEach(link => {
+    if (routeKey(link.href) === page.route) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
   });
 }
 
-export function initMusicPanel(root = document) {
-  const musicBtn = root.querySelector('.music-btn');
-  const musicPanel = root.querySelector('.music-panel');
-  if (!musicBtn || !musicPanel) return;
-  const frame = musicPanel.querySelector('iframe');
+export function createSiteNavigator({
+  location = window.location,
+  history = window.history,
+  fetchImpl = window.fetch.bind(window),
+  parsePage = parseBrowserPage,
+  renderPage = renderBrowserPage,
+  lifecycle = createPageLifecycle(),
+  assign = href => window.location.assign(href),
+  view = typeof window === 'undefined' ? null : window,
+  root = typeof document === 'undefined' ? null : document
+} = {}) {
+  let controller = null;
+  let started = false;
+  let currentRoute = routeKey(location.href);
+  const pageCache = new Map();
+  if (root?.querySelector) pageCache.set(currentRoute, root.querySelector('main'));
 
-  const NETEASE_PLAYLIST_ID = '885054268';
-  let panelOpen = false;
+  async function navigate(input, { push = true } = {}) {
+    const url = new URL(input, location.href);
+    const targetRoute = routeKey(url.href);
+    if (!targetRoute || url.origin !== new URL(location.href).origin) return false;
 
-  musicBtn.addEventListener('click', () => {
-    panelOpen = !panelOpen;
-    if (panelOpen) {
-      // lazy load: empty src would make the iframe load the page itself
-      if (frame && !frame.getAttribute('src')) frame.src = frame.dataset.src;
-      musicPanel.classList.add('open');
-      musicPanel.setAttribute('aria-hidden', 'false');
-      musicBtn.classList.add('playing');
-    } else {
-      musicPanel.classList.remove('open');
-      musicPanel.setAttribute('aria-hidden', 'true');
-      musicBtn.classList.remove('playing');
+    controller?.abort();
+    controller = new AbortController();
+
+    try {
+      let page;
+      if (pageCache.has(targetRoute)) {
+        page = { main: pageCache.get(targetRoute), title: '', description: '', canonical: url.href, bodyClass: targetRoute === 'home' ? 'home-page jarvis-home' : '', route: targetRoute };
+        if (root) {
+          const response = await fetchImpl(url.href, { signal: controller.signal });
+          if (!response.ok) throw new Error('navigation ' + response.status);
+          const metadata = parsePage(await response.text(), url.href);
+          page = { ...metadata, main: page.main };
+        }
+      } else {
+        const response = await fetchImpl(url.href, { signal: controller.signal });
+        if (!response.ok) throw new Error('navigation ' + response.status);
+        page = parsePage(await response.text(), url.href);
+      }
+
+      if (root?.querySelector) pageCache.set(currentRoute, root.querySelector('main'));
+      lifecycle.deactivate();
+      renderPage(page);
+      pageCache.set(targetRoute, page.main);
+      currentRoute = targetRoute;
+      if (push) history.pushState({ path: url.pathname }, '', url.href);
+      lifecycle.activate(targetRoute, root);
+      view?.scrollTo?.({ top: 0, behavior: 'instant' });
+      root?.querySelector?.('main h1')?.focus?.({ preventScroll: true });
+      return true;
+    } catch (error) {
+      if (error?.name === 'AbortError') return false;
+      assign(url.href);
+      return false;
     }
-  });
+  }
 
-  musicBtn.addEventListener('dblclick', () => {
-    window.open('https://music.163.com/#/playlist?id=' + NETEASE_PLAYLIST_ID, '_blank');
-  });
+  function handleClick(event) {
+    const link = event.target.closest?.('a');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (link.target || link.hasAttribute('download') || !routeKey(link.href)) return;
+    event.preventDefault();
+    navigate(link.href);
+  }
+
+  function handlePopState() {
+    navigate(location.href, { push: false });
+  }
+
+  function start() {
+    if (started || !root || !view) return;
+    started = true;
+    root.addEventListener('click', handleClick);
+    view.addEventListener('popstate', handlePopState);
+    lifecycle.activate(currentRoute, root);
+  }
+
+  function destroy() {
+    controller?.abort();
+    if (!started || !root || !view) return;
+    root.removeEventListener('click', handleClick);
+    view.removeEventListener('popstate', handlePopState);
+    lifecycle.deactivate();
+    started = false;
+  }
+
+  return { start, navigate, destroy };
 }
 
 if (typeof document !== 'undefined') {
   initSiteNavigation();
-  initMusicPanel();
+  createSiteNavigator().start();
 }
+
