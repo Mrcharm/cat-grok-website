@@ -19,11 +19,9 @@ export function layout({
   const canonical = siteRoot + canonicalPath;
   const nav = [
     ['home', '首页', root + 'index.html'],
-    ['timeline', '人生轨迹', root + 'timeline/'],
-    ['writing', '写作', root + 'writing/'],
-    ['projects', '作品', root + 'projects/'],
-    ['about', '关于我', root + 'about/'],
-    ['action', '今日行动', root + 'action/']
+    ['articles', '文章', root + 'articles/'],
+    ['skills', '技能', root + 'skills/'],
+    ['action', '学习日记', root + 'action/']
   ].map(([id, label, href]) => (
     '<a href="' + href + '"' +
     (active === id ? ' aria-current="page"' : '') +
@@ -34,7 +32,7 @@ export function layout({
     '<meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<meta name="description" content="' + escapeHtml(description) + '">' +
-    '<meta name="theme-color" content="#eaf5ff">' +
+    '<meta name="theme-color" content="#05070d">' +
     '<link rel="canonical" href="' + escapeHtml(canonical) + '">' +
     '<meta property="og:type" content="website">' +
     '<meta property="og:locale" content="zh_CN">' +
@@ -55,12 +53,12 @@ export function layout({
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
     '<header class="site-header">' +
-    '<a class="brand" href="' + root + 'index.html">🐱 <strong>猫哥</strong></a>' +
+    '<a class="brand" href="' + root + 'index.html">🤖 <strong>猫哥 · JARVIS</strong></a>' +
     '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
     '<nav id="site-nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
     '</header>' +
     '<main id="main">' + body + '</main>' +
-    '<footer><strong>猫哥 · 向 2031 生长</strong><span>精选公开，长期更新。</span></footer>' +
+    '<footer><strong>猫哥 · JARVIS</strong><span>AI 陪伴系统 · 静态生成</span></footer>' +
     '<script type="module" src="' + root + 'assets/js/site.js"></script>' +
     '</body></html>';
 }

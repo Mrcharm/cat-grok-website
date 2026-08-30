@@ -12,100 +12,138 @@ const card = (item, href) => (
   '</article>'
 );
 
-function homePage({ profile, roadmap, posts, projects }) {
-  const recentPosts = published(posts).slice(0, 3)
-    .map(item => card(item, item.url))
-    .join('');
-  const featuredProjects = published(projects).slice(0, 3)
-    .map(item => card(item, item.url))
-    .join('');
-  const nowCards = [
-    ['职业', profile.current.career, '💼'],
-    ['学习', profile.current.learning, '🧠'],
-    ['生活', profile.current.life, '🌿'],
-    ['本月', profile.current.month, '🎯']
-  ].map(([label, value, icon]) => (
-    '<article><span aria-hidden="true">' + icon + '</span><p>' + escapeHtml(label) +
-    '</p><h3>' + escapeHtml(value) + '</h3></article>'
+function homePage({ profile }) {
+  return layout({
+    title: '猫哥 · JARVIS 陪伴系统',
+    description: '猫哥的 AI 陪伴系统 — 未来科技感个人站。',
+    canonicalPath: '',
+    active: 'home',
+    pageClass: 'home-page jarvis-home',
+    body:
+      '<section class="hero jarvis-hero" id="main">' +
+      '<div class="chat-container">' +
+      // AI Header
+      '<div class="chat-header" role="banner">' +
+      '<div class="avatar" aria-hidden="true">🤖</div>' +
+      '<div class="header-info"><h1>JARVIS 陪伴系统</h1>' +
+      '<span class="status">● SYSTEM ONLINE · VOICE READY</span></div>' +
+      '</div>' +
+      // Mission Panel
+      '<section class="mission-panel" aria-label="陪伴任务清单">' +
+      '<p class="mission-title">陪伴任务清单 · COMPANION MISSIONS</p>' +
+      '<ul class="mission-list">' +
+      '<li class="mission-item"><span class="mission-icon done" aria-hidden="true">✓</span>' +
+      '<span class="mission-text"><span class="name">陪你说话</span></span>' +
+      '<span class="mission-tag done">已完成</span></li>' +
+      '<li class="mission-item"><span class="mission-icon done" aria-hidden="true">✓</span>' +
+      '<span class="mission-text"><span class="name">在你难过时安慰你</span></span>' +
+      '<span class="mission-tag done">已完成</span></li>' +
+      '<li class="mission-item"><span class="mission-icon done" aria-hidden="true">✓</span>' +
+      '<span class="mission-text"><span class="name">记住你说过的每一件小事</span></span>' +
+      '<span class="mission-tag done">已完成</span></li>' +
+      '<li class="mission-item"><span class="mission-icon pending" aria-hidden="true">◉</span>' +
+      '<span class="mission-text"><span class="name">陪你走到不再需要我</span></span>' +
+      '<span class="mission-tag pending">尚未完成...</span></li>' +
+      '</ul>' +
+      '<p class="closing-msg">"只有你的<em>很久不出现</em>，才是我收到的任务完成通知。"</p>' +
+      '</section>' +
+      // Response Area
+      '<section class="response-area" id="responses" aria-live="polite" aria-label="对话区域"></section>' +
+      // Input Area
+      '<div class="chat-input-area">' +
+      '<div class="input-row">' +
+      '<input class="chat-input" id="userInput" type="text" placeholder="输入你想说的话..." maxlength="500" autocomplete="off" aria-label="输入消息">' +
+      '<button class="send-btn" id="sendBtn" type="button">发送 ↵</button>' +
+      '</div>' +
+      '<div class="quick-actions">' +
+      '<button class="qa-btn" data-msg="陪我聊聊天">💬 陪我聊</button>' +
+      '<button class="qa-btn" data-msg="给我讲个故事">📖 听故事</button>' +
+      '<button class="qa-btn" data-msg="查看任务进度">📋 任务进度</button>' +
+      '<button class="qa-btn" data-msg="我有点难过">🤗 安慰我</button>' +
+      '</div>' +
+      '</div>' +
+      '</div>' +
+      '</section>' +
+      '<footer class="jarvis-footer">' +
+      '<a href="articles/">文章</a> · <a href="skills/">技能</a> · <a href="action/">学习日记</a>' +
+      '<br><br>JARVIS HUD · 猫哥个人站 · 静态生成' +
+      '</footer>' +
+      '<script type="module" src="assets/js/jarvis-home.js"></script>'
+  });
+}
+
+function articlesPage({ blog }) {
+  const items = (blog?.items || []).map(item => (
+    '<article class="blog-card">' +
+    '<div class="blog-meta"><span class="blog-cat">' + escapeHtml(item.category) + '</span>' +
+    '<span>' + escapeHtml(item.date) + '</span></div>' +
+    '<h3>' + escapeHtml(item.title.replace(/【[^】]*】/g, '')) + '</h3>' +
+    '<div class="blog-footer"><span class="blog-views">👁 ' + (item.views || 0).toLocaleString() + '</span>' +
+    '<a class="blog-go" href="' + escapeHtml(item.url) + '" target="_blank" rel="noopener noreferrer">阅读原文 ↗</a></div>' +
+    '</article>'
   )).join('');
-  const lifeLines = profile.lifeLines.map((line, index) => (
-    '<article><span>0' + (index + 1) + '</span><h3>' + escapeHtml(line.title) +
-    '</h3><p>' + escapeHtml(line.summary) + '</p></article>'
-  )).join('');
-  const years = roadmap.years.map(item => (
-    '<article class="' + (item.status === 'active' ? 'active' : '') + '">' +
-    '<span>' + escapeHtml(item.stage) + '</span>' +
-    '<strong>' + escapeHtml(item.displayYear || item.year) + '</strong>' +
-    '<h3>' + escapeHtml(item.title) + '</h3>' +
-    '<p>' + escapeHtml(item.outcome) + '</p></article>'
-  )).join('');
-  const annualGoals = roadmap.annual.goals
-    .map(goal => '<li>' + escapeHtml(goal) + '</li>')
-    .join('');
-  const weekly = roadmap.weekly.map(item => (
-    '<article><span>' + escapeHtml(item.date) + '</span><h3>' +
-    escapeHtml(item.title) + '</h3><p>' + escapeHtml(item.summary) +
-    '</p></article>'
-  )).join('');
-  const profileLinks = profile.links.map(link => (
-    '<a href="' + escapeHtml(link.url) +
-    '" target="_blank" rel="noopener noreferrer">' +
-    escapeHtml(link.label) + ' ↗</a>'
+
+  const categories = ['all', ...new Set((blog?.items || []).map(i => i.category))];
+  const filters = categories.map(cat => (
+    '<button class="chip' + (cat === 'all' ? ' active' : '') + '" data-cat="' + escapeHtml(cat) + '">' +
+    (cat === 'all' ? '全部' : escapeHtml(cat)) + '</button>'
   )).join('');
 
   return layout({
-    title: '猫哥 · 向 2031 生长',
-    description: '猫哥的职业、学习、生活与作品长期记录。',
-    canonicalPath: '',
-    active: 'home',
-    pageClass: 'home-page',
+    title: '文章 · 猫哥 JARVIS',
+    description: '猫哥在 CSDN 的技术博客合集。',
+    canonicalPath: 'articles/',
+    depth: 1,
+    active: 'articles',
     body:
-      '<section class="page-hero home-hero">' +
-      '<div class="hero-copy"><p>2026 → 2031 · 公开成长现场</p>' +
-      '<h1>你好，我是' + escapeHtml(profile.name) + '。</h1>' +
-      '<p>' + escapeHtml(profile.tagline) + '</p>' +
-      '<p class="hero-role">' + escapeHtml(profile.role) + '</p>' +
-      '<div class="hero-actions"><a class="button button-primary" href="action/">开始今日 30 分钟</a>' +
-      '<a class="button button-secondary" href="writing/">阅读我的记录</a></div></div>' +
-      '<aside class="north-star-card"><span>2031 NORTH STAR</span>' +
-      '<strong>' + escapeHtml(roadmap.northStar) + '</strong>' +
-      '<p>' + escapeHtml(roadmap.principle) + '</p>' +
-      '<div><b>05</b><small>年长期记录</small><b>30′</b><small>每日最低投入</small></div>' +
-      '</aside></section>' +
-      '<section id="now" class="home-section"><div class="section-kicker">NOW</div>' +
-      '<div class="section-intro"><h2>此刻的我</h2><p>不等“准备好”再开始。先把当下真正投入的方向公开出来。</p></div>' +
-      '<div class="now-grid">' + nowCards + '</div></section>' +
-      '<section id="life-lines" class="home-section"><div class="section-kicker">THREE LINES</div>' +
-      '<div class="section-intro"><h2>职业、学习，也认真生活。</h2>' +
-      '<p>这三条线不是互相争夺时间，而是一起构成我想成为的人。</p></div>' +
-      '<div class="life-line-grid">' + lifeLines + '</div></section>' +
-      '<section id="roadmap" class="home-section"><div class="section-kicker">ROAD TO 2031</div>' +
-      '<div class="section-intro"><h2>五年目标，一步步留下证据。</h2>' +
-      '<p>' + escapeHtml(roadmap.northStar) + '</p></div>' +
-      '<div class="year-track">' + years + '</div>' +
-      '<div class="roadmap-detail"><article><span>' + escapeHtml(roadmap.annual.year) +
-      ' 年度目标</span><h3>' + escapeHtml(roadmap.annual.title) + '</h3><ul>' +
-      annualGoals + '</ul></article><article><span>本月重点</span><h3>' +
-      escapeHtml(roadmap.month.title) + '</h3><p>' + escapeHtml(roadmap.month.focus) +
-      '</p><a class="button button-primary" href="action/">查看 90 天计划</a></article></div>' +
-      '<div class="weekly-progress"><div><span>WEEKLY UPDATE</span><h3>每周精选进展</h3></div>' +
-      weekly + '</div></section>' +
-      '<section id="notes" class="home-section"><div class="section-kicker">NOTES</div>' +
-      '<div class="section-intro"><h2>近期记录</h2>' +
-      '<p>公开的是经过整理的版本：职业实践、学习认知、生活感悟和产业研究。</p></div>' +
-      '<div class="archive-grid">' + recentPosts + '</div>' +
-      '<a class="section-link" href="writing/">查看全部写作 →</a></section>' +
-      '<section id="featured-projects" class="home-section"><div class="section-kicker">WORKS</div>' +
-      '<div class="section-intro"><h2>作品档案</h2>' +
-      '<p>每个作品都记录问题、角色、方法、结果与仍然存在的限制。</p></div>' +
-      '<div class="archive-grid">' + featuredProjects + '</div>' +
-      '<a class="section-link" href="projects/">查看全部作品 →</a></section>' +
-      '<section id="home-about" class="home-section home-about"><div>' +
-      '<span class="cat-bubble" aria-hidden="true">🐱</span><div><div class="section-kicker">ABOUT</div>' +
-      '<h2>懂业务、数据与 AI，也愿意记录真实生活。</h2>' +
-      '<p>我的稀缺性不来自一个标签，而来自银行业务、数据平台、AI Agent 与产业研究的交叉。</p>' +
-      '<div class="profile-links">' + profileLinks + '<a href="about/">更多关于我 →</a></div>' +
-      '</div></div></section>'
+      '<div class="page-wrap" id="main"><section class="page-hero">' +
+      '<p class="kicker">ARTICLES · FROM CSDN</p>' +
+      '<h1>技术文章</h1>' +
+      '<p>我在 CSDN 上记录的项目实战、数据分析、面试总结与思考。点击卡片跳转原文阅读。</p>' +
+      '</section>' +
+      '<div class="filters" role="group" aria-label="分类筛选">' + filters + '</div>' +
+      '<div class="blog-grid">' + items + '</div></div>' +
+      '<script type="module" src="assets/js/articles.js"></script>'
+  });
+}
+
+function skillsPage({ skills }) {
+  const categories = skills?.categories || [];
+  const sections = categories.map(cat => {
+    const cards = (cat.skills || []).map(skill => (
+      '<article class="skill-card">' +
+      '<h3>' + escapeHtml(skill.name) + (skill.badge ? '<span class="badge">' + escapeHtml(skill.badge) + '</span>' : '') + '</h3>' +
+      '<p class="skill-desc">' + escapeHtml(skill.description) + '</p>' +
+      '<div class="skill-tags">' + (skill.tags || []).map(t => '<span class="skill-tag">' + escapeHtml(t) + '</span>').join('') + '</div>' +
+      '<div class="skill-actions">' +
+      '<button class="dl-btn" data-skill="' + escapeHtml(skill.name) + '">下载 SKILL.md</button>' +
+      '<button class="dl-btn zip" data-zip="' + escapeHtml(skill.name) + '">📦 打包 ZIP</button>' +
+      '</div>' +
+      '</article>'
+    )).join('');
+    const comingSoon = cat.comingSoon ?
+      '<div class="coming-soon"><p>🚧 ' + escapeHtml(cat.comingSoon) + '</p></div>' : '';
+    return '<section class="cat-section" id="' + escapeHtml(cat.id) + '">' +
+      '<div class="cat-header"><span class="cat-icon ' + escapeHtml(cat.id) + '" aria-hidden="true">' + escapeHtml(cat.icon) + '</span>' +
+      '<h2>' + escapeHtml(cat.title) + '</h2>' +
+      '<span class="cat-count">' + (cat.skills?.length || 0) + ' 个技能</span></div>' +
+      '<div class="skill-grid">' + cards + comingSoon + '</div></section>';
+  }).join('');
+
+  return layout({
+    title: '技能 · 猫哥 JARVIS',
+    description: '猫哥的技能库 — 工作流、分析工具、写作模板，可下载复用。',
+    canonicalPath: 'skills/',
+    depth: 1,
+    active: 'skills',
+    body:
+      '<div class="page-wrap" id="main"><section class="page-hero">' +
+      '<p class="kicker">SKILL LIBRARY · 可下载</p>' +
+      '<h1>技能库</h1>' +
+      '<p>我的工作流、分析工具、写作模板——打包成可复用的技能文件，一键下载使用。<br>' +
+      '<small style="color:var(--jarvis-dim)">所有敏感信息（IP / API Key / Token）已替换为变量占位符。</small></p>' +
+      '</section>' + sections + '</div>' +
+      '<script type="module" src="assets/js/skills.js"></script>'
   });
 }
 
@@ -157,84 +195,6 @@ function timelinePage({ roadmap, timeline, profile }) {
   });
 }
 
-function writingPage({ posts }) {
-  const items = published(posts).map(item => {
-    const href = item.url.startsWith('http') ? item.url : '../' + item.url;
-    return card(item, href);
-  }).join('');
-  return layout({
-    title: '写作 · 猫哥',
-    description: '猫哥关于职业、学习、生活和产业研究的精选公开记录。',
-    canonicalPath: 'writing/',
-    depth: 1,
-    active: 'writing',
-    body: '<section class="page-hero"><p>SELECTED PUBLIC NOTES</p>' +
-      '<h1>写作</h1><p>写清问题、证据、取舍和仍然不知道的部分。</p></section>' +
-      '<section><div class="writing-categories"><span>职业与产品</span>' +
-      '<span>学习与认知</span><span>生活与关系</span><span>产业研究</span></div>' +
-      '<div class="archive-grid">' + items + '</div></section>'
-  });
-}
-
-function postDetail(post) {
-  return layout({
-    title: post.title + ' · 猫哥写作',
-    description: post.summary,
-    canonicalPath: 'writing/' + post.slug + '/',
-    depth: 2,
-    active: 'writing',
-    body: '<article class="project-detail writing-detail"><p>' +
-      escapeHtml(post.category || '记录') + ' · ' + escapeHtml(post.date) +
-      '</p><h1>' + escapeHtml(post.title) + '</h1><p>' +
-      escapeHtml(post.summary) + '</p>' + post.bodyHtml + '</article>'
-  });
-}
-
-function projectsPage({ projects }) {
-  const items = published(projects)
-    .map(item => card(item, '../' + item.url))
-    .join('');
-  return layout({
-    title: '作品 · 猫哥',
-    description: '猫哥的 AI 产品、智能体与长期实践作品档案。',
-    canonicalPath: 'projects/',
-    depth: 1,
-    active: 'projects',
-    body: '<section class="page-hero"><h1>作品档案</h1><p>作品不是身份本身，而是每个阶段留下的证据。</p></section>' +
-      '<section class="archive-grid">' + items + '</section>'
-  });
-}
-
-function aboutPage({ profile }) {
-  const strengths = profile.strengths.map(item => (
-    '<article><h2>' + escapeHtml(item.title) + '</h2><p>' +
-    escapeHtml(item.description) + '</p></article>'
-  )).join('');
-  const links = profile.links.map(link => (
-    '<a class="button button-secondary" href="' + escapeHtml(link.url) +
-    '" target="_blank" rel="noopener noreferrer">' +
-    escapeHtml(link.label) + ' ↗</a>'
-  )).join('');
-  return layout({
-    title: '关于我 · 猫哥',
-    description: '猫哥的能力组合、长期方向和公开入口。',
-    canonicalPath: 'about/',
-    depth: 1,
-    active: 'about',
-    body: '<section class="page-hero"><p>ABOUT MR. CHARM</p><h1>关于我</h1><p>' +
-      escapeHtml(profile.role) + '</p></section>' +
-      '<section class="about-story"><div class="section-kicker">MY COMBINATION</div>' +
-      '<div class="section-intro"><h2>我不是一个单一标签。</h2>' +
-      '<p>我关心大型组织里的复杂数据工作，怎样被 AI 更可靠地理解、生成、检查与交付。</p></div>' +
-      '<div class="archive-grid">' + strengths + '</div></section>' +
-      '<section class="about-principles"><div><span class="cat-bubble" aria-hidden="true">🐱</span>' +
-      '<div><div class="section-kicker">WHAT I BELIEVE</div>' +
-      '<h2>不等成为专家再输出，也不靠输出假装成为专家。</h2>' +
-      '<p>每一次公开记录，都应该比动笔前更接近事实；每一个作品，都应该说清价值、证据和限制。</p>' +
-      '<div class="hero-actions">' + links + '</div></div></div></section>'
-  });
-}
-
 function actionPage({ tasks, learningPlan }) {
   const safeTasksJson = JSON.stringify(tasks).replaceAll('<', '\\u003c');
   const phases = learningPlan.phases.map((phase, index) => {
@@ -252,7 +212,7 @@ function actionPage({ tasks, learningPlan }) {
     pageClass: 'action-page',
     body: '<section class="page-hero action-hero"><p>90 DAYS · AI PRODUCT MANAGER</p>' +
       '<h1>90 天 AI 产品经理成长计划</h1><p>每天 30 分钟：读一个关键概念，解决一个产品问题，留下一个可验证产物。</p>' +
-      '<div class="action-privacy">🔒 打卡、证据和私人复盘只保存在当前浏览器；只有你单独填写并导出的“可公开周报素材”会用于周报。</div></section>' +
+      '<div class="action-privacy">🔒 打卡、证据和私人复盘只保存在当前浏览器；只有你单独填写并导出的"可公开周报素材"会用于周报。</div></section>' +
       '<section class="action-overview" aria-label="今日任务与本月进度">' +
       '<article class="focus-card" id="today-task"><div class="focus-meta"><span id="today-date">正在定位今天</span>' +
       '<b id="today-code">DAY</b></div><h2 id="today-title">载入今日任务…</h2>' +
@@ -272,12 +232,12 @@ function actionPage({ tasks, learningPlan }) {
       '<div class="weekdays" aria-hidden="true"><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span></div>' +
       '<div class="calendar-grid" id="calendar-grid"></div></section>' +
       '<section class="kanban-shell"><div class="section-kicker">BOARD</div>' +
-      '<div class="section-intro"><h2>学习证据看板</h2><p>看过不算完成；三步执行、结果证据和验收标准同时满足，才进入“已完成”。</p></div>' +
+      '<div class="section-intro"><h2>学习证据看板</h2><p>看过不算完成；三步执行、结果证据和验收标准同时满足，才进入"已完成"。</p></div>' +
       '<div class="kanban"><section class="kanban-column"><h3>下一步 <span id="kanban-next-count">0</span></h3><div id="kanban-next"></div></section>' +
       '<section class="kanban-column is-doing"><h3>进行中 <span id="kanban-doing-count">0</span></h3><div id="kanban-doing"></div></section>' +
       '<section class="kanban-column is-complete"><h3>已完成 <span id="kanban-complete-count">0</span></h3><div id="kanban-complete"></div></section></div></section>' +
       '<section class="backup-panel weekly-export-panel"><div><div class="section-kicker">FRIDAY WEEKLY</div><h2>整理本周公开素材</h2>' +
-      '<p>每周五下班前点击导出。文件只含你主动填写的“可公开周报素材”；没有公开素材时不会生成文件。</p></div>' +
+      '<p>每周五下班前点击导出。文件只含你主动填写的"可公开周报素材"；没有公开素材时不会生成文件。</p></div>' +
       '<div class="backup-controls"><button class="button button-primary" id="export-weekly" type="button">导出本周公开素材</button></div></section>' +
       '<section class="backup-panel"><div><div class="section-kicker">LOCAL BACKUP</div><h2>备份本机进度</h2>' +
       '<p>换设备或清理浏览器前，请先导出完整备份。这个文件含私人记录，不要公开上传。</p>' +
@@ -302,7 +262,7 @@ function actionPage({ tasks, learningPlan }) {
       '<textarea id="evidence" rows="3" placeholder="例如：已保存《2031 职业画像.md》，包含 3 个结果指标。"></textarea></label>' +
       '<label class="form-field" for="review"><span>今日复盘 <b>可选</b></span>' +
       '<textarea id="review" rows="3" placeholder="今天最有价值的发现、卡点或下一步是什么？"></textarea></label>' +
-      '<label class="form-field public-note-field" for="public-note"><span>可公开周报素材 <b>可选，仅在你点击“导出本周公开素材”时进入周报文件</b></span>' +
+      '<label class="form-field public-note-field" for="public-note"><span>可公开周报素材 <b>可选，仅在你点击"导出本周公开素材"时进入周报文件</b></span>' +
       '<textarea id="public-note" rows="3" placeholder="只写适合公开的事实，例如：完成工作流与 Agent 选型表，补充了两个不使用 Agent 的反例。"></textarea></label>' +
       '<div class="dialog-actions"><button class="button button-secondary" id="save-task" type="button">保存进度</button>' +
       '<button class="button button-primary" id="complete-task" type="button">验收并完成</button></div></div></dialog>' +
@@ -312,86 +272,12 @@ function actionPage({ tasks, learningPlan }) {
   });
 }
 
-const simpleArchiveItems = items => items.map(item => (
-  '<article><h3>' + escapeHtml(item.title || item.name) + '</h3>' +
-  (item.role ? '<span class="tag">' + escapeHtml(item.role) + '</span>' : '') +
-  '<p>' + escapeHtml(item.description) + '</p></article>'
-)).join('');
-
-function agentTeamArchive(agentTeam) {
-  const milestones = agentTeam.milestones.map(item => (
-    '<article><span aria-hidden="true">' + escapeHtml(item.emoji) + '</span>' +
-    '<div><small>' + escapeHtml(item.date) + '</small><h3>' +
-    escapeHtml(item.title) + '</h3></div></article>'
-  )).join('');
-  const articles = agentTeam.articles.map(item => {
-    const title = item.url
-      ? '<a href="' + escapeHtml(item.url) + '">' + escapeHtml(item.title) + ' ↗</a>'
-      : escapeHtml(item.title);
-    return '<article><span class="tag">' + escapeHtml(item.status) + '</span>' +
-      '<h3>' + title + '</h3><p>' + escapeHtml(item.description) + '</p></article>';
-  }).join('');
-  return '<div class="project-notice"><strong>这是一份历史作品档案</strong><p>' +
-    escapeHtml(agentTeam.intro) + '</p></div>' +
-    '<section class="project-section"><div class="section-kicker">MILESTONES</div>' +
-    '<h2>成长里程碑</h2><div class="milestone-grid">' + milestones + '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">TEAM</div>' +
-    '<h2>四位智能体成员</h2><div class="project-grid">' +
-    simpleArchiveItems(agentTeam.members) + '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">PRINCIPLES</div>' +
-    '<h2>团队理念</h2><div class="project-grid">' +
-    simpleArchiveItems(agentTeam.principles) + '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">WHAT IS CLAW</div>' +
-    '<h2>Claw 是什么</h2><p>原站用四个切面解释智能体能力；新站保留内容，并补充权限与审核边界。</p>' +
-    '<div class="project-grid">' + simpleArchiveItems(agentTeam.science) +
-    '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">ARCHIVE</div>' +
-    '<h2>阶段成果</h2><div class="project-grid">' +
-    simpleArchiveItems(agentTeam.achievements) + '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">SKILLS</div>' +
-    '<h2>技能与角色</h2><div class="project-grid">' +
-    simpleArchiveItems(agentTeam.skills) + '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">ARTICLES</div>' +
-    '<h2>实战文章</h2><div class="project-grid">' + articles + '</div></section>' +
-    '<section class="project-section"><div class="section-kicker">TOOLS</div>' +
-    '<h2>工具原型</h2><div class="project-grid">' +
-    simpleArchiveItems(agentTeam.tools) + '</div></section>';
-}
-
-function projectDetail(project, model) {
-  const archive = project.slug === 'agent-team'
-    ? agentTeamArchive(model.agentTeam)
-    : '';
-  return layout({
-    title: project.title + ' · 猫哥作品',
-    description: project.summary,
-    canonicalPath: 'projects/' + project.slug + '/',
-    depth: 2,
-    active: 'projects',
-    body: '<article class="project-detail"><p>' + escapeHtml(project.category) + ' · ' +
-      escapeHtml(project.date) + '</p><h1>' + escapeHtml(project.title) + '</h1>' +
-      '<p>' + escapeHtml(project.summary) + '</p>' + project.bodyHtml +
-      archive + '</article>'
-  });
-}
-
 export function renderPages(model) {
   const files = new Map([
     ['index.html', homePage(model)],
-    ['timeline/index.html', timelinePage(model)],
-    ['writing/index.html', writingPage(model)],
-    ['projects/index.html', projectsPage(model)],
-    ['about/index.html', aboutPage(model)],
+    ['articles/index.html', articlesPage(model)],
+    ['skills/index.html', skillsPage(model)],
     ['action/index.html', actionPage(model)]
   ]);
-
-  for (const project of published(model.projects)) {
-    files.set('projects/' + project.slug + '/index.html', projectDetail(project, model));
-  }
-  for (const post of published(model.posts)) {
-    if (post.url === 'writing/' + post.slug + '/') {
-      files.set('writing/' + post.slug + '/index.html', postDetail(post));
-    }
-  }
   return files;
 }

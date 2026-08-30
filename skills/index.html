@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="猫哥的技能库 — 产品设计、写作、股票分析、SQL 生成工具，可下载复用。">
+<meta name="theme-color" content="#03050a">
+<title>技能 · 猫哥 JARVIS</title>
+<link rel="stylesheet" href="../assets/styles/site.css">
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主要内容</a>
+<header class="site-header">
+  <a class="brand" href="../index.html"><span class="brand-mark" aria-hidden="true"></span><span>MR.C <b>JARVIS</b></span></a>
+  <div class="topbar-right">
+    <nav id="site-nav" data-open="false" aria-label="主导航">
+      <a href="../index.html">首页</a>
+      <a href="../articles/">文章</a>
+      <a href="../skills/" aria-current="page">技能</a>
+      <a href="../portfolio/">作品集</a>
+    </nav>
+    <button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>
+    <button class="music-btn" id="musicBtn" type="button" title="单击展开歌单播放器 · 双击打开网易云">
+      <span class="bar"><i></i><i></i><i></i><i></i></span>
+      <span>音乐</span>
+    </button>
+  </div>
+</header>
+<div class="music-panel" id="musicPanel" aria-hidden="true">
+  <iframe id="neteaseFrame" title="网易云音乐歌单播放器" frameborder="no" border="0" marginwidth="0" marginheight="0" width="330" height="86" data-src="https://music.163.com/outchain/player?type=0&id=885054268&auto=0&height=66"></iframe>
+</div>
+
+<main id="main">
+<div class="page-wrap">
+  <section class="page-hero">
+    <p class="kicker">SKILL LIBRARY · 可下载</p>
+    <h1>技能库</h1>
+    <p>我的工作流、分析工具、写作模板——打包成可复用的技能文件，一键下载使用。<br><small style="color:var(--jarvis-dim)">所有敏感信息（IP / API Key / Token / 路径）已替换为变量占位符。</small></p>
+  </section>
+
+  <!-- 产品设计 -->
+  <section class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon work">🎨</span>
+      <h2>产品设计</h2>
+      <span class="cat-count">1 个技能</span>
+    </div>
+    <div class="skill-grid">
+      <article class="skill-card">
+        <h3>AI 产品需求澄清框架 <span class="badge">PRD</span></h3>
+        <p class="skill-desc">接收 Excel/JSON/自然语言混合需求输入，输出结构化需求卡片。支持接口响应式澄清与多轮追问。适用于 AI 功能的需求梳理阶段。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">需求分析</span>
+          <span class="skill-tag">Excel 解析</span>
+          <span class="skill-tag">多轮对话</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 写作 -->
+  <section class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon write">✍️</span>
+      <h2>写作</h2>
+      <span class="cat-count">1 个技能</span>
+    </div>
+    <div class="skill-grid">
+      <article class="skill-card">
+        <h3>技术文章写作助手 <span class="badge">写作</span></h3>
+        <p class="skill-desc">结构化技术文章生成框架：从选题、大纲、案例填充到结论升华。内置 CSDN 爆款文章结构模板与 SEO 优化检查清单。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Markdown</span>
+          <span class="skill-tag">技术写作</span>
+          <span class="skill-tag">SEO</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 股票分析 -->
+  <section class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon stock">📈</span>
+      <h2>股票分析</h2>
+      <span class="cat-count">1 个技能</span>
+    </div>
+    <div class="skill-grid">
+      <article class="skill-card">
+        <h3>A 股每日复盘模板 <span class="badge">复盘</span></h3>
+        <p class="skill-desc">每日收盘后自动化复盘框架：大盘情绪、板块轮动、个股技术位、资金流向、次日策略。支持数据自动抓取与图表生成。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Python</span>
+          <span class="skill-tag">数据分析</span>
+          <span class="skill-tag">量化</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- SQL 生成 -->
+  <section class="cat-section">
+    <div class="cat-header">
+      <span class="cat-icon work">🗄️</span>
+      <h2>SQL 生成</h2>
+      <span class="cat-count">5 个技能</span>
+    </div>
+    <div class="skill-grid">
+      <article class="skill-card">
+        <h3>ETL-SQL 生成器 <span class="badge">SQL</span></h3>
+        <p class="skill-desc">自然语言/结构化输入 → 自动生成 ETL SQL 创建语句。支持 PostgreSQL 方言，含证据不足时的修复流程。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">PostgreSQL</span>
+          <span class="skill-tag">NL2SQL</span>
+          <span class="skill-tag">ETL</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+
+      <article class="skill-card">
+        <h3>需求澄清模块 <span class="badge">需求</span></h3>
+        <p class="skill-desc">接收混合需求输入，输出结构化需求卡片。支持接口响应式澄清与多轮追问，是 SQL 生成的前置步骤。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">需求分析</span>
+          <span class="skill-tag">状态机</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+
+      <article class="skill-card">
+        <h3>证据收集模块 <span class="badge">证据</span></h3>
+        <p class="skill-desc">按需收集 ETL 开发各阶段证据（检查点、规划、简单查询、失败补充），支持白名单路由与空结果确认。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">证据管理</span>
+          <span class="skill-tag">白名单</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+
+      <article class="skill-card">
+        <h3>文档写入模块 <span class="badge">文档</span></h3>
+        <p class="skill-desc">将执行结果写入 Markdown 记录文件（检查计划记录、证据检查点、SQL 计划记录）。含模板映射与源 JSON 规范。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">Markdown</span>
+          <span class="skill-tag">模板引擎</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+
+      <article class="skill-card">
+        <h3>校验规则引擎 <span class="badge">校验</span></h3>
+        <p class="skill-desc">对生成的 SQL 进行多维度校验：API 高风险输出检测、静态规则兜底、通过标准判定。保障数据安全底线。</p>
+        <div class="skill-tags">
+          <span class="skill-tag">安全</span>
+          <span class="skill-tag">静态分析</span>
+        </div>
+        <div class="skill-actions">
+          <a class="dl-btn" href="#" onclick="alert('技能包整理中，请联系猫哥获取');return false">下载技能包</a>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>
+  <p><strong>猫哥 · JARVIS</strong> — 向 2031 生长</p>
+</footer>
+
+<script type="module" src="../assets/js/site.js"></script>
+</body>
+</html>
