@@ -98,7 +98,7 @@ img{max-width:100%}
     background:rgba(3,5,10,.95);backdrop-filter:blur(16px);padding:12px;gap:4px;
     border-bottom:1px solid var(--jarvis-line);
   }
-  .music-btn span{display:none}
+  .music-btn > span:last-child{display:none}
   .music-panel{right:12px;left:12px}
   .music-panel iframe{width:100%}
 }

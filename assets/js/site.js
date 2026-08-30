@@ -7,6 +7,12 @@ const ROUTES = new Map([
   ['/skills/', 'skills'],
   ['/portfolio/', 'portfolio']
 ]);
+const ROUTE_PATHS = new Map([
+  ['home', ''],
+  ['articles', 'articles/'],
+  ['skills', 'skills/'],
+  ['portfolio', 'portfolio/']
+]);
 
 function routePath(url) {
   let path = new URL(url, 'https://local.invalid/').pathname;
@@ -19,6 +25,20 @@ function routePath(url) {
 
 export function routeKey(url) {
   return ROUTES.get(routePath(url)) || null;
+}
+
+export function routeHref(route, currentHref) {
+  const current = new URL(currentHref);
+  const marker = '/cat-grok-website/';
+  const markerIndex = current.pathname.indexOf(marker);
+  const basePath = markerIndex >= 0
+    ? current.pathname.slice(0, markerIndex) + marker
+    : '/';
+  return new URL(basePath + ROUTE_PATHS.get(route), current.origin).href;
+}
+
+export function linkRoute(link) {
+  return link.dataset?.route || routeKey(link.href);
 }
 
 const PLAYLIST_URL = 'https://music.163.com/outchain/player?type=0&id=885054268&auto=1&height=66';
@@ -157,7 +177,7 @@ function renderBrowserPage(page, root = document) {
   const canonical = root.querySelector('link[rel="canonical"]');
   if (canonical) canonical.href = page.canonical;
   root.querySelectorAll('#site-nav a').forEach(link => {
-    if (routeKey(link.href) === page.route) link.setAttribute('aria-current', 'page');
+    if (linkRoute(link) === page.route) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
   });
 }
@@ -223,9 +243,11 @@ export function createSiteNavigator({
   function handleClick(event) {
     const link = event.target.closest?.('a');
     if (!link || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    if (link.target || link.hasAttribute('download') || !routeKey(link.href)) return;
+    const route = linkRoute(link);
+    if (link.target || link.hasAttribute('download') || !route) return;
     event.preventDefault();
-    navigate(link.href);
+    const target = link.dataset.route ? routeHref(route, location.href) : link.href;
+    navigate(target);
   }
 
   function handlePopState() {

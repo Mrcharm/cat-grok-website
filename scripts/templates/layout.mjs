@@ -21,7 +21,7 @@ export const NETEASE_PLAYER_URL =
 export function persistentShell({ depth = 0, active = 'home' } = {}) {
   const root = '../'.repeat(depth);
   const nav = NAV_ITEMS.map(([id, label, path]) => (
-    '<a href="' + root + path + '"' +
+    '<a href="' + root + path + '" data-route="' + id + '"' +
     (active === id ? ' aria-current="page"' : '') +
     '>' + label + '</a>'
   )).join('');
@@ -33,7 +33,7 @@ export function persistentShell({ depth = 0, active = 'home' } = {}) {
     '<div class="topbar-right">' +
     '<nav id="site-nav" class="nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
     '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
-    '<button class="music-btn" type="button" aria-expanded="true" aria-controls="music-panel">' +
+    '<button class="music-btn" type="button" aria-label="音乐" aria-expanded="true" aria-controls="music-panel">' +
     '<span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>音乐</span></button>' +
     '</div></header>' +
     '<aside class="music-panel open" id="music-panel" aria-label="背景音乐">' +
@@ -86,4 +86,3 @@ export function layout({
     '<script type="module" src="' + root + 'assets/js/site.js"></script>' +
     '</body></html>';
 }
-

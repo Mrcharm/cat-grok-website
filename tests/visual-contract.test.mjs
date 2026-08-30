@@ -18,3 +18,8 @@ test('固定页头和选中态不会改变导航几何', async () => {
   assert.doesNotMatch(css.match(/\.nav a\[aria-current[^}]*\}/s)?.[0] || '', /font-weight|padding|font-size|min-width/);
 });
 
+test('移动端只隐藏音乐文字并保留声波入口', async () => {
+  const css = await readFile('assets/styles/site.css', 'utf8');
+  assert.doesNotMatch(css, /\.music-btn span\s*\{\s*display:\s*none/);
+  assert.match(css, /\.music-btn\s*>\s*span:last-child\s*\{\s*display:\s*none/);
+});

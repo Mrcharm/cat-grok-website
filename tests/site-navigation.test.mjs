@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createSiteNavigator, initSiteNavigation, routeKey } from '../assets/js/site.js';
+import { createSiteNavigator, initSiteNavigation, linkRoute, routeHref, routeKey } from '../assets/js/site.js';
 
 test('菜单按钮切换 aria-expanded 与导航打开状态', () => {
   const listeners = {};
@@ -26,6 +26,18 @@ test('识别根目录和 GitHub Pages 子目录的四个公开路由', () => {
   assert.equal(routeKey('https://example.test/cat-grok-website/skills/'), 'skills');
   assert.equal(routeKey('https://example.test/cat-grok-website/portfolio/'), 'portfolio');
   assert.equal(routeKey('https://example.test/action/'), null);
+});
+
+test('公共导航地址不受当前页面路径影响', () => {
+  assert.equal(routeHref('skills', 'https://example.test/articles/'), 'https://example.test/skills/');
+  assert.equal(
+    routeHref('portfolio', 'https://example.test/cat-grok-website/articles/'),
+    'https://example.test/cat-grok-website/portfolio/'
+  );
+});
+
+test('选中态优先使用固定 data-route 而不是变化后的相对 href', () => {
+  assert.equal(linkRoute({ dataset: { route: 'skills' }, href: 'https://example.test/articles/skills/' }), 'skills');
 });
 
 test('站内导航只渲染主体并保留公共外壳对象', async () => {
@@ -68,4 +80,3 @@ test('目标获取失败时退回普通跳转', async () => {
   assert.equal(await navigator.navigate('https://example.test/skills/'), false);
   assert.equal(assigned, 'https://example.test/skills/');
 });
-

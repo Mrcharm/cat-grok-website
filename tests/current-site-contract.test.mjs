@@ -22,6 +22,7 @@ test('四页使用同一品牌、导航和音乐歌单', async () => {
     assert.match(html, /<span>MR\.C <b>JARVIS<\/b><\/span>/);
     assert.match(html, /id="site-nav" class="nav"/);
     assert.match(html, /首页[\s\S]*文章[\s\S]*技能[\s\S]*作品集/);
+    assert.match(html, /class="music-btn"[^>]*aria-label="音乐"/);
     assert.match(html, /id=885054268&amp;auto=1/);
     assert.equal((html.match(/<main\b/g) || []).length, 1, path);
   }

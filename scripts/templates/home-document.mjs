@@ -13,6 +13,18 @@ export function normalizeHomeDocument(source) {
     html = html.replace('</head>', '<link rel="stylesheet" href="assets/styles/site.css">\n</head>');
   }
 
+  if (!html.includes('rel="canonical"')) {
+    const siteUrl = 'https://mrcharm.github.io/cat-grok-website/';
+    const social =
+      '<link rel="canonical" href="' + siteUrl + '">\n' +
+      '<meta property="og:type" content="website">\n' +
+      '<meta property="og:title" content="猫哥 · JARVIS">\n' +
+      '<meta property="og:description" content="JARVIS — 猫哥的 AI 陪伴系统。我在这里，等你开口。">\n' +
+      '<meta property="og:image" content="' + siteUrl + 'og.png">\n' +
+      '<meta name="twitter:card" content="summary_large_image">\n';
+    html = html.replace('</head>', social + '</head>');
+  }
+
   if (!/<main\b/.test(html)) {
     html = html
       .replace('<!-- Fullscreen Three.js canvas -->', '<main id="main" data-page-module="home">\n<!-- Fullscreen Three.js canvas -->')
