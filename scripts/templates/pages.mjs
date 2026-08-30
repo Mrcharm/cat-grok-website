@@ -96,14 +96,13 @@ function articlesPage({ blog }) {
     depth: 1,
     active: 'articles',
     body:
-      '<div class="page-wrap" id="main"><section class="page-hero">' +
+      '<div class="page-wrap" data-page-module="articles"><section class="page-hero">' +
       '<p class="kicker">ARTICLES · FROM CSDN</p>' +
       '<h1>技术文章</h1>' +
       '<p>我在 CSDN 上记录的项目实战、数据分析、面试总结与思考。点击卡片跳转原文阅读。</p>' +
       '</section>' +
       '<div class="filters" role="group" aria-label="分类筛选">' + filters + '</div>' +
-      '<div class="blog-grid">' + items + '</div></div>' +
-      '<script type="module" src="assets/js/articles.js"></script>'
+      '<div class="blog-grid">' + items + '</div></div>'
   });
 }
 
@@ -137,13 +136,40 @@ function skillsPage({ skills }) {
     depth: 1,
     active: 'skills',
     body:
-      '<div class="page-wrap" id="main"><section class="page-hero">' +
+      '<div class="page-wrap" data-page-module="skills"><section class="page-hero">' +
       '<p class="kicker">SKILL LIBRARY · 可下载</p>' +
       '<h1>技能库</h1>' +
       '<p>我的工作流、分析工具、写作模板——打包成可复用的技能文件，一键下载使用。<br>' +
       '<small style="color:var(--jarvis-dim)">所有敏感信息（IP / API Key / Token）已替换为变量占位符。</small></p>' +
-      '</section>' + sections + '</div>' +
-      '<script type="module" src="assets/js/skills.js"></script>'
+      '</section>' + sections + '</div>'
+  });
+}
+
+function portfolioPage() {
+  const projects = [
+    ['🎯', 'JARVIS 陪伴系统', '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', ['Three.js', 'Web Speech API', '产品原型'], '<a class="portfolio-link" href="../index.html">查看项目 →</a>'],
+    ['📊', '数据血缘与知识图谱平台', '从烟囱式数据架构到全行统一血缘图谱的设计与落地，覆盖元数据、影响分析与链路追踪。', ['数据治理', '知识图谱', '可视化'], '<span class="portfolio-link muted">截图与文档整理中</span>'],
+    ['🤖', 'AI 数据研发 Copilot', '自然语言到 SQL 的智能转换系统，覆盖需求澄清、证据收集、SQL 生成、校验与文档输出。', ['NL2SQL', 'AI 产品', 'B 端设计'], '<span class="portfolio-link muted">脱敏文档整理中</span>'],
+    ['⏳', '更多项目', 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', ['AI 应用', '研发平台', '数据大屏'], '<span class="portfolio-link muted">敬请期待</span>']
+  ].map(([icon, title, summary, tags, action], index) => (
+    '<article class="portfolio-item' + (index === 3 ? ' placeholder' : '') + '">' +
+    '<div class="portfolio-thumb">' + icon + '</div><div class="portfolio-info">' +
+    '<h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(summary) + '</p>' +
+    '<div class="portfolio-meta">' + tags.map((tag, tagIndex) => (
+      '<span class="portfolio-tag' + (tagIndex === 0 ? ' highlight' : '') + '">' + escapeHtml(tag) + '</span>'
+    )).join('') + '</div>' + action + '</div></article>'
+  )).join('');
+
+  return layout({
+    title: '作品集 · 猫哥 JARVIS',
+    description: '作品集 — 数据可视化、AI 应用、研发平台与产品设计项目。',
+    canonicalPath: 'portfolio/',
+    depth: 1,
+    active: 'portfolio',
+    body: '<div class="page-wrap" data-page-module="portfolio"><section class="page-hero">' +
+      '<p class="kicker">PORTFOLIO · SELECTED WORKS</p><h1>作品集</h1>' +
+      '<p>数据可视化、AI 应用、研发平台与产品设计——我做过的一些东西。</p>' +
+      '</section><div class="portfolio-grid">' + projects + '</div></div>'
   });
 }
 
@@ -274,10 +300,9 @@ function actionPage({ tasks, learningPlan }) {
 
 export function renderPages(model) {
   const files = new Map([
-    ['index.html', homePage(model)],
     ['articles/index.html', articlesPage(model)],
     ['skills/index.html', skillsPage(model)],
-    ['action/index.html', actionPage(model)]
+    ['portfolio/index.html', portfolioPage(model)]
   ]);
   return files;
 }
