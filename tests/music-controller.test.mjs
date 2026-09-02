@@ -11,88 +11,85 @@ function classList(initial = []) {
   };
 }
 
-function createMusicFixture() {
-  const timers = [];
-  const storageValues = new Map();
-  const storage = {
-    getItem(key) { return storageValues.get(key) ?? null; },
-    setItem(key, value) { storageValues.set(key, value); },
-    removeItem(key) { storageValues.delete(key); }
+function eventTarget() {
+  const listeners = new Map();
+  return {
+    addEventListener(type, handler) { listeners.set(type, handler); },
+    removeEventListener(type, handler) {
+      if (listeners.get(type) === handler) listeners.delete(type);
+    },
+    dispatch(type) { listeners.get(type)?.({ type }); },
+    has(type) { return listeners.has(type); }
   };
-  const panel = {
-    classList: classList(['music-panel', 'open']),
-    frame: null,
-    querySelector(selector) { return selector === 'iframe' ? this.frame : null; }
+}
+
+function createMusicFixture() {
+  const interactionTarget = eventTarget();
+  const buttonEvents = eventTarget();
+  const button = {
+    ...buttonEvents,
+    attrs: new Map([['aria-pressed', 'true']]),
+    classList: classList(['music-btn', 'playing']),
+    getAttribute(name) { return this.attrs.get(name); },
+    setAttribute(name, value) { this.attrs.set(name, value); }
   };
   const makeFrame = () => ({
     src: '',
     cloneNode() { return makeFrame(); },
-    replaceWith(next) { panel.frame = next; }
+    replaceWith(next) { root.frame = next; }
   });
-  panel.frame = makeFrame();
-  const button = {
-    attrs: new Map([['aria-expanded', 'true']]),
-    addEventListener() {},
-    removeEventListener() {},
-    getAttribute(name) { return this.attrs.get(name); },
-    setAttribute(name, value) { this.attrs.set(name, value); }
-  };
-  const unlock = { hidden: true, addEventListener() {}, removeEventListener() {} };
   const root = {
+    frame: makeFrame(),
     querySelector(selector) {
-      if (selector === '#music-panel') return panel;
+      if (selector === '#background-music-frame') return this.frame;
       if (selector === '.music-btn') return button;
-      if (selector === '.music-unlock') return unlock;
       return null;
     }
   };
-  return {
-    panel, button, unlock, storage,
-    runTimer(ms) { timers.filter(item => item.ms === ms).forEach(item => item.fn()); },
-    dependencies: {
-      root,
-      storage,
-      schedule(fn, ms) { timers.push({ fn, ms }); return timers.length; },
-      cancel() {}
-    }
-  };
+  return { root, button, interactionTarget, dependencies: { root, interactionTarget } };
 }
 
-test('首次加载立即使用指定歌单和 auto=1', () => {
+test('首次加载立即尝试播放《鲜花》单曲', () => {
   const fixture = createMusicFixture();
   createMusicController(fixture.dependencies).start();
-  assert.match(fixture.panel.frame.src, /id=885054268/);
-  assert.match(fixture.panel.frame.src, /auto=1/);
-  assert.equal(fixture.panel.classList.contains('open'), true);
+  assert.match(fixture.root.frame.src, /type=2/);
+  assert.match(fixture.root.frame.src, /id=2086327879/);
+  assert.match(fixture.root.frame.src, /auto=1/);
+  assert.equal(fixture.button.getAttribute('aria-pressed'), 'true');
+  assert.equal(fixture.button.getAttribute('aria-label'), '停止背景音乐：《鲜花》');
 });
 
-test('1.5 秒后提供点击开启且不声称正在播放', () => {
-  const fixture = createMusicFixture();
-  createMusicController(fixture.dependencies).start();
-  fixture.runTimer(1500);
-  assert.equal(fixture.unlock.hidden, false);
-  assert.equal(String(fixture.button.textContent || '').includes('正在播放'), false);
-});
-
-test('用户点击开启时重建 iframe 并记录当前会话', () => {
+test('点击音乐按钮停止，再次点击恢复', () => {
   const fixture = createMusicFixture();
   const controller = createMusicController(fixture.dependencies);
   controller.start();
-  const firstFrame = fixture.panel.frame;
-  controller.unlock();
-  assert.notEqual(fixture.panel.frame, firstFrame);
-  assert.match(fixture.panel.frame.src, /auto=1/);
-  assert.equal(fixture.storage.getItem('jarvis-music-unlocked'), '1');
-  assert.equal(fixture.unlock.hidden, true);
+  fixture.button.dispatch('click');
+  assert.equal(fixture.root.frame.src, 'about:blank');
+  assert.equal(fixture.button.getAttribute('aria-pressed'), 'false');
+  assert.equal(fixture.button.classList.contains('playing'), false);
+  fixture.button.dispatch('click');
+  assert.match(fixture.root.frame.src, /id=2086327879/);
+  assert.equal(fixture.button.getAttribute('aria-pressed'), 'true');
+  assert.equal(fixture.button.classList.contains('playing'), true);
 });
 
-test('用户关闭后当前会话不再强制打开', () => {
+test('首次页面交互重建 iframe 以恢复被拦截的自动播放', () => {
+  const fixture = createMusicFixture();
+  createMusicController(fixture.dependencies).start();
+  const initialFrame = fixture.root.frame;
+  fixture.interactionTarget.dispatch('pointerdown');
+  assert.notEqual(fixture.root.frame, initialFrame);
+  assert.match(fixture.root.frame.src, /id=2086327879/);
+  assert.equal(fixture.interactionTarget.has('pointerdown'), false);
+  assert.equal(fixture.interactionTarget.has('keydown'), false);
+});
+
+test('用户主动停止后，其他页面交互不会恢复音乐', () => {
   const fixture = createMusicFixture();
   const controller = createMusicController(fixture.dependencies);
   controller.start();
-  controller.toggle(false);
-  assert.equal(fixture.storage.getItem('jarvis-music-muted'), '1');
-  assert.equal(fixture.panel.classList.contains('open'), false);
-  assert.equal(fixture.panel.frame.src, 'about:blank');
+  controller.stop();
+  fixture.interactionTarget.dispatch('keydown');
+  assert.equal(fixture.root.frame.src, 'about:blank');
+  assert.equal(fixture.button.getAttribute('aria-pressed'), 'false');
 });
-
