@@ -23,3 +23,9 @@ test('移动端只隐藏音乐文字并保留声波入口', async () => {
   assert.doesNotMatch(css, /\.music-btn span\s*\{\s*display:\s*none/);
   assert.match(css, /\.music-btn\s*>\s*span:last-child\s*\{\s*display:\s*none/);
 });
+
+test('背景音乐 iframe 始终不可见', async () => {
+  const css = await readFile(new URL('../assets/styles/site.css', import.meta.url), 'utf8');
+  assert.match(css, /\.background-music-frame\s*\{[^}]*position:\s*fixed[^}]*width:\s*1px[^}]*height:\s*1px[^}]*opacity:\s*0/s);
+  assert.doesNotMatch(css, /\.music-panel\s*\{/);
+});
