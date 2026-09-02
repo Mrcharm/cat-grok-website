@@ -41,30 +41,25 @@ export function linkRoute(link) {
   return link.dataset?.route || routeKey(link.href);
 }
 
-const PLAYLIST_URL = 'https://music.163.com/outchain/player?type=0&id=885054268&auto=1&height=66';
-const SESSION_UNLOCKED = 'jarvis-music-unlocked';
-const SESSION_MUTED = 'jarvis-music-muted';
+const FLOWERS_URL = 'https://music.163.com/outchain/player?type=2&id=2086327879&auto=1&height=32';
 
 export function createMusicController({
   root = document,
-  storage = sessionStorage,
-  schedule = setTimeout,
-  cancel = clearTimeout
+  interactionTarget = document
 } = {}) {
-  const panel = root.querySelector('#music-panel');
   const button = root.querySelector('.music-btn');
-  const unlockButton = root.querySelector('.music-unlock');
-  if (!panel || !button || !unlockButton) {
-    return { start() {}, toggle() {}, unlock() {}, destroy() {} };
+  if (!root.querySelector('#background-music-frame') || !button) {
+    return { start() {}, toggle() {}, play() {}, stop() {}, destroy() {} };
   }
 
-  let promptTimer = null;
+  let playing = true;
+  let started = false;
 
   function frame() {
-    return panel.querySelector('iframe');
+    return root.querySelector('#background-music-frame');
   }
 
-  function replaceFrame(src = PLAYLIST_URL) {
+  function replaceFrame(src = FLOWERS_URL) {
     const current = frame();
     const next = current.cloneNode(false);
     next.src = src;
@@ -72,52 +67,60 @@ export function createMusicController({
     return next;
   }
 
-  function unlock() {
+  function renderState() {
+    button.setAttribute('aria-pressed', String(playing));
+    button.setAttribute('aria-label', playing ? '停止背景音乐：《鲜花》' : '播放背景音乐：《鲜花》');
+    button.classList[playing ? 'add' : 'remove']('playing');
+  }
+
+  function detachGestureRecovery() {
+    interactionTarget.removeEventListener('pointerdown', recoverAfterGesture);
+    interactionTarget.removeEventListener('keydown', recoverAfterGesture);
+  }
+
+  function play() {
+    playing = true;
     replaceFrame();
-    storage.setItem(SESSION_UNLOCKED, '1');
-    storage.removeItem(SESSION_MUTED);
-    unlockButton.hidden = true;
-    panel.classList.add('open');
-    button.setAttribute('aria-expanded', 'true');
+    renderState();
+    detachGestureRecovery();
   }
 
-  function toggle(open = button.getAttribute('aria-expanded') !== 'true') {
-    if (open) {
-      unlock();
-      return;
-    }
-    storage.setItem(SESSION_MUTED, '1');
-    panel.classList.remove('open');
-    button.setAttribute('aria-expanded', 'false');
-    unlockButton.hidden = true;
+  function stop() {
+    playing = false;
     frame().src = 'about:blank';
+    renderState();
+    detachGestureRecovery();
   }
 
-  const handleToggle = () => toggle();
-  const handleUnlock = () => unlock();
+  function toggle() {
+    if (playing) stop();
+    else play();
+  }
+
+  function recoverAfterGesture() {
+    if (playing) replaceFrame();
+    detachGestureRecovery();
+  }
 
   function start() {
-    button.addEventListener('click', handleToggle);
-    unlockButton.addEventListener('click', handleUnlock);
-    if (storage.getItem(SESSION_MUTED) === '1') {
-      toggle(false);
-      return;
-    }
-    frame().src = PLAYLIST_URL;
-    panel.classList.add('open');
-    button.setAttribute('aria-expanded', 'true');
-    if (storage.getItem(SESSION_UNLOCKED) !== '1') {
-      promptTimer = schedule(() => { unlockButton.hidden = false; }, 1500);
-    }
+    if (started) return;
+    started = true;
+    button.addEventListener('click', toggle);
+    interactionTarget.addEventListener('pointerdown', recoverAfterGesture);
+    interactionTarget.addEventListener('keydown', recoverAfterGesture);
+    playing = true;
+    frame().src = FLOWERS_URL;
+    renderState();
   }
 
   function destroy() {
-    if (promptTimer !== null) cancel(promptTimer);
-    button.removeEventListener('click', handleToggle);
-    unlockButton.removeEventListener('click', handleUnlock);
+    if (!started) return;
+    button.removeEventListener('click', toggle);
+    detachGestureRecovery();
+    started = false;
   }
 
-  return { start, toggle, unlock, destroy };
+  return { start, toggle, play, stop, destroy };
 }
 
 export function initSiteNavigation(root = document, view = window) {

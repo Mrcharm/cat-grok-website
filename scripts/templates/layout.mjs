@@ -12,11 +12,11 @@ export const NAV_ITEMS = [
   ['portfolio', '作品集', 'portfolio/']
 ];
 
-export const NETEASE_PLAYLIST_ID = '885054268';
+export const NETEASE_SONG_ID = '2086327879';
 export const NETEASE_PLAYER_URL =
-  'https://music.163.com/outchain/player?type=0&amp;id=' +
-  NETEASE_PLAYLIST_ID +
-  '&amp;auto=1&amp;height=66';
+  'https://music.163.com/outchain/player?type=2&amp;id=' +
+  NETEASE_SONG_ID +
+  '&amp;auto=1&amp;height=32';
 
 export function persistentShell({ depth = 0, active = 'home' } = {}) {
   const root = '../'.repeat(depth);
@@ -33,14 +33,11 @@ export function persistentShell({ depth = 0, active = 'home' } = {}) {
     '<div class="topbar-right">' +
     '<nav id="site-nav" class="nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
     '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
-    '<button class="music-btn" type="button" aria-label="音乐" aria-expanded="true" aria-controls="music-panel">' +
+    '<button class="music-btn playing" type="button" aria-label="停止背景音乐：《鲜花》" aria-pressed="true">' +
     '<span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>音乐</span></button>' +
     '</div></header>' +
-    '<aside class="music-panel open" id="music-panel" aria-label="背景音乐">' +
-    '<iframe title="网易云音乐歌单播放器" width="330" height="86" src="' + NETEASE_PLAYER_URL + '"></iframe>' +
-    '<button class="music-unlock" type="button" hidden>没听到音乐？点击开启</button>' +
-    '<a class="music-external" href="https://music.163.com/#/playlist?id=' + NETEASE_PLAYLIST_ID +
-    '" target="_blank" rel="noopener noreferrer">在网易云打开</a></aside>';
+    '<iframe class="background-music-frame" id="background-music-frame" title="背景音乐：回春丹乐队《鲜花》" ' +
+    'aria-hidden="true" tabindex="-1" src="' + NETEASE_PLAYER_URL + '"></iframe>';
 }
 
 export function layout({

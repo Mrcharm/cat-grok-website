@@ -78,18 +78,7 @@ img{max-width:100%}
 .music-btn:not(.playing) .bar i{animation:none;height:3px !important;background:rgba(107,130,153,.5)}
 @keyframes soundBar{0%,100%{height:3px}50%{height:12px}}
 
-/* Netease playlist panel */
-.music-panel{
-  position:fixed;top:64px;right:28px;z-index:60;border-radius:12px;overflow:hidden;
-  border:1px solid rgba(56,225,255,.2);box-shadow:0 12px 40px rgba(0,0,0,.55);
-  background:rgba(10,18,32,.92);
-  opacity:0;transform:translateY(-10px);pointer-events:none;transition:.25s ease;
-}
-.music-panel.open{opacity:1;transform:translateY(0);pointer-events:auto}
-.music-unlock{display:block;width:100%;padding:8px 12px;border-top:1px solid rgba(56,225,255,.15);color:var(--jarvis-cyan);background:rgba(3,5,10,.92);font:11px var(--font-mono)}
-.music-unlock[hidden]{display:none}
-.music-external{display:block;padding:5px 12px;color:var(--jarvis-dim);font-size:11px;text-align:right}
-.music-external:hover{color:var(--jarvis-cyan)}
+.background-music-frame{position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;border:0;overflow:hidden}
 
 /* Mobile nav open state — constrained to mobile breakpoint */
 @media(max-width:640px){
@@ -99,8 +88,6 @@ img{max-width:100%}
     border-bottom:1px solid var(--jarvis-line);
   }
   .music-btn > span:last-child{display:none}
-  .music-panel{right:12px;left:12px}
-  .music-panel iframe{width:100%}
 }
 
 /* ===== Footer ===== */
