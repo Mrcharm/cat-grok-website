@@ -144,6 +144,10 @@ footer strong{color:var(--jarvis-cyan);font-weight:600}
 .cat-icon.stock{background:rgba(255,169,77,.1)}
 .cat-icon.write{background:rgba(183,148,246,.1)}
 .cat-icon.life{background:rgba(78,205,196,.1)}
+.cat-icon.minds{background:rgba(255,214,102,.12)}
+.cat-icon.design{background:rgba(56,225,255,.1)}
+.cat-icon.dev{background:rgba(78,205,196,.1)}
+
 .cat-header h2{font-size:22px}
 .cat-count{margin-left:auto;font-family:var(--font-mono);font-size:13px;color:var(--jarvis-dim);background:var(--jarvis-panel);padding:4px 12px;border-radius:999px}
 
