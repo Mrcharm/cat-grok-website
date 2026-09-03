@@ -282,7 +282,6 @@ export function initSkillDownloads() {
   const base = location.pathname.includes('/cat-grok-website')
     ? '/cat-grok-website/'
     : '/';
-  const zipUrl = base + 'downloads/etl-sql-skills-3.0.zip';
 
   document.addEventListener('click', (event) => {
     const target = event.target;
@@ -299,9 +298,11 @@ export function initSkillDownloads() {
     const zipBtn = target.closest('.dl-btn[data-zip]');
     if (zipBtn) {
       event.preventDefault();
+      const name = zipBtn.getAttribute('data-zip');
+      const file = name + '.zip';
       const link = document.createElement('a');
-      link.href = zipUrl;
-      link.download = 'etl-sql-skills-3.0.zip';
+      link.href = base + 'downloads/skills/' + file;
+      link.download = file;
       document.body.appendChild(link);
       link.click();
       link.remove();
