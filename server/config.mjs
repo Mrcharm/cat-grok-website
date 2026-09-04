@@ -31,6 +31,29 @@ export function loadConfig(env = process.env) {
   };
 }
 
+export function loadRtcConfig(env = process.env) {
+  return {
+    rtc: {
+      appId: required(env, 'RTC_APP_ID'),
+      appKey: required(env, 'RTC_APP_KEY')
+    },
+    iam: {
+      accessKeyId: required(env, 'VOLC_ACCESS_KEY_ID'),
+      secretAccessKey: required(env, 'VOLC_SECRET_ACCESS_KEY')
+    },
+    s2s: {
+      appId: required(env, 'S2S_APP_ID'),
+      accessToken: required(env, 'S2S_ACCESS_TOKEN')
+    },
+    allowedOrigins: required(env, 'ALLOWED_ORIGINS')
+      .split(',')
+      .map(value => value.trim())
+      .filter(Boolean),
+    sessionTtlMs: Math.min(Number(env.RTC_SESSION_TTL_MS?.trim() || 900000), 900000),
+    maxConnectionsPerIp: Number(env.MAX_CONNECTIONS_PER_IP?.trim() || 2)
+  };
+}
+
 export function isAllowedOrigin(origin, allowedOrigins) {
   return typeof origin === 'string' && allowedOrigins.includes(origin);
 }

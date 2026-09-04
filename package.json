@@ -4,7 +4,8 @@
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "pnpm build:rtc && node scripts/build.mjs",
+    "build:rtc": "esbuild assets/js/voice/rtc-entry.js --bundle --format=esm --outfile=assets/dist/rtc-voice.js",
     "start:voice": "node server/index.mjs",
     "test": "node --test",
     "weekly:generate": "node scripts/generate-weekly-report.mjs",
@@ -13,9 +14,14 @@
     "check": "pnpm validate && pnpm test && pnpm build && pnpm smoke"
   },
   "dependencies": {
+    "@volcengine/openapi": "1.36.2",
     "gray-matter": "4.0.3",
     "markdown-it": "14.3.0",
     "ws": "8.18.3"
+  },
+  "devDependencies": {
+    "@volcengine/rtc": "4.69.1",
+    "esbuild": "0.28.2"
   },
   "engines": {
     "node": ">=20"
