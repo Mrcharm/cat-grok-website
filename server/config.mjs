@@ -32,6 +32,14 @@ export function loadConfig(env = process.env) {
 }
 
 export function loadRtcConfig(env = process.env) {
+  const allowedOrigins = required(env, 'ALLOWED_ORIGINS')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean);
+  if (allowedOrigins.length === 0) {
+    throw new Error('Missing required environment variable: ALLOWED_ORIGINS');
+  }
+
   return {
     rtc: {
       appId: required(env, 'RTC_APP_ID'),
@@ -45,12 +53,12 @@ export function loadRtcConfig(env = process.env) {
       appId: required(env, 'S2S_APP_ID'),
       accessToken: required(env, 'S2S_ACCESS_TOKEN')
     },
-    allowedOrigins: required(env, 'ALLOWED_ORIGINS')
-      .split(',')
-      .map(value => value.trim())
-      .filter(Boolean),
-    sessionTtlMs: Math.min(Number(env.RTC_SESSION_TTL_MS?.trim() || 900000), 900000),
-    maxConnectionsPerIp: Number(env.MAX_CONNECTIONS_PER_IP?.trim() || 2)
+    allowedOrigins,
+    sessionTtlMs: Math.min(
+      positiveInteger(env, 'RTC_SESSION_TTL_MS', 900000),
+      900000
+    ),
+    maxConnectionsPerIp: positiveInteger(env, 'MAX_CONNECTIONS_PER_IP', 2)
   };
 }
 

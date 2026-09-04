@@ -20,6 +20,22 @@ test('loadRtcConfig requires every server-only RTC credential and origin setting
   }
 });
 
+test('loadRtcConfig rejects blank required values after trimming', () => {
+  for (const name of Object.keys(valid)) {
+    assert.throws(
+      () => loadRtcConfig({ ...valid, [name]: '   ' }),
+      new RegExp(name)
+    );
+  }
+});
+
+test('loadRtcConfig rejects an origin list that becomes empty after trimming', () => {
+  assert.throws(
+    () => loadRtcConfig({ ...valid, ALLOWED_ORIGINS: '  ,   ' }),
+    /ALLOWED_ORIGINS/
+  );
+});
+
 test('loadRtcConfig trims credentials and parses origins into server configuration', () => {
   const config = loadRtcConfig({
     ...valid,
@@ -45,4 +61,17 @@ test('loadRtcConfig applies the safe session and connection defaults', () => {
 
   assert.equal(config.sessionTtlMs, 900000);
   assert.equal(config.maxConnectionsPerIp, 2);
+});
+
+test('loadRtcConfig rejects non-positive and non-numeric limits', () => {
+  for (const value of ['not-a-number', '0', '-1']) {
+    assert.throws(
+      () => loadRtcConfig({ ...valid, RTC_SESSION_TTL_MS: value }),
+      /RTC_SESSION_TTL_MS/
+    );
+    assert.throws(
+      () => loadRtcConfig({ ...valid, MAX_CONNECTIONS_PER_IP: value }),
+      /MAX_CONNECTIONS_PER_IP/
+    );
+  }
 });

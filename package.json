@@ -4,8 +4,7 @@
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
-    "build": "pnpm build:rtc && node scripts/build.mjs",
-    "build:rtc": "esbuild assets/js/voice/rtc-entry.js --bundle --format=esm --outfile=assets/dist/rtc-voice.js",
+    "build": "node scripts/build.mjs",
     "start:voice": "node server/index.mjs",
     "test": "node --test",
     "weekly:generate": "node scripts/generate-weekly-report.mjs",
