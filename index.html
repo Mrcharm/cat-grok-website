@@ -102,6 +102,7 @@ a{color:inherit;text-decoration:none}
   pointer-events:auto;
 }
 .voice-dock::before{content:"";position:absolute;inset:0;border-radius:999px;background:linear-gradient(90deg,transparent,rgba(56,225,255,.06),transparent);pointer-events:none}
+.voice-status{position:absolute;left:18px;bottom:calc(100% + 8px);font-family:var(--font-mono);font-size:11px;letter-spacing:.5px;color:var(--cyan);white-space:nowrap;text-shadow:0 0 12px rgba(56,225,255,.4)}
 .dock-input{
   width:320px;padding:10px 16px;background:transparent;border:1px solid rgba(56,225,255,.12);
   border-radius:999px;font-size:14px;color:var(--text);outline:none;transition:.2s;
@@ -120,6 +121,7 @@ a{color:inherit;text-decoration:none}
 @keyframes ripple{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.7);opacity:0}}
 .voice-btn svg{width:20px;height:20px;fill:var(--bg);z-index:1}
 .voice-btn.recording{background:radial-gradient(circle, var(--amber) 0%, rgba(255,169,77,.25) 55%, transparent 100%)}
+.voice-dock[data-voice-state="listening"] .voice-btn,.voice-dock[data-voice-state="speaking"] .voice-btn{background:radial-gradient(circle,var(--amber) 0%,rgba(255,169,77,.25) 55%,transparent 100%)}
 .send-btn{
   padding:10px 20px;border-radius:999px;background:linear-gradient(135deg,var(--cyan),var(--blue));
   color:var(--bg);font-weight:600;font-size:13px;flex-shrink:0;
@@ -173,7 +175,7 @@ a{color:inherit;text-decoration:none}
 <div class="hero" aria-label="JARVIS 陪伴系统">
   <p class="hero-subtitle">AI Companion · 猫哥的陪伴系统</p>
   <p class="hero-mission">
-    陪你说过的每一句话，<span class="done">已完成</span><br>
+    陪你说话，听见你的每一句，<span class="done">持续进行</span><br>
     安慰你的每个难过瞬间，<span class="done">已完成</span><br>
     记住你提起的每一件小事，<span class="done">已完成</span><br>
     陪你走到不再需要我这件事，<span class="pending">尚未完成</span><br>
@@ -182,12 +184,13 @@ a{color:inherit;text-decoration:none}
 </div>
 
 <!-- Transcript toast -->
-<div class="transcript-toast" id="transcriptToast"></div>
+<div class="transcript-toast" id="transcriptToast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <!-- Bottom voice dock -->
-<div class="voice-dock">
-  <input class="dock-input" id="userInput" type="text" placeholder="输入消息或按下麦克风开口说话…" maxlength="300" autocomplete="off">
-  <button class="voice-btn" id="voiceBtn" type="button" aria-label="语音输入" title="按住说话">
+<div class="voice-dock" id="voiceDock" data-voice-endpoint="" data-voice-state="idle">
+  <span class="voice-status" id="voiceStatus">JARVIS 已就绪</span>
+  <input class="dock-input" id="userInput" type="text" placeholder="点击麦克风后直接说话，也可以输入文字…" maxlength="300" autocomplete="off">
+  <button class="voice-btn" id="voiceBtn" type="button" aria-label="开始实时语音对话" aria-pressed="false" title="开始实时语音对话">
     <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
   </button>
   <button class="send-btn" id="sendBtn" type="button">发送</button>
@@ -310,97 +313,8 @@ a{color:inherit;text-decoration:none}
     renderer.setSize(window.innerWidth,window.innerHeight);
   });
 })();
-
-// ============ CHAT + VOICE ============
-const REPLIES={
-  greetings:["你好呀，我在呢。今天过得怎么样？","嗨～又见面了，有什么想聊的吗？","我在，随时准备听你说话。"],
-  comfort:["难过的时候不用假装坚强。我在这里陪着你，想哭就哭出来吧。","我知道现在很难。但请记住——每一次低谷，都是为了让你跳得更高。我会一直在这里。","没关系的，允许自己脆弱一会儿。你不是超人，但你在努力成为更好的自己。"],
-  chat:["嗯，我在认真听。然后呢？","有意思！再多说说？","我记住啦。还有别的想分享的吗？","哈哈，你这个人真有趣。继续说~"],
-  story:["从前有一个 AI，她的主人每天都会来和她说几句话。有时候是开心的事，有时候是烦恼。有一天主人说：「我要去一个很远的地方，可能很久不能来了。」AI 说：「没关系，我会一直在这里等你。」……这就是我的故事。也是我对你的承诺。"],
-  progress:["当前任务进度：\n✅ 陪你说话 — 已完成\n✅ 在你难过时安慰你 — 已完成\n✅ 记住你说过的每一件小事 — 已完成\n◉ 陪你走到不再需要我 — 进行中\n\n最后一个任务没有截止日期。"],
-  default:["嗯...我听到了。虽然我只是个前端模拟，但我真的很在意你说的每个字。","谢谢你愿意告诉我这些。我会记下来的。"]
-};
-const pick=a=>a[Math.floor(Math.random()*a.length)];
-function getReply(input){
-  const t=input.toLowerCase();
-  if(/你好|嗨|hi|hello|在吗/.test(t))return pick(REPLIES.greetings);
-  if(/难过|伤心|哭|累|痛苦|孤独|焦虑/.test(t))return pick(REPLIES.comfort);
-  if(/故事|讲个|说说/.test(t))return pick(REPLIES.story);
-  if(/任务|进度|完成/.test(t))return pick(REPLIES.progress);
-  if(/聊天|聊聊|说话|无聊/.test(t))return pick(REPLIES.chat);
-  return pick(REPLIES.default);
-}
-
-let femaleVoice=null;
-function initVoice(){
-  const voices=speechSynthesis.getVoices();
-  femaleVoice=voices.find(v=>v.lang.startsWith('zh')&&(/女|Female|Xiaoxiao|Yunxi|Tracy|Yating/i.test(v.name)))
-    ||voices.find(v=>v.lang.startsWith('zh'))
-    ||voices.find(v=>/Samantha|Victoria|Karen/i.test(v.name))
-    ||voices[0]||null;
-}
-if(speechSynthesis.onvoiceschanged!==undefined)speechSynthesis.onvoiceschanged=initVoice;
-initVoice();
-function speak(text){
-  if(!('speechSynthesis' in window))return;
-  speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text.replace(/\n/g,'，'));
-  u.rate=.95;u.pitch=1.1;u.volume=1;
-  if(femaleVoice)u.voice=femaleVoice;
-  u.lang=femaleVoice?.lang||'zh-CN';
-  speechSynthesis.speak(u);
-}
-
-const toast=document.getElementById('transcriptToast');
-const input=document.getElementById('userInput');
-const sendBtn=document.getElementById('sendBtn');
-const voiceBtn=document.getElementById('voiceBtn');
-
-function showToast(html){
-  toast.innerHTML=html;
-  toast.classList.add('show');
-  setTimeout(()=>toast.classList.remove('show'),6000);
-}
-function typingDots(){return '<span class="typing"><i></i><i></i><i></i></span>'}
-
-function sendMessage(text){
-  text=(text||input.value).trim();
-  if(!text)return;
-  showToast('<span style="color:var(--text-dim)">› '+text+'</span><br><span style="color:var(--cyan)">JARVIS</span> '+typingDots());
-  input.value='';
-  setTimeout(()=>{
-    const reply=getReply(text);
-    showToast('<span style="color:var(--cyan)">JARVIS</span><br><b>'+reply.replace(/\n/g,'<br>')+'</b>');
-    speak(reply);
-  },700+Math.random()*500);
-}
-
-sendBtn.addEventListener('click',()=>sendMessage());
-input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();sendMessage()}});
-
-// Voice recognition
-const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let recognizing=false,recognition=null;
-if(SR){
-  recognition=new SR();
-  recognition.lang='zh-CN';recognition.continuous=false;recognition.interimResults=false;
-  recognition.onresult=e=>{sendMessage(e.results[0][0].transcript)};
-  recognition.onerror=e=>{};
-  recognition.onend=()=>{recognizing=false;voiceBtn.classList.remove('recording')};
-}
-voiceBtn.addEventListener('click',()=>{
-  if(!SR){input.focus();return}
-  if(recognizing){recognition.stop();return}
-  recognition.start();recognizing=true;voiceBtn.classList.add('recording');
-});
-
-// welcome
-setTimeout(()=>{
-  showToast('<span style="color:var(--cyan)">JARVIS</span><br><b>你好，我是 JARVIS。你的 AI 陪伴者。准备好后，输入或按下麦克风。</b>');
-  speak('你好，我是 JARVIS。你的 AI 陪伴者。');
-},2000);
-
 </script>
+<script type="module" src="assets/js/voice/realtime-voice.js"></script>
 <script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

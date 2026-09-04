@@ -1,5 +1,5 @@
 node_modules/
 .superpowers/
 .worktrees/
-.env
+.env*
 *.log

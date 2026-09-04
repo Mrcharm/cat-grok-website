@@ -15,3 +15,12 @@ test('首页第一屏不把智能体团队当作主体', async () => {
   assert.equal(html.slice(0, firstSectionEnd).includes('智能体团队'), false);
 });
 
+test('首页使用一次启动的豆包实时语音入口而不是浏览器模拟回复', async () => {
+  const html = (await buildSite({ write: false })).get('index.html');
+  assert.match(html, /id="voiceDock"[^>]*data-voice-endpoint=/);
+  assert.match(html, /id="voiceStatus"[^>]*>JARVIS 已就绪</);
+  assert.match(html, /assets\/js\/voice\/realtime-voice\.js/);
+  assert.match(html, /aria-live="polite"/);
+  assert.doesNotMatch(html, /const REPLIES|speechSynthesis|SpeechRecognition/);
+});
+

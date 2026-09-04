@@ -1,0 +1,14 @@
+.git
+.worktrees
+node_modules
+.env*
+tests
+docs
+data
+content
+downloads
+assets
+articles
+skills
+portfolio
+*.log

@@ -14,6 +14,9 @@ importers:
       markdown-it:
         specifier: 14.3.0
         version: 14.3.0
+      ws:
+        specifier: 8.18.3
+        version: 8.18.3
 
 packages:
 
@@ -80,6 +83,18 @@ packages:
   uc.micro@2.1.0:
     resolution: {integrity: sha512-ARDJmphmdvUk6Glw7y9DQ2bFkKBHwQHLi2lsaH6PPmz/Ka9sFOBsBluozhDltWmnv9u/cF6Rt87znRTPV+yp/A==}
 
+  ws@8.18.3:
+    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
 snapshots:
 
   argparse@1.0.10:
@@ -139,3 +154,5 @@ snapshots:
   strip-bom-string@1.0.0: {}
 
   uc.micro@2.1.0: {}
+
+  ws@8.18.3: {}

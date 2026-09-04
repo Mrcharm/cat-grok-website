@@ -5,6 +5,7 @@
   "packageManager": "pnpm@11.9.0",
   "scripts": {
     "build": "node scripts/build.mjs",
+    "start:voice": "node server/index.mjs",
     "test": "node --test",
     "weekly:generate": "node scripts/generate-weekly-report.mjs",
     "validate": "node scripts/validate-content.mjs",
@@ -13,6 +14,10 @@
   },
   "dependencies": {
     "gray-matter": "4.0.3",
-    "markdown-it": "14.3.0"
+    "markdown-it": "14.3.0",
+    "ws": "8.18.3"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
