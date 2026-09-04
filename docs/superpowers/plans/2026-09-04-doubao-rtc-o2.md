@@ -31,7 +31,7 @@
 - [ ] Run `node --test tests/rtc-config.test.mjs`; expect missing-export failure.
 - [ ] Implement strict trimmed values, `sessionTtlMs=Math.min(Number(RTC_SESSION_TTL_MS||900000),900000)`, and `maxConnectionsPerIp=Number(MAX_CONNECTIONS_PER_IP||2)`.
 - [ ] Add production dependency `@volcengine/openapi`; add development dependencies `@volcengine/rtc` and `esbuild`.
-- [ ] Add `build:rtc` to bundle `assets/js/voice/rtc-entry.js` to `assets/dist/rtc-voice.js`, and make the existing build run it first.
+- [ ] Do not wire `build:rtc` yet because its entry file is created in Task 5; the normal build must remain green after this task.
 - [ ] Run `pnpm install && node --test tests/rtc-config.test.mjs`; expect PASS and no credential values.
 - [ ] Commit: `feat: configure secure RTC voice service`.
 
@@ -87,6 +87,7 @@
 - [ ] Write failing tests proving event order `prepare-session -> join-room -> start-ai`.
 - [ ] Test permission denial, remote bot audio, subtitle updates, autoplay failure, disconnect limit, stop, page hide, and unload cleanup.
 - [ ] In `rtc-entry.js`, import `createEngine` and required enums from `@volcengine/rtc`.
+- [ ] Add `build:rtc` to bundle `assets/js/voice/rtc-entry.js` to `assets/dist/rtc-voice.js`, and make the existing build run it first.
 - [ ] Join with audio-only auto-publish and auto-subscribe, then call the server start route.
 - [ ] Map SDK events to visible status and `aria-live`; stop must call DELETE, leave room, destroy engine, and release microphone.
 - [ ] Switch homepage from provisional `realtime-voice.js` to `assets/dist/rtc-voice.js`; keep only the public Render origin in HTML.
