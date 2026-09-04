@@ -44,10 +44,11 @@
 
 ### Render 会话服务
 
-Render 从服务端环境变量读取长期凭据，提供以下最小接口：
+Render 从服务端环境变量读取长期凭据，提供以下最小接口。会话采用两阶段启动，确保真人已经进入 RTC 房间后再启动 AI Bot：
 
-- `POST /rtc/session`：校验网页来源和限流，生成一次性房间标识、用户标识和短期 RTC Token，随后调用 `StartVoiceChat` 启动 AI Bot。
-- `DELETE /rtc/session/:taskId`：校验会话所有权并停止 VoiceChat 任务。
+- `POST /rtc/session`：校验网页来源和限流，生成一次性房间标识、用户标识和短期 RTC Token，但不启动 AI Bot。
+- `POST /rtc/session/:sessionId/start`：校验会话所有权，在浏览器确认入房后调用 `StartVoiceChat` 启动 AI Bot；重复调用返回同一会话状态，不创建第二个任务。
+- `DELETE /rtc/session/:sessionId`：校验会话所有权并停止对应 VoiceChat 任务。
 - `GET /healthz`：只返回服务健康状态，不暴露配置。
 
 服务负责生成 RTC Token、签名调用火山引擎 RTC 服务端 API、创建与销毁 VoiceChat 任务。服务不代理实时音频，不保存字幕，也不把长期凭据下发给浏览器。
