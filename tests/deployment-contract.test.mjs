@@ -15,7 +15,9 @@ const REQUIRED_SERVER_SETTINGS = [
 
 test('RTC service has a non-root production container contract', async () => {
   const dockerfile = await readFile('Dockerfile', 'utf8');
-  assert.match(dockerfile, /FROM node:22\.13-alpine/);
+  assert.match(dockerfile, /FROM node:22\.22\.2-alpine/);
+  assert.match(dockerfile, /RUN npm install --global corepack@0\.35\.0 && corepack enable/);
+  assert.doesNotMatch(dockerfile, /COREPACK_INTEGRITY_KEYS\s*=\s*0/);
   assert.match(dockerfile, /COPY package\.json pnpm-lock\.yaml pnpm-workspace\.yaml/);
   assert.match(dockerfile, /pnpm install --prod --frozen-lockfile/);
   assert.match(dockerfile, /USER node/);

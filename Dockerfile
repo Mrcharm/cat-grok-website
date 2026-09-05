@@ -1,7 +1,7 @@
-FROM node:22.13-alpine
+FROM node:22.22.2-alpine
 
 WORKDIR /app
-RUN corepack enable
+RUN npm install --global corepack@0.35.0 && corepack enable
 
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --prod --frozen-lockfile
