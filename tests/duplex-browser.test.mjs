@@ -59,7 +59,9 @@ class FakeSocket {
 
 class FakeAudioContext {
   static starts = [];
+  static instances = [];
   constructor(options = {}) {
+    FakeAudioContext.instances.push(this);
     this.sampleRate = options.sampleRate || 48000;
     this.state = 'running';
     this.currentTime = 0;
@@ -78,6 +80,47 @@ class FakeAudioContext {
 }
 
 const waitTurn = () => new Promise(resolve => setTimeout(resolve, 0));
+
+test('sending text before connecting is safely rejected', () => {
+  const controller = new DuplexVoiceController({ endpoint: 'https://voice.invalid', mediaDevices: {}, WebSocketCtor: FakeSocket, AudioContextCtor: FakeAudioContext });
+  assert.equal(controller.sendText('你好'), false);
+});
+
+test('speaker is unlocked before waiting for microphone permission', async () => {
+  FakeAudioContext.instances = [];
+  let resolvePermission;
+  const controller = new DuplexVoiceController({ endpoint: 'https://voice.invalid',
+    mediaDevices: { getUserMedia: () => new Promise(resolve => { resolvePermission = resolve; }) },
+    WebSocketCtor: FakeSocket, AudioContextCtor: FakeAudioContext });
+  const starting = controller.start();
+  await waitTurn();
+  try { assert.ok(FakeAudioContext.instances.length > 0, 'output context must exist during permission prompt'); }
+  finally {
+    await controller.stop();
+    resolvePermission({ getTracks: () => [] });
+    await starting;
+  }
+});
+
+test('muted microphone does not close the reply audio channel', async () => {
+  FakeSocket.instances = [];
+  const diagnostics = [];
+  const track = { muted: true, readyState: 'live', stop() {} };
+  const controller = new DuplexVoiceController({ endpoint: 'https://voice.invalid',
+    mediaDevices: { getUserMedia: async () => ({ getAudioTracks: () => [track], getTracks: () => [track] }) },
+    WebSocketCtor: FakeSocket, AudioContextCtor: FakeAudioContext, onDiagnostic: value => diagnostics.push(value) });
+  const starting = controller.start();
+  await waitTurn();
+  const socket = FakeSocket.instances[0]; socket.emit('open'); await starting;
+  controller.session.monitor.silentSince = Date.now() - 5000;
+  socket.emit('message', { data: JSON.stringify({ type: 'session.created' }) });
+  await new Promise(resolve => setTimeout(resolve, 300));
+  try {
+    assert.equal(socket.readyState, FakeSocket.OPEN);
+    assert.equal(controller.session.player.context.state, 'running');
+    assert.ok(diagnostics.some(d => d.microphone === 'muted'));
+  } finally { await controller.stop(); }
+});
 
 test('audio pump waits for session.created instead of racing the upstream session', async () => {
   FakeSocket.instances = [];
@@ -214,6 +257,7 @@ test('late audio from a canceled response is ignored until a clearly new respons
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAA=' }) });
   await waitTurn();
   assert.equal(FakeAudioContext.starts.length, 1);
+  const unlockedOutput = controller.session.player.context;
 
   socket.emit('message', { data: JSON.stringify({ type: 'conversation.item.input_audio_transcription.started' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.started', question_id: 'q1', response_id: 'r1', tts_type: 'default' }) });
@@ -226,6 +270,7 @@ test('late audio from a canceled response is ignored until a clearly new respons
   await waitTurn();
   try {
     assert.equal(FakeAudioContext.starts.length, 2);
+    assert.equal(controller.session.player.context, unlockedOutput, 'interrupt must reuse the user-unlocked output context');
   } finally {
     await controller.stop();
   }

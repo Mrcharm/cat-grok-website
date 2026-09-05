@@ -1,7 +1,12 @@
 import { initArticlesPage } from './articles.js';
 import { initSkillsPage } from './skills.js';
+import { bootDuplexVoice } from './voice/duplex-controller.js';
 
 const INITIALIZERS = {
+  home: root => {
+    const voice = bootDuplexVoice({ root });
+    return () => voice?.destroy();
+  },
   articles: initArticlesPage,
   skills: initSkillsPage
 };

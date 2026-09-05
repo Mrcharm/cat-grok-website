@@ -100,6 +100,7 @@ class PcmStreamPlayer {
     this.context = null;
     this.nextPlayTime = 0;
     this.sources = new Set();
+    this.epoch = 0;
   }
 
   async start() {
@@ -112,7 +113,9 @@ class PcmStreamPlayer {
 
   async enqueue(bytes) {
     if (bytes.byteLength < 2) return;
+    const epoch = this.epoch;
     await this.start();
+    if (epoch !== this.epoch || !this.context || this.context.state === 'closed') return;
     const samples = Math.floor(bytes.byteLength / 2);
     const buffer = this.context.createBuffer(1, samples, OUTPUT_SAMPLE_RATE);
     const channel = buffer.getChannelData(0);
@@ -128,11 +131,17 @@ class PcmStreamPlayer {
     this.nextPlayTime = startAt + buffer.duration;
   }
 
-  async stop() {
+  clear() {
+    this.epoch += 1;
     for (const source of this.sources) {
       try { source.stop(); } catch {}
     }
     this.sources.clear();
+    this.nextPlayTime = 0;
+  }
+
+  async stop() {
+    this.clear();
     if (this.context && this.context.state !== 'closed') await this.context.close().catch(() => {});
     this.context = null;
     this.nextPlayTime = 0;
@@ -157,7 +166,8 @@ export class DuplexVoiceController {
     music = { pause() {} },
     onState = () => {},
     onTranscript = () => {},
-    onError = () => {}
+    onError = () => {},
+    onDiagnostic = () => {}
   }) {
     this.endpoint = endpoint;
     this.mediaDevices = mediaDevices;
@@ -167,6 +177,7 @@ export class DuplexVoiceController {
     this.onState = onState;
     this.onTranscript = onTranscript;
     this.onError = onError;
+    this.onDiagnostic = onDiagnostic;
     this.state = 'idle';
     this.generation = 0;
     this.sessionReady = false;
@@ -200,6 +211,10 @@ export class DuplexVoiceController {
     this.music.pause();
     this.setState('permission');
     try {
+      // Called inside the click gesture, before the asynchronous permission prompt.
+      const outputReady = session.player.start();
+      outputReady.catch(() => {});
+      this.onDiagnostic({ microphone: 'permission', output: session.player.context?.state, audioChunks: 0 });
       const stream = await this.mediaDevices.getUserMedia({
         audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: false
@@ -214,7 +229,7 @@ export class DuplexVoiceController {
       session.captureContext = new this.AudioContextCtor();
       await session.captureContext.resume();
       if (!this.isCurrent(session)) throw START_CANCELLED;
-      await session.player.start();
+      await outputReady;
       if (!this.isCurrent(session)) throw START_CANCELLED;
       this.setupCapture(session);
       this.setState('connecting');
@@ -238,7 +253,7 @@ export class DuplexVoiceController {
   }
 
   isCurrent(session) {
-    return this.session === session && session.generation === this.generation && !session.stopping;
+    return Boolean(session && this.session === session && session.generation === this.generation && !session.stopping);
   }
 
   setupCapture(session) {
@@ -286,7 +301,7 @@ export class DuplexVoiceController {
   startPumps(session) {
     const silence = new Uint8Array(PCM_FRAME_BYTES);
     session.audioTimer = setInterval(() => {
-      if (!this.isCurrent(session) || !session.sessionReady || session.socket?.readyState !== this.WebSocketCtor.OPEN) return;
+      if (!this.isCurrent(session) || !session.sessionReady || session.track?.muted || session.track?.readyState === 'ended' || session.socket?.readyState !== this.WebSocketCtor.OPEN) return;
       const frame = session.pendingFrames.shift() || silence;
       session.socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: bytesToBase64(frame) }));
     }, 20);
@@ -295,9 +310,12 @@ export class DuplexVoiceController {
       const muted = Boolean(session.track?.muted || session.track?.readyState === 'ended');
       const peak = session.lastPeak || 0;
       session.lastPeak = 0;
-      if (session.monitor.observe({ now: Date.now(), muted, peak })) {
-        void this.fail('麦克风没有收到声音，连接已结束。请检查系统麦克风是否静音。', undefined, session);
-      }
+      session.monitor.observe({ now: Date.now(), muted, peak });
+      this.onDiagnostic({
+        microphone: muted ? 'muted' : peak > 0.001 ? 'receiving' : 'ready',
+        output: session.player.context?.state || 'closed',
+        audioChunks: session.audioChunks || 0
+      });
     }, 250);
   }
 
@@ -321,8 +339,7 @@ export class DuplexVoiceController {
         }
         if (session.activeResponseId) session.canceledResponseIds.add(session.activeResponseId);
         session.cancellationPending = true;
-        void session.player.stop();
-        session.player = new PcmStreamPlayer(this.AudioContextCtor);
+        session.player.clear();
         this.userTranscript = '';
         this.setState('listening');
         break;
@@ -355,9 +372,12 @@ export class DuplexVoiceController {
       case 'response.output_audio.delta': {
         if (!this.acceptResponseEvent(session, event)) break;
         const audio = event.audio || event.delta;
-        if (audio) void session.player.enqueue(base64ToBytes(audio)).catch(() => {
+        if (audio) {
+          session.audioChunks = (session.audioChunks || 0) + 1;
+          void session.player.enqueue(base64ToBytes(audio)).catch(() => {
           if (this.isCurrent(session)) return this.fail('JARVIS 的声音播放失败，请重新开始。', undefined, session);
-        });
+          });
+        }
         break;
       }
       case 'response.output_audio.done':
@@ -391,6 +411,10 @@ export class DuplexVoiceController {
     session.socket.send(JSON.stringify({ type: 'speech_text_buffer.commit', text: clean.slice(0, 300) }));
     this.onTranscript({ speaker: 'user', text: clean.slice(0, 300) });
     return true;
+  }
+
+  async resumeOutput() {
+    if (this.session && this.isCurrent(this.session)) await this.session.player.start();
   }
 
   async fail(message, cause, session = this.session) {
@@ -441,6 +465,8 @@ const STATE_LABELS = {
   error: '实时语音暂不可用'
 };
 
+const mountedVoices = new WeakMap();
+
 export function bootDuplexVoice({ root = document } = {}) {
   const dock = root.querySelector('#voiceDock');
   const button = root.querySelector('#voiceBtn');
@@ -449,6 +475,21 @@ export function bootDuplexVoice({ root = document } = {}) {
   const input = root.querySelector('#userInput');
   const send = root.querySelector('#sendBtn');
   if (!dock || !button || !status || !transcript || !input || !send) return null;
+  if (mountedVoices.has(dock)) return mountedVoices.get(dock);
+  status.textContent = STATE_LABELS.idle;
+  dock.dataset.voiceState = 'idle';
+  button.setAttribute('aria-pressed', 'false');
+  button.setAttribute('aria-label', '开始实时语音对话');
+
+  const diagnostic = root.createElement('span');
+  diagnostic.className = 'voice-diagnostic';
+  diagnostic.id = 'voiceDiagnostic';
+  const resume = root.createElement('button');
+  resume.type = 'button';
+  resume.className = 'voice-resume';
+  resume.textContent = '开启回复声音';
+  resume.hidden = true;
+  dock.append(diagnostic, resume);
 
   const showMessage = (speaker, text) => {
     transcript.replaceChildren();
@@ -477,28 +518,62 @@ export function bootDuplexVoice({ root = document } = {}) {
       const active = ACTIVE_STATES.has(state);
       button.setAttribute('aria-pressed', String(active));
       button.setAttribute('aria-label', active ? '结束实时语音对话' : '开始实时语音对话');
+      if (!active) { diagnostic.textContent = ''; resume.hidden = true; }
     },
     onTranscript: value => showMessage(value.speaker, value.text),
-    onError: error => showMessage('assistant', error.message)
+    onError: error => showMessage('assistant', error.message),
+    onDiagnostic({ microphone, output, audioChunks }) {
+      const mic = microphone === 'permission' ? '等待麦克风授权' : microphone === 'muted' ? '麦克风未提供输入，可输入文字' : microphone === 'receiving' ? '正在收到你的声音' : '麦克风已连接';
+      const speaker = output === 'running' ? '播放通道已开启' : '回复声音等待授权';
+      const text = `${mic} · ${speaker} · 已接收 ${audioChunks} 段音频`;
+      if (diagnostic.textContent !== text) diagnostic.textContent = text;
+      resume.hidden = output === 'running';
+    }
   });
 
-  button.addEventListener('click', () => {
+  const toggleVoice = () => {
+    transcript.replaceChildren();
+    transcript.classList.remove('show');
     const action = ACTIVE_STATES.has(controller.state) ? controller.stop() : controller.start();
     action.catch(() => {});
-  });
+  };
+  button.addEventListener('click', toggleVoice);
+  const heroTrigger = root.querySelector('[data-focus-voice]');
+  heroTrigger?.addEventListener('click', toggleVoice);
+  const resumeVoice = () => controller.resumeOutput().catch(() => showMessage('assistant', '播放未开启，请检查浏览器或系统声音设置。'));
+  resume.addEventListener('click', resumeVoice);
   const sendText = () => {
     if (controller.sendText(input.value)) input.value = '';
     else if (input.value.trim()) showMessage('assistant', '请先连接实时语音，再发送文字。');
   };
   send.addEventListener('click', sendText);
-  input.addEventListener('keydown', event => {
+  const inputKey = event => {
     if (event.key === 'Enter') {
       event.preventDefault();
       sendText();
     }
-  });
+  };
+  input.addEventListener('keydown', inputKey);
   const cleanup = () => void controller.stop();
   root.defaultView?.addEventListener('pagehide', cleanup, { once: true });
   root.defaultView?.addEventListener('beforeunload', cleanup, { once: true });
+  controller.destroy = () => {
+    controller.onState = () => {};
+    controller.onError = () => {};
+    controller.onDiagnostic = () => {};
+    controller.onTranscript = () => {};
+    button.removeEventListener('click', toggleVoice);
+    heroTrigger?.removeEventListener('click', toggleVoice);
+    send.removeEventListener('click', sendText);
+    input.removeEventListener('keydown', inputKey);
+    resume.removeEventListener('click', resumeVoice);
+    diagnostic.remove();
+    resume.remove();
+    root.defaultView?.removeEventListener('pagehide', cleanup);
+    root.defaultView?.removeEventListener('beforeunload', cleanup);
+    mountedVoices.delete(dock);
+    cleanup();
+  };
+  mountedVoices.set(dock, controller);
   return controller;
 }
