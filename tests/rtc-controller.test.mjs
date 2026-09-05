@@ -9,7 +9,7 @@ import {
 const RTC = {
   events: {
     onRemoteAudioFirstFrame: 'onRemoteAudioFirstFrame',
-    onSubtitleMessageReceived: 'onSubtitleMessageReceived',
+    onRoomBinaryMessageReceived: 'onRoomBinaryMessageReceived',
     onAutoplayFailed: 'onAutoplayFailed',
     onConnectionStateChanged: 'onConnectionStateChanged'
   },
@@ -26,8 +26,9 @@ const RTC = {
 };
 
 class FakeEngine {
-  constructor(trace) {
+  constructor(trace, joinResponse) {
     this.trace = trace;
+    this.joinResponse = joinResponse;
     this.listeners = new Map();
     this.joinArgs = null;
     this.captureDeviceId = null;
@@ -51,6 +52,7 @@ class FakeEngine {
   async joinRoom(...args) {
     this.joinArgs = args;
     this.trace.push('join-room');
+    if (this.joinResponse) return this.joinResponse();
   }
 
   async leaveRoom() {
@@ -80,29 +82,36 @@ const session = {
   expiresAt: '2026-09-05T10:00:00.000Z'
 };
 
-function setup({ permission = async () => 'microphone-device' } = {}) {
+function setup({
+  permission = async () => 'microphone-device',
+  prepareResponse,
+  joinResponse,
+  startResponse,
+  deleteResponse,
+  deleteTimeoutMs = 25
+} = {}) {
   const trace = [];
   const states = [];
   const transcripts = [];
   const errors = [];
   const requests = [];
   const music = { paused: false, pause() { this.paused = true; } };
-  const engine = new FakeEngine(trace);
+  const engine = new FakeEngine(trace, joinResponse);
   const createCalls = [];
   const fetchFn = async (url, options = {}) => {
     const pathname = new URL(url).pathname;
     requests.push({ url, pathname, options });
     if (options.method === 'POST' && pathname === '/rtc/session') {
       trace.push('prepare-session');
-      return response({ status: 201, body: session });
+      return prepareResponse ? prepareResponse() : response({ status: 201, body: session });
     }
     if (options.method === 'POST' && pathname === `/rtc/session/${session.sessionId}/start`) {
       trace.push('start-ai');
-      return response({ body: { sessionId: session.sessionId, state: 'started' } });
+      return startResponse ? startResponse() : response({ body: { sessionId: session.sessionId, state: 'started' } });
     }
     if (options.method === 'DELETE' && pathname === `/rtc/session/${session.sessionId}`) {
       trace.push('delete-session');
-      return response({ status: 204 });
+      return deleteResponse ? deleteResponse() : response({ status: 204 });
     }
     throw new Error(`Unexpected request: ${options.method} ${pathname}`);
   };
@@ -121,6 +130,7 @@ function setup({ permission = async () => 'microphone-device' } = {}) {
     },
     requestPermission: permission,
     fetchFn,
+    deleteTimeoutMs,
     music,
     onState: state => states.push(state),
     onTranscript: value => transcripts.push(value),
@@ -130,6 +140,35 @@ function setup({ permission = async () => 'microphone-device' } = {}) {
 }
 
 const flush = () => new Promise(resolve => setImmediate(resolve));
+
+const deferred = () => {
+  let resolve;
+  let reject;
+  const promise = new Promise((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, resolve, reject };
+};
+
+const delay = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+
+async function waitFor(predicate) {
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    if (predicate()) return;
+    await flush();
+  }
+  assert.fail('Timed out waiting for test condition');
+}
+
+function aigcTlv(tag, payload) {
+  const value = new TextEncoder().encode(JSON.stringify(payload));
+  const bytes = new Uint8Array(8 + value.length);
+  for (let index = 0; index < 4; index += 1) bytes[index] = tag.charCodeAt(index);
+  new DataView(bytes.buffer).setUint32(4, value.length, false);
+  bytes.set(value, 8);
+  return bytes.buffer;
+}
 
 test('prepares the session, joins audio-only RTC, then starts AI in order', async () => {
   const { controller, engine, trace, states, music, createCalls } = setup();
@@ -183,20 +222,59 @@ test('remote bot audio changes the session from listening to speaking', async ()
   assert.equal(controller.state, 'speaking');
 });
 
-test('RTC subtitle events map user and bot text to the homepage transcript', async () => {
+test('official AIGC subv room messages map user and bot text to the homepage transcript', async () => {
   const { controller, engine, transcripts } = setup();
   await controller.start();
 
-  engine.emit(RTC.events.onSubtitleMessageReceived, [
-    { userId: session.userId, text: '你好', definite: true, sequence: 1, language: 'zh' },
-    { userId: session.botUserId, text: '我在', definite: false, sequence: 1, language: 'zh' }
-  ]);
+  engine.emit(RTC.events.onRoomBinaryMessageReceived, {
+    userId: session.botUserId,
+    message: aigcTlv('subv', {
+      data: [
+        { userId: session.userId, text: '你好', definite: true, sequence: 1, language: 'zh' },
+        { userId: session.botUserId, text: '我在', definite: false, sequence: 1, language: 'zh' }
+      ]
+    })
+  });
 
   assert.deepEqual(transcripts, [
     { speaker: 'user', text: '你好', final: true },
     { speaker: 'assistant', text: '我在', final: false }
   ]);
   assert.equal(controller.state, 'speaking');
+});
+
+test('official AIGC conv messages update speaking and listening state', async () => {
+  const { controller, engine } = setup();
+  await controller.start();
+
+  engine.emit(RTC.events.onRoomBinaryMessageReceived, {
+    userId: session.botUserId,
+    message: aigcTlv('conv', { Stage: { Code: 3, Description: 'Speaking' } })
+  });
+  assert.equal(controller.state, 'speaking');
+
+  engine.emit(RTC.events.onRoomBinaryMessageReceived, {
+    userId: session.botUserId,
+    message: aigcTlv('conv', { Stage: { Code: 5, Description: 'Finished' } })
+  });
+  assert.equal(controller.state, 'listening');
+});
+
+test('malformed and unknown AIGC room messages are ignored by the controller', async () => {
+  const { controller, engine, transcripts } = setup();
+  await controller.start();
+
+  engine.emit(RTC.events.onRoomBinaryMessageReceived, {
+    userId: session.botUserId,
+    message: new Uint8Array([0x73, 0x75, 0x62]).buffer
+  });
+  engine.emit(RTC.events.onRoomBinaryMessageReceived, {
+    userId: session.botUserId,
+    message: aigcTlv('tool', { data: [{ text: 'must be ignored' }] })
+  });
+
+  assert.deepEqual(transcripts, []);
+  assert.equal(controller.state, 'listening');
 });
 
 test('remote audio autoplay failure is reported and cleans up the live session', async () => {
@@ -213,6 +291,50 @@ test('remote audio autoplay failure is reported and cleans up the live session',
   });
   assert.ok(trace.includes('delete-session'));
   assert.ok(trace.includes('release-microphone'));
+});
+
+test('autoplay failure while start AI is pending cannot revive a destroyed session', async () => {
+  const pendingStart = deferred();
+  const { controller, engine, errors, trace, states } = setup({
+    startResponse: () => pendingStart.promise
+  });
+  const starting = controller.start();
+  await waitFor(() => controller.state === 'starting');
+
+  engine.emit(RTC.events.onAutoplayFailed, { userId: session.botUserId, kind: 'audio' });
+  await waitFor(() => trace.includes('destroy-engine'));
+  assert.equal(controller.state, 'error');
+  assert.equal(errors.at(-1).code, 'AUTOPLAY_BLOCKED');
+
+  pendingStart.resolve(response({ body: { sessionId: session.sessionId, state: 'started' } }));
+  await starting;
+
+  assert.equal(controller.state, 'error');
+  assert.equal(states.slice(states.lastIndexOf('error') + 1).includes('listening'), false);
+});
+
+test('a fresh session can start after failure cleanup without waiting for the old start response', async () => {
+  const pendingStart = deferred();
+  let startCalls = 0;
+  const { controller, engine, trace } = setup({
+    startResponse: () => {
+      startCalls += 1;
+      return startCalls === 1
+        ? pendingStart.promise
+        : response({ body: { sessionId: session.sessionId, state: 'started' } });
+    }
+  });
+  const staleStart = controller.start();
+  await waitFor(() => controller.state === 'starting');
+  engine.emit(RTC.events.onAutoplayFailed, { userId: session.botUserId, kind: 'audio' });
+  await waitFor(() => trace.includes('destroy-engine'));
+
+  await controller.start();
+  assert.equal(controller.state, 'listening');
+
+  pendingStart.resolve(response({ body: { sessionId: session.sessionId, state: 'started' } }));
+  await staleStart;
+  assert.equal(controller.state, 'listening');
 });
 
 test('three consecutive RTC disconnects end and clean up the session', async () => {
@@ -241,6 +363,26 @@ test('stop asks the server first, then leaves, releases capture, and destroys RT
     'delete-session', 'leave-room', 'release-microphone', 'destroy-engine'
   ]);
   assert.equal(requests.at(-1).options.keepalive, false);
+});
+
+test('a DELETE that never resolves cannot hold the microphone indefinitely', async () => {
+  const { controller, trace } = setup({
+    deleteResponse: () => new Promise(() => {}),
+    deleteTimeoutMs: 20
+  });
+  await controller.start();
+
+  const stopping = controller.stop();
+  assert.equal(trace.at(-1), 'delete-session');
+  await Promise.race([
+    stopping,
+    delay(250).then(() => assert.fail('stop did not release local RTC resources in time'))
+  ]);
+
+  assert.deepEqual(trace.slice(trace.indexOf('delete-session')), [
+    'delete-session', 'leave-room', 'release-microphone', 'destroy-engine'
+  ]);
+  assert.equal(controller.state, 'stopped');
 });
 
 test('a restarted session gets a fresh cleanup instead of reusing the previous stop', async () => {
@@ -285,6 +427,66 @@ test('unload cleanup starts the keepalive DELETE synchronously for a live sessio
   assert.equal(requests.at(-1).options.method, 'DELETE');
   assert.equal(requests.at(-1).options.keepalive, true);
   await stopping;
+});
+
+test('pagehide while start AI is pending cancels and begins cleanup immediately', async () => {
+  const pendingStart = deferred();
+  const { controller, trace, requests, states } = setup({
+    startResponse: () => pendingStart.promise
+  });
+  const starting = controller.start();
+  await waitFor(() => controller.state === 'starting');
+
+  const listeners = new Map();
+  const target = {
+    addEventListener(name, listener) { listeners.set(name, listener); },
+    removeEventListener(name) { listeners.delete(name); }
+  };
+  bindRtcLifecycle(controller, target);
+  listeners.get('pagehide')();
+
+  assert.equal(requests.at(-1).options.method, 'DELETE');
+  assert.equal(requests.at(-1).options.keepalive, true);
+  assert.ok(trace.includes('leave-room'));
+
+  pendingStart.resolve(response({ body: { sessionId: session.sessionId, state: 'started' } }));
+  await starting;
+  await waitFor(() => controller.state === 'stopped');
+  assert.equal(states.slice(states.lastIndexOf('stopped') + 1).includes('listening'), false);
+});
+
+test('a session returned after stop is deleted without reviving the old start', async () => {
+  const pendingPrepare = deferred();
+  const { controller, trace, states } = setup({
+    prepareResponse: () => pendingPrepare.promise
+  });
+  const starting = controller.start();
+  await waitFor(() => controller.state === 'preparing');
+
+  await controller.stop({ keepalive: true });
+  assert.equal(controller.state, 'stopped');
+  pendingPrepare.resolve(response({ status: 201, body: session }));
+  await starting;
+
+  assert.ok(trace.includes('delete-session'));
+  assert.equal(states.slice(states.lastIndexOf('stopped') + 1).includes('listening'), false);
+});
+
+test('pagehide while join is pending deletes the known session and releases RTC immediately', async () => {
+  const pendingJoin = deferred();
+  const { controller, trace, requests } = setup({ joinResponse: () => pendingJoin.promise });
+  const starting = controller.start();
+  await waitFor(() => controller.state === 'joining');
+
+  const stopping = controller.stop({ keepalive: true });
+  assert.equal(requests.at(-1).options.method, 'DELETE');
+  assert.equal(requests.at(-1).options.keepalive, true);
+  assert.ok(trace.includes('leave-room'));
+  pendingJoin.resolve();
+  await Promise.all([starting, stopping]);
+
+  assert.equal(controller.state, 'stopped');
+  assert.ok(trace.includes('release-microphone'));
 });
 
 test('the RTC entry imports the installed SDK and package build bundles it first', async () => {

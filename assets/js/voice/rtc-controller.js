@@ -1,3 +1,5 @@
+import { parseAigcTlvMessage } from './rtc-aigc-message.js';
+
 const ACTIVE_STATES = new Set([
   'permission',
   'preparing',
@@ -7,7 +9,7 @@ const ACTIVE_STATES = new Set([
   'speaking'
 ]);
 
-const STOP_REQUESTED = Symbol('stop-requested');
+const START_CANCELLED = Symbol('start-cancelled');
 
 const ERROR_MESSAGES = {
   microphone: {
@@ -41,6 +43,16 @@ async function expectResponse(response) {
   return response;
 }
 
+function settleWithin(promise, timeoutMs) {
+  return new Promise(resolve => {
+    const timer = setTimeout(resolve, timeoutMs);
+    Promise.resolve(promise).catch(() => {}).finally(() => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
+
 export class RtcVoiceController {
   #origin;
   #rtc;
@@ -51,13 +63,12 @@ export class RtcVoiceController {
   #onTranscript;
   #onError;
   #maxDisconnects;
+  #deleteTimeoutMs;
   #disconnects = 0;
-  #engine = null;
-  #session = null;
+  #generation = 0;
+  #current = null;
   #startPromise = null;
   #stopPromise = null;
-  #cleanupPromise = null;
-  #stopRequested = false;
 
   state = 'idle';
 
@@ -70,7 +81,8 @@ export class RtcVoiceController {
     onState = () => {},
     onTranscript = () => {},
     onError = () => {},
-    maxDisconnects = 3
+    maxDisconnects = 3,
+    deleteTimeoutMs = 1500
   }) {
     this.#origin = new URL(endpoint).origin;
     this.#rtc = rtc;
@@ -81,6 +93,7 @@ export class RtcVoiceController {
     this.#onTranscript = onTranscript;
     this.#onError = onError;
     this.#maxDisconnects = maxDisconnects;
+    this.#deleteTimeoutMs = deleteTimeoutMs;
   }
 
   #setState(state) {
@@ -88,14 +101,33 @@ export class RtcVoiceController {
     this.#onState(state);
   }
 
-  #ensureRunning() {
-    if (this.#stopRequested) throw STOP_REQUESTED;
+  #isCurrent(context) {
+    return this.#current === context
+      && !context.cancelled
+      && context.generation === this.#generation;
+  }
+
+  #ensureCurrent(context) {
+    if (!this.#isCurrent(context)) throw START_CANCELLED;
   }
 
   start() {
     if (ACTIVE_STATES.has(this.state)) return this.#startPromise || Promise.resolve();
-    this.#stopRequested = false;
-    const run = this.#start();
+    const previous = this.#current;
+    const generation = ++this.#generation;
+    const run = (async () => {
+      if (previous?.cleanupPromise) await previous.cleanupPromise.catch(() => {});
+      if (generation !== this.#generation) return;
+      const context = {
+        generation,
+        cancelled: false,
+        session: null,
+        engine: null,
+        cleanupPromise: null
+      };
+      this.#current = context;
+      await this.#start(context);
+    })();
     const tracked = run.finally(() => {
       if (this.#startPromise === tracked) this.#startPromise = null;
     });
@@ -103,12 +135,12 @@ export class RtcVoiceController {
     return tracked;
   }
 
-  async #start() {
+  async #start(context) {
     try {
       this.#music.pause();
       this.#setState('permission');
       const deviceId = await this.#requestPermission();
-      this.#ensureRunning();
+      this.#ensureCurrent(context);
 
       this.#setState('preparing');
       const prepared = await expectResponse(await this.#fetch(sessionUrl(this.#origin), {
@@ -116,21 +148,23 @@ export class RtcVoiceController {
         headers: { 'content-type': 'application/json' },
         body: '{}'
       }));
-      this.#session = await prepared.json();
-      this.#ensureRunning();
+      const session = await prepared.json();
+      context.session = session;
+      this.#ensureCurrent(context);
 
-      this.#engine = this.#rtc.createEngine(this.#session.appId, {
+      const engine = this.#rtc.createEngine(session.appId, {
         autoPlayPolicy: this.#rtc.RTCAutoPlayPolicy.AUTO_PLAY
       });
-      this.#bindEngineEvents();
-      await this.#engine.startAudioCapture(deviceId || undefined);
-      this.#ensureRunning();
+      context.engine = engine;
+      this.#bindEngineEvents(context);
+      await engine.startAudioCapture(deviceId || undefined);
+      this.#ensureCurrent(context);
 
       this.#setState('joining');
-      await this.#engine.joinRoom(
-        this.#session.token,
-        this.#session.roomId,
-        { userId: this.#session.userId },
+      await engine.joinRoom(
+        session.token,
+        session.roomId,
+        { userId: session.userId },
         {
           isAutoPublish: true,
           isAutoSubscribeAudio: true,
@@ -138,46 +172,69 @@ export class RtcVoiceController {
           roomProfileType: this.#rtc.RoomProfileType.chat
         }
       );
-      this.#ensureRunning();
+      this.#ensureCurrent(context);
 
       this.#setState('starting');
       await expectResponse(await this.#fetch(
-        sessionUrl(this.#origin, `/${encodeURIComponent(this.#session.sessionId)}/start`),
+        sessionUrl(this.#origin, `/${encodeURIComponent(session.sessionId)}/start`),
         {
           method: 'POST',
           headers: { 'content-type': 'application/json' },
           body: '{}'
         }
       ));
-      this.#ensureRunning();
+      this.#ensureCurrent(context);
       this.#setState('listening');
     } catch (cause) {
-      if (cause === STOP_REQUESTED) return;
+      if (cause === START_CANCELLED || !this.#isCurrent(context)) {
+        await this.#cleanupContext(context, { keepalive: false });
+        return;
+      }
       const error = this.state === 'permission' ? ERROR_MESSAGES.microphone : ERROR_MESSAGES.service;
-      await this.#fail(error);
+      await this.#fail(error, context);
       throw cause;
     }
   }
 
-  #bindEngineEvents() {
+  #bindEngineEvents(context) {
     const events = this.#rtc.events;
-    this.#engine.on(events.onRemoteAudioFirstFrame, event => {
-      if (event?.userId === this.#session?.botUserId) this.#setState('speaking');
+    const engine = context.engine;
+    const session = context.session;
+    engine.on(events.onRemoteAudioFirstFrame, event => {
+      if (this.#isCurrent(context) && event?.userId === session?.botUserId) this.#setState('speaking');
     });
-    this.#engine.on(events.onSubtitleMessageReceived, messages => {
-      for (const message of messages || []) {
-        if (!message?.text || !this.#session) continue;
-        const speaker = message.userId === this.#session.userId ? 'user' : 'assistant';
-        this.#onTranscript({ speaker, text: message.text, final: Boolean(message.definite) });
-        this.#setState(speaker === 'assistant' ? 'speaking' : 'listening');
+    engine.on(events.onRoomBinaryMessageReceived, event => {
+      if (!this.#isCurrent(context) || event?.userId !== session?.botUserId) return;
+      let parsed;
+      try {
+        parsed = parseAigcTlvMessage(event.message);
+      } catch {
+        return;
+      }
+      if (!parsed) return;
+      if (parsed.tag === 'subv') {
+        for (const message of Array.isArray(parsed.payload.data) ? parsed.payload.data : []) {
+          if (typeof message?.text !== 'string' || !message.text) continue;
+          const speaker = message.userId === session.userId
+            ? 'user'
+            : message.userId === session.botUserId ? 'assistant' : null;
+          if (!speaker) continue;
+          this.#onTranscript({ speaker, text: message.text, final: Boolean(message.definite) });
+          this.#setState(speaker === 'assistant' ? 'speaking' : 'listening');
+        }
+        return;
+      }
+      const stage = Number(parsed.payload?.Stage?.Code);
+      if (stage === 3) this.#setState('speaking');
+      if ([1, 2, 4, 5].includes(stage)) this.#setState('listening');
+    });
+    engine.on(events.onAutoplayFailed, event => {
+      if (this.#isCurrent(context) && event?.kind === 'audio' && event.userId === session?.botUserId) {
+        void this.#fail(ERROR_MESSAGES.autoplay, context);
       }
     });
-    this.#engine.on(events.onAutoplayFailed, event => {
-      if (event?.kind === 'audio' && event.userId === this.#session?.botUserId) {
-        void this.#fail(ERROR_MESSAGES.autoplay);
-      }
-    });
-    this.#engine.on(events.onConnectionStateChanged, event => {
+    engine.on(events.onConnectionStateChanged, event => {
+      if (!this.#isCurrent(context)) return;
       const states = this.#rtc.ConnectionState;
       if ([states.CONNECTION_STATE_CONNECTED, states.CONNECTION_STATE_RECONNECTED].includes(event?.state)) {
         this.#disconnects = 0;
@@ -187,24 +244,30 @@ export class RtcVoiceController {
         return;
       }
       this.#disconnects += 1;
-      if (this.#disconnects >= this.#maxDisconnects) void this.#fail(ERROR_MESSAGES.connection);
+      if (this.#disconnects >= this.#maxDisconnects) void this.#fail(ERROR_MESSAGES.connection, context);
     });
   }
 
-  async #fail(error) {
+  async #fail(error, context) {
+    if (!this.#isCurrent(context)) return;
+    context.cancelled = true;
+    if (context.generation === this.#generation) this.#generation += 1;
     if (this.state !== 'error') {
       this.#setState('error');
       this.#onError(error);
     }
-    await this.#cleanup({ keepalive: false });
+    await this.#cleanupContext(context, { keepalive: false });
+    if (this.#current === context) this.#current = null;
   }
 
   stop({ keepalive = false } = {}) {
-    this.#stopRequested = true;
     if (this.#stopPromise) return this.#stopPromise;
+    const context = this.#current;
+    this.#generation += 1;
+    if (context) context.cancelled = true;
     const run = (async () => {
-      if (this.#startPromise) await this.#startPromise.catch(() => {});
-      await this.#cleanup({ keepalive });
+      if (context) await this.#cleanupContext(context, { keepalive });
+      if (this.#current === context) this.#current = null;
       this.#setState('stopped');
     })();
     const tracked = run.finally(() => {
@@ -214,31 +277,46 @@ export class RtcVoiceController {
     return tracked;
   }
 
-  #cleanup({ keepalive }) {
-    if (this.#cleanupPromise) return this.#cleanupPromise;
-    const run = (async () => {
-      const session = this.#session;
-      const engine = this.#engine;
-      this.#session = null;
-      this.#engine = null;
-      this.#disconnects = 0;
+  #cleanupContext(context, { keepalive }) {
+    const session = context.session;
+    const engine = context.engine;
+    context.session = null;
+    context.engine = null;
+    if (!session && !engine) return context.cleanupPromise || Promise.resolve();
 
-      if (session) {
-        await this.#fetch(
-          sessionUrl(this.#origin, `/${encodeURIComponent(session.sessionId)}`),
-          { method: 'DELETE', keepalive }
-        ).catch(() => {});
-      }
-      if (engine) {
-        await engine.leaveRoom().catch(() => {});
-        await engine.stopAudioCapture().catch(() => {});
-        this.#rtc.destroyEngine(engine);
+    const run = (async () => {
+      this.#disconnects = 0;
+      try {
+        if (session) {
+          let deletion;
+          try {
+            deletion = Promise.resolve(this.#fetch(
+              sessionUrl(this.#origin, `/${encodeURIComponent(session.sessionId)}`),
+              { method: 'DELETE', keepalive }
+            )).catch(() => {});
+          } catch {
+            deletion = Promise.resolve();
+          }
+          if (!keepalive) await settleWithin(deletion, this.#deleteTimeoutMs);
+        }
+      } finally {
+        if (engine) {
+          await engine.leaveRoom().catch(() => {});
+          await engine.stopAudioCapture().catch(() => {});
+          try {
+            this.#rtc.destroyEngine(engine);
+          } catch {}
+        }
       }
     })();
-    const tracked = run.finally(() => {
-      if (this.#cleanupPromise === tracked) this.#cleanupPromise = null;
+
+    const combined = context.cleanupPromise
+      ? Promise.allSettled([context.cleanupPromise, run]).then(() => {})
+      : run;
+    const tracked = combined.finally(() => {
+      if (context.cleanupPromise === tracked) context.cleanupPromise = null;
     });
-    this.#cleanupPromise = tracked;
+    context.cleanupPromise = tracked;
     return tracked;
   }
 }
