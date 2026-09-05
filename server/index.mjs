@@ -1,158 +1,205 @@
 import http from 'node:http';
 import { pathToFileURL } from 'node:url';
-import { WebSocketServer, WebSocket } from 'ws';
-import { loadConfig, isAllowedOrigin } from './config.mjs';
-import { createDoubaoSession } from './doubao-session.mjs';
+import { isAllowedOrigin, loadRtcConfig } from './config.mjs';
+import { createRtcOpenApi } from './rtc-openapi.mjs';
+import { createRtcSessionStore } from './rtc-session-store.mjs';
 
-const sendJson = (socket, message) => {
-  if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(message));
+const MAX_JSON_BYTES = 8 * 1024;
+
+const json = (response, status, payload, origin) => {
+  const headers = {
+    'content-type': 'application/json; charset=utf-8',
+    'cache-control': 'no-store'
+  };
+  if (origin) {
+    headers['access-control-allow-origin'] = origin;
+    headers.vary = 'Origin';
+  }
+  response.writeHead(status, headers);
+  response.end(JSON.stringify(payload));
 };
 
-const publicError = (socket, code, message) => sendJson(socket, {
-  type: 'server.error',
-  code,
-  message
-});
+const empty = (response, status, origin) => {
+  const headers = { 'cache-control': 'no-store' };
+  if (origin) {
+    headers['access-control-allow-origin'] = origin;
+    headers.vary = 'Origin';
+  }
+  response.writeHead(status, headers);
+  response.end();
+};
 
-export function createVoiceServer({ config, upstreamFactory = createDoubaoSession }) {
-  const connectionsByIp = new Map();
-  const server = http.createServer((request, response) => {
-    if (request.method === 'GET' && request.url === '/healthz') {
-      response.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-      response.end(JSON.stringify({ ok: true }));
-      return;
+const parseJsonBody = async request => {
+  const contentLength = Number(request.headers['content-length'] || 0);
+  if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BYTES) {
+    request.resume();
+    const error = new Error('body_too_large');
+    error.status = 413;
+    throw error;
+  }
+  let size = 0;
+  const chunks = [];
+  for await (const chunk of request) {
+    size += chunk.length;
+    if (size > MAX_JSON_BYTES) {
+      const error = new Error('body_too_large');
+      error.status = 413;
+      throw error;
     }
-    response.writeHead(404, { 'content-type': 'application/json; charset=utf-8' });
-    response.end(JSON.stringify({ error: 'not_found' }));
+    chunks.push(chunk);
+  }
+  if (size === 0) return {};
+  try {
+    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+  } catch {
+    const error = new Error('invalid_json');
+    error.status = 400;
+    throw error;
+  }
+};
+
+const pathSessionId = pathname => {
+  const match = /^\/rtc\/session\/([^/]+)(?:\/start)?$/.exec(pathname);
+  if (!match) return null;
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return null;
+  }
+};
+
+export function createVoiceServer({
+  config,
+  rtcApi = createRtcOpenApi({ config }),
+  tokenFactory,
+  setTimeoutFn,
+  clearTimeoutFn
+}) {
+  let store;
+  const stopTakenSession = async session => {
+    try {
+      await session.startPromise;
+    } catch {
+      // A failed start has no remote task to stop.
+    }
+    if (session.state === 'started') {
+      try {
+        await rtcApi.stopVoiceChat(session);
+      } catch {
+        // The task has been removed locally; never retain a session or secret on stop failure.
+      }
+    }
+  };
+  const removeSession = async sessionId => {
+    const session = store.take(sessionId);
+    if (session) await stopTakenSession(session);
+  };
+  store = createRtcSessionStore({
+    config,
+    tokenFactory,
+    setTimeoutFn,
+    clearTimeoutFn,
+    onExpire: removeSession
   });
 
-  const wss = new WebSocketServer({ noServer: true, maxPayload: 64 * 1024 });
-
-  server.on('upgrade', (request, socket, head) => {
-    const origin = request.headers.origin;
+  const server = http.createServer(async (request, response) => {
     const pathname = new URL(request.url, 'http://localhost').pathname;
-    if (pathname !== '/voice' || !isAllowedOrigin(origin, config.allowedOrigins)) {
-      socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');
-      socket.destroy();
+    if (request.method === 'GET' && pathname === '/healthz') {
+      json(response, 200, { ok: true });
       return;
     }
 
-    const ip = request.socket.remoteAddress || 'unknown';
-    const active = connectionsByIp.get(ip) || 0;
-    if (active >= config.maxConnectionsPerIp) {
-      socket.write('HTTP/1.1 429 Too Many Requests\r\nConnection: close\r\n\r\n');
-      socket.destroy();
+    if (!pathname.startsWith('/rtc/session')) {
+      json(response, 404, { error: 'not_found' });
       return;
     }
 
-    connectionsByIp.set(ip, active + 1);
-    wss.handleUpgrade(request, socket, head, client => {
-      wss.emit('connection', client, request, ip);
-    });
-  });
+    const origin = request.headers.origin;
+    if (!isAllowedOrigin(origin, config.allowedOrigins)) {
+      json(response, 403, { error: 'origin_not_allowed' });
+      return;
+    }
+    if (request.method === 'OPTIONS') {
+      response.writeHead(204, {
+        'access-control-allow-origin': origin,
+        'access-control-allow-methods': 'POST, DELETE, OPTIONS',
+        'access-control-allow-headers': 'Content-Type',
+        'cache-control': 'no-store',
+        vary: 'Origin'
+      });
+      response.end();
+      return;
+    }
 
-  wss.on('connection', (client, _request, ip) => {
-    let upstream;
-    let starting = false;
-    let cleaned = false;
-    const timeout = setTimeout(() => client.close(1000, 'session_limit'), config.maxSessionMs);
+    if (request.method === 'POST') {
+      try {
+        await parseJsonBody(request);
+      } catch (error) {
+        json(response, error.status || 400, { error: error.message }, origin);
+        return;
+      }
+    }
 
-    const cleanup = () => {
-      if (cleaned) return;
-      cleaned = true;
-      clearTimeout(timeout);
-      upstream?.close();
-      const active = connectionsByIp.get(ip) || 1;
-      if (active <= 1) connectionsByIp.delete(ip);
-      else connectionsByIp.set(ip, active - 1);
-    };
+    if (request.method === 'POST' && pathname === '/rtc/session') {
+      let session;
+      try {
+        session = store.create(request.socket.remoteAddress || 'unknown');
+      } catch {
+        json(response, 500, { error: 'session_unavailable' }, origin);
+        return;
+      }
+      if (!session) {
+        json(response, 429, { error: 'session_limit' }, origin);
+        return;
+      }
+      json(response, 201, store.public(session), origin);
+      return;
+    }
 
-    client.on('close', cleanup);
-    client.on('error', cleanup);
-    client.on('message', async (data, isBinary) => {
-      if (isBinary) {
-        if (!upstream?.ready) {
-          publicError(client, 'SESSION_NOT_READY', '实时语音尚未连接，请稍候。');
+    const sessionId = pathSessionId(pathname);
+    if (request.method === 'POST' && sessionId && pathname.endsWith('/start')) {
+      try {
+        const session = await store.start(sessionId, rtcApi.startVoiceChat.bind(rtcApi));
+        if (!session) {
+          json(response, 404, { error: 'session_not_found' }, origin);
           return;
         }
-        upstream.sendAudio(Buffer.from(data));
-        return;
+        json(response, 200, { sessionId, state: 'started' }, origin);
+      } catch (error) {
+        json(response, 502, { error: error.code || 'RTC_UPSTREAM' }, origin);
       }
+      return;
+    }
 
-      let message;
-      try {
-        message = JSON.parse(data.toString('utf8'));
-      } catch {
-        publicError(client, 'INVALID_MESSAGE', '无法识别客户端消息。');
-        return;
-      }
+    if (request.method === 'DELETE' && sessionId && pathname === `/rtc/session/${encodeURIComponent(sessionId)}`) {
+      await removeSession(sessionId);
+      empty(response, 204, origin);
+      return;
+    }
 
-      if (message.type === 'client.stop') {
-        cleanup();
-        client.close(1000, 'client_stop');
-        return;
-      }
-      if (message.type === 'client.text') {
-        const text = typeof message.text === 'string' ? message.text.trim() : '';
-        if (!upstream?.ready) {
-          publicError(client, 'SESSION_NOT_READY', '实时语音尚未连接，请稍候。');
-        } else if (!text || text.length > 300) {
-          publicError(client, 'INVALID_TEXT', '文字内容必须为 1 至 300 个字符。');
-        } else {
-          upstream.sendText(text);
-        }
-        return;
-      }
-      if (message.type !== 'client.start' || upstream || starting) {
-        publicError(client, 'INVALID_STATE', '当前会话状态不接受该操作。');
-        return;
-      }
+    json(response, 404, { error: 'not_found' }, origin);
+  });
 
-      starting = true;
-      try {
-        upstream = await upstreamFactory({ config });
-        upstream.on('ready', () => sendJson(client, { type: 'server.ready' }));
-        upstream.on('transcript', transcript => sendJson(client, {
-          type: 'server.transcript',
-          ...transcript
-        }));
-        upstream.on('audio', pcm => {
-          if (client.readyState === WebSocket.OPEN) client.send(pcm, { binary: true });
-        });
-        upstream.on('interrupted', () => sendJson(client, {
-          type: 'server.state',
-          state: 'interrupted'
-        }));
-        upstream.on('turn-complete', () => sendJson(client, {
-          type: 'server.state',
-          state: 'listening'
-        }));
-        upstream.on('safe-error', error => publicError(client, error.code, error.message));
-        upstream.on('closed', () => sendJson(client, {
-          type: 'server.state',
-          state: 'closed'
-        }));
-      } catch {
-        publicError(client, 'UPSTREAM_CONNECTION_FAILED', '实时语音服务连接失败，请稍后重试。');
-      } finally {
-        starting = false;
-      }
-    });
+  // WebSocket voice transport remains in the repository for its later migration,
+  // but this HTTP-only phase never accepts an upgrade.
+  server.on('upgrade', (_request, socket) => {
+    socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');
+    socket.destroy();
   });
 
   return {
     server,
     close(callback) {
-      for (const client of wss.clients) client.terminate();
-      wss.close(() => server.close(callback));
+      Promise.all(store.takeAll().map(stopTakenSession))
+        .finally(() => server.close(callback));
     }
   };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const config = loadConfig();
+  const config = loadRtcConfig();
   const app = createVoiceServer({ config });
-  app.server.listen(config.port, '0.0.0.0', () => {
-    console.log(`JARVIS realtime voice proxy listening on port ${config.port}`);
+  app.server.listen(config.port || 8787, '0.0.0.0', () => {
+    console.log('JARVIS RTC session API listening');
   });
 }
