@@ -312,10 +312,7 @@ export class DuplexVoiceController {
         this.setState('listening');
         break;
       case 'response.created': {
-        const responseId = event.response?.id || event.response_id;
-        if (!responseId) break;
-        session.activeResponseId = responseId;
-        if (!session.canceledResponseIds.has(responseId)) session.cancellationPending = false;
+        this.acceptResponseEvent(session, event);
         break;
       }
       case 'conversation.item.input_audio_transcription.started':
@@ -330,7 +327,7 @@ export class DuplexVoiceController {
         this.setState('listening');
         break;
       case 'conversation.item.input_audio_transcription.delta': {
-        this.userTranscript = `${this.userTranscript || ''}${eventText(event)}`;
+        this.userTranscript = eventText(event);
         if (this.userTranscript) this.onTranscript({ speaker: 'user', text: this.userTranscript });
         break;
       }
@@ -340,21 +337,23 @@ export class DuplexVoiceController {
         if (this.userTranscript) this.onTranscript({ speaker: 'user', text: this.userTranscript });
         break;
       case 'response.output_text.delta':
+        if (!this.acceptResponseEvent(session, event)) break;
         this.assistantTranscript = `${this.assistantTranscript || ''}${eventText(event)}`;
         if (this.assistantTranscript) this.onTranscript({ speaker: 'assistant', text: this.assistantTranscript });
         this.setState('speaking');
         break;
       case 'response.output_text.done':
+        if (!this.acceptResponseEvent(session, event)) break;
         this.assistantTranscript = eventText(event) || this.assistantTranscript || '';
         if (this.assistantTranscript) this.onTranscript({ speaker: 'assistant', text: this.assistantTranscript });
         this.setState('speaking');
         break;
       case 'response.output_audio.started':
+        if (!this.acceptResponseEvent(session, event)) break;
         this.setState('speaking');
         break;
       case 'response.output_audio.delta': {
-        const responseId = event.response_id || event.response?.id;
-        if (session.cancellationPending || (responseId && session.canceledResponseIds.has(responseId))) break;
+        if (!this.acceptResponseEvent(session, event)) break;
         const audio = event.audio || event.delta;
         if (audio) void session.player.enqueue(base64ToBytes(audio)).catch(() => {
           if (this.isCurrent(session)) return this.fail('JARVIS 的声音播放失败，请重新开始。', undefined, session);
@@ -363,6 +362,7 @@ export class DuplexVoiceController {
       }
       case 'response.output_audio.done':
       case 'response.done':
+        if (!this.acceptResponseEvent(session, event)) break;
         this.setState('listening');
         break;
       case 'error':
@@ -371,6 +371,17 @@ export class DuplexVoiceController {
       default:
         break;
     }
+  }
+
+  acceptResponseEvent(session, event) {
+    const responseId = event.response_id || event.response?.id;
+    if (responseId && session.canceledResponseIds.has(responseId)) return false;
+    if (session.cancellationPending) {
+      if (!responseId) return false;
+      session.cancellationPending = false;
+    }
+    if (responseId) session.activeResponseId = responseId;
+    return true;
   }
 
   sendText(text) {

@@ -210,19 +210,54 @@ test('late audio from a canceled response is ignored until a clearly new respons
   socket.emit('open');
   await starting;
   socket.emit('message', { data: JSON.stringify({ type: 'session.created' }) });
-  socket.emit('message', { data: JSON.stringify({ type: 'response.created', response: { id: 'r1' } }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.started', question_id: 'q1', response_id: 'r1', tts_type: 'default' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAA=' }) });
   await waitTurn();
   assert.equal(FakeAudioContext.starts.length, 1);
 
   socket.emit('message', { data: JSON.stringify({ type: 'conversation.item.input_audio_transcription.started' }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.started', question_id: 'q1', response_id: 'r1', tts_type: 'default' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAA=' }) });
   await waitTurn();
   assert.equal(FakeAudioContext.starts.length, 1);
 
-  socket.emit('message', { data: JSON.stringify({ type: 'response.created', response: { id: 'r2' } }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'response.output_text.delta', question_id: 'q2', response_id: 'r2', delta: '新回答' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r2', delta: 'AAA=' }) });
   await waitTurn();
-  assert.equal(FakeAudioContext.starts.length, 2);
-  await controller.stop();
+  try {
+    assert.equal(FakeAudioContext.starts.length, 2);
+  } finally {
+    await controller.stop();
+  }
+});
+
+test('ASR delta replaces the revised full hypothesis instead of appending it', async () => {
+  FakeSocket.instances = [];
+  const transcripts = [];
+  const track = { muted: false, readyState: 'live', stop() {} };
+  const controller = new DuplexVoiceController({
+    endpoint: 'https://voice.invalid',
+    mediaDevices: { getUserMedia: async () => ({ getAudioTracks: () => [track], getTracks: () => [track] }) },
+    WebSocketCtor: FakeSocket,
+    AudioContextCtor: FakeAudioContext,
+    onTranscript: value => transcripts.push(value)
+  });
+  const starting = controller.start();
+  await waitTurn();
+  const socket = FakeSocket.instances[0];
+  socket.emit('open');
+  await starting;
+  socket.emit('message', { data: JSON.stringify({ type: 'session.created' }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'conversation.item.input_audio_transcription.started' }) });
+
+  const hypotheses = ['你好', '你好。', '你好', '你好请问', '你好，请问 1+1 等于几？'];
+  for (const delta of hypotheses) {
+    socket.emit('message', { data: JSON.stringify({ type: 'conversation.item.input_audio_transcription.delta', delta }) });
+  }
+
+  try {
+    assert.deepEqual(transcripts.map(value => value.text), hypotheses);
+  } finally {
+    await controller.stop();
+  }
 });
