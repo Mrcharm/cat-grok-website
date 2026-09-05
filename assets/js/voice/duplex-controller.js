@@ -3,6 +3,7 @@ const OUTPUT_SAMPLE_RATE = 24000;
 const PCM_FRAME_BYTES = 640;
 const ACTIVE_STATES = new Set(['permission', 'connecting', 'listening', 'speaking']);
 const START_CANCELLED = Symbol('start-cancelled');
+export const CONNECTION_TIMEOUT_MS = 75_000;
 
 export function downsampleToPcm16(input, inputRate, targetRate = INPUT_SAMPLE_RATE) {
   const ratio = inputRate / targetRate;
@@ -167,13 +168,6 @@ export class DuplexVoiceController {
     this.onTranscript = onTranscript;
     this.onError = onError;
     this.state = 'idle';
-    this.pendingFrames = [];
-    this.frameBuffer = new PcmFrameBuffer(frame => {
-      this.pendingFrames.push(frame);
-      if (this.pendingFrames.length > 5) this.pendingFrames.shift();
-    });
-    this.monitor = new MicrophoneActivityMonitor();
-    this.player = new PcmStreamPlayer(AudioContextCtor);
     this.generation = 0;
     this.sessionReady = false;
   }
@@ -186,7 +180,22 @@ export class DuplexVoiceController {
   async start() {
     if (ACTIVE_STATES.has(this.state)) return;
     const generation = ++this.generation;
-    this.stopping = false;
+    const session = {
+      generation,
+      stopping: false,
+      pendingFrames: [],
+      monitor: new MicrophoneActivityMonitor(),
+      player: new PcmStreamPlayer(this.AudioContextCtor),
+      sessionReady: false,
+      canceledResponseIds: new Set(),
+      cancellationPending: false,
+      activeResponseId: null
+    };
+    session.frameBuffer = new PcmFrameBuffer(frame => {
+      session.pendingFrames.push(frame);
+      if (session.pendingFrames.length > 5) session.pendingFrames.shift();
+    });
+    this.session = session;
     this.sessionReady = false;
     this.music.pause();
     this.setState('permission');
@@ -195,105 +204,128 @@ export class DuplexVoiceController {
         audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         video: false
       });
-      if (this.stopping || generation !== this.generation) {
+      if (!this.isCurrent(session)) {
         for (const track of stream.getTracks()) track.stop();
         throw START_CANCELLED;
       }
-      this.stream = stream;
-      this.track = this.stream.getAudioTracks()[0];
-      if (!this.track) throw new Error('microphone_missing');
-      this.captureContext = new this.AudioContextCtor();
-      await this.captureContext.resume();
-      if (this.stopping || generation !== this.generation) throw START_CANCELLED;
-      await this.player.start();
-      if (this.stopping || generation !== this.generation) throw START_CANCELLED;
-      this.setupCapture();
+      session.stream = stream;
+      session.track = stream.getAudioTracks()[0];
+      if (!session.track) throw new Error('microphone_missing');
+      session.captureContext = new this.AudioContextCtor();
+      await session.captureContext.resume();
+      if (!this.isCurrent(session)) throw START_CANCELLED;
+      await session.player.start();
+      if (!this.isCurrent(session)) throw START_CANCELLED;
+      this.setupCapture(session);
       this.setState('connecting');
-      await this.connect();
-      if (this.stopping || generation !== this.generation) throw START_CANCELLED;
-      this.startPumps();
+      await this.connect(session);
+      if (!this.isCurrent(session)) throw START_CANCELLED;
+      this.startPumps(session);
     } catch (cause) {
-      if (cause === START_CANCELLED || generation !== this.generation || this.stopping) {
-        await this.cleanup();
+      if (cause === START_CANCELLED || !this.isCurrent(session)) {
+        await this.cleanup(session);
         return;
       }
       await this.fail(
         this.state === 'permission'
           ? '无法使用麦克风，请检查浏览器和系统权限后重试。'
           : '实时语音服务暂不可用，请稍后重试。',
-        cause
+        cause,
+        session
       );
       throw cause;
     }
   }
 
-  setupCapture() {
-    this.source = this.captureContext.createMediaStreamSource(this.stream);
-    this.processor = this.captureContext.createScriptProcessor(1024, 1, 1);
-    this.processor.onaudioprocess = event => {
-      if (this.stopping) return;
+  isCurrent(session) {
+    return this.session === session && session.generation === this.generation && !session.stopping;
+  }
+
+  setupCapture(session) {
+    session.source = session.captureContext.createMediaStreamSource(session.stream);
+    session.processor = session.captureContext.createScriptProcessor(1024, 1, 1);
+    session.processor.onaudioprocess = event => {
+      if (!this.isCurrent(session)) return;
       const input = event.inputBuffer.getChannelData(0);
       let peak = 0;
       for (let index = 0; index < input.length; index += 1) peak = Math.max(peak, Math.abs(input[index]));
-      this.lastPeak = Math.max(this.lastPeak || 0, peak);
-      this.frameBuffer.append(downsampleToPcm16(input, this.captureContext.sampleRate));
+      session.lastPeak = Math.max(session.lastPeak || 0, peak);
+      session.frameBuffer.append(downsampleToPcm16(input, session.captureContext.sampleRate));
     };
-    this.source.connect(this.processor);
-    this.processor.connect(this.captureContext.destination);
+    session.source.connect(session.processor);
+    session.processor.connect(session.captureContext.destination);
   }
 
-  connect() {
+  connect(session) {
     return new Promise((resolve, reject) => {
       const socket = new this.WebSocketCtor(websocketUrl(this.endpoint));
-      this.socket = socket;
-      const timeout = setTimeout(() => reject(new Error('connection_timeout')), 10000);
+      session.socket = socket;
+      let settled = false;
+      const finish = callback => value => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        callback(value);
+      };
+      const timeout = setTimeout(finish(() => reject(new Error('connection_timeout'))), CONNECTION_TIMEOUT_MS);
       socket.addEventListener('open', () => {
-        clearTimeout(timeout);
-        resolve();
+        if (!this.isCurrent(session)) return finish(reject)(START_CANCELLED);
+        finish(resolve)();
       }, { once: true });
-      socket.addEventListener('message', event => this.handleMessage(event.data));
-      socket.addEventListener('error', () => {
-        clearTimeout(timeout);
-        reject(new Error('connection_failed'));
-      }, { once: true });
+      socket.addEventListener('message', event => {
+        if (this.isCurrent(session)) this.handleMessage(event.data, session);
+      });
+      socket.addEventListener('error', () => finish(reject)(new Error('connection_failed')), { once: true });
       socket.addEventListener('close', () => {
-        clearTimeout(timeout);
-        if (!this.stopping) void this.fail('实时语音连接已中断，请重新开始。');
+        if (!settled) finish(reject)(START_CANCELLED);
+        if (this.isCurrent(session)) void this.fail('实时语音连接已中断，请重新开始。', undefined, session);
       });
     });
   }
 
-  startPumps() {
+  startPumps(session) {
     const silence = new Uint8Array(PCM_FRAME_BYTES);
-    this.audioTimer = setInterval(() => {
-      if (!this.sessionReady || this.socket?.readyState !== this.WebSocketCtor.OPEN) return;
-      const frame = this.pendingFrames.shift() || silence;
-      this.socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: bytesToBase64(frame) }));
+    session.audioTimer = setInterval(() => {
+      if (!this.isCurrent(session) || !session.sessionReady || session.socket?.readyState !== this.WebSocketCtor.OPEN) return;
+      const frame = session.pendingFrames.shift() || silence;
+      session.socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: bytesToBase64(frame) }));
     }, 20);
-    this.activityTimer = setInterval(() => {
-      const muted = Boolean(this.track?.muted || this.track?.readyState === 'ended');
-      const peak = this.lastPeak || 0;
-      this.lastPeak = 0;
-      if (this.monitor.observe({ now: Date.now(), muted, peak })) {
-        void this.fail('麦克风没有收到声音，连接已结束。请检查系统麦克风是否静音。');
+    session.activityTimer = setInterval(() => {
+      if (!this.isCurrent(session)) return;
+      const muted = Boolean(session.track?.muted || session.track?.readyState === 'ended');
+      const peak = session.lastPeak || 0;
+      session.lastPeak = 0;
+      if (session.monitor.observe({ now: Date.now(), muted, peak })) {
+        void this.fail('麦克风没有收到声音，连接已结束。请检查系统麦克风是否静音。', undefined, session);
       }
     }, 250);
   }
 
-  handleMessage(raw) {
+  handleMessage(raw, session = this.session) {
+    if (!this.isCurrent(session)) return;
     let event;
     try { event = JSON.parse(raw); } catch { return; }
     switch (event.type) {
       case 'session.created':
+        session.sessionReady = true;
         this.sessionReady = true;
         this.setState('listening');
         break;
+      case 'response.created': {
+        const responseId = event.response?.id || event.response_id;
+        if (!responseId) break;
+        session.activeResponseId = responseId;
+        if (!session.canceledResponseIds.has(responseId)) session.cancellationPending = false;
+        break;
+      }
       case 'conversation.item.input_audio_transcription.started':
-        if (this.socket?.readyState === this.WebSocketCtor.OPEN) {
-          this.socket.send(JSON.stringify({ type: 'response.cancel' }));
+        if (session.socket?.readyState === this.WebSocketCtor.OPEN) {
+          session.socket.send(JSON.stringify({ type: 'response.cancel' }));
         }
-        void this.player.stop();
-        this.player = new PcmStreamPlayer(this.AudioContextCtor);
+        if (session.activeResponseId) session.canceledResponseIds.add(session.activeResponseId);
+        session.cancellationPending = true;
+        void session.player.stop();
+        session.player = new PcmStreamPlayer(this.AudioContextCtor);
         this.userTranscript = '';
         this.setState('listening');
         break;
@@ -321,8 +353,12 @@ export class DuplexVoiceController {
         this.setState('speaking');
         break;
       case 'response.output_audio.delta': {
+        const responseId = event.response_id || event.response?.id;
+        if (session.cancellationPending || (responseId && session.canceledResponseIds.has(responseId))) break;
         const audio = event.audio || event.delta;
-        if (audio) void this.player.enqueue(base64ToBytes(audio)).catch(() => this.fail('JARVIS 的声音播放失败，请重新开始。'));
+        if (audio) void session.player.enqueue(base64ToBytes(audio)).catch(() => {
+          if (this.isCurrent(session)) return this.fail('JARVIS 的声音播放失败，请重新开始。', undefined, session);
+        });
         break;
       }
       case 'response.output_audio.done':
@@ -339,49 +375,48 @@ export class DuplexVoiceController {
 
   sendText(text) {
     const clean = String(text || '').trim();
-    if (!clean || !this.sessionReady || this.socket?.readyState !== this.WebSocketCtor.OPEN) return false;
-    this.socket.send(JSON.stringify({ type: 'speech_text_buffer.commit', text: clean.slice(0, 300) }));
+    const session = this.session;
+    if (!clean || !this.isCurrent(session) || !session.sessionReady || session.socket?.readyState !== this.WebSocketCtor.OPEN) return false;
+    session.socket.send(JSON.stringify({ type: 'speech_text_buffer.commit', text: clean.slice(0, 300) }));
     this.onTranscript({ speaker: 'user', text: clean.slice(0, 300) });
     return true;
   }
 
-  async fail(message, cause) {
-    if (this.stopping) return;
+  async fail(message, cause, session = this.session) {
+    if (!this.isCurrent(session)) return;
     this.onError({ code: 'VOICE_UNAVAILABLE', message, cause });
     this.setState('error');
-    await this.cleanup();
+    await this.cleanup(session);
   }
 
   async stop() {
     this.generation += 1;
-    if (this.socket?.readyState === this.WebSocketCtor.OPEN) {
-      this.socket.send(JSON.stringify({ type: 'input_audio_buffer.commit' }));
+    const session = this.session;
+    if (session?.socket?.readyState === this.WebSocketCtor.OPEN) {
+      session.socket.send(JSON.stringify({ type: 'input_audio_buffer.commit' }));
     }
-    await this.cleanup();
+    await this.cleanup(session);
+    if (this.session === session) this.session = null;
     this.setState('stopped');
   }
 
-  async cleanup() {
-    if (this.stopping) return;
-    this.stopping = true;
-    clearInterval(this.audioTimer);
-    clearInterval(this.activityTimer);
-    this.frameBuffer.clear();
-    this.pendingFrames = [];
-    this.processor?.disconnect();
-    this.source?.disconnect();
-    for (const track of this.stream?.getTracks?.() || []) track.stop();
-    if (this.socket && [this.WebSocketCtor.OPEN, this.WebSocketCtor.CONNECTING].includes(this.socket.readyState)) this.socket.close();
-    await this.captureContext?.close?.().catch(() => {});
-    await this.player.stop();
-    this.socket = null;
-    this.sessionReady = false;
-    this.stream = null;
-    this.track = null;
-    this.captureContext = null;
-    this.processor = null;
-    this.source = null;
-    this.monitor.reset();
+  async cleanup(session = this.session) {
+    if (!session || session.stopping) return;
+    session.stopping = true;
+    clearInterval(session.audioTimer);
+    clearInterval(session.activityTimer);
+    session.frameBuffer.clear();
+    session.pendingFrames = [];
+    session.processor?.disconnect();
+    session.source?.disconnect();
+    for (const track of session.stream?.getTracks?.() || []) track.stop();
+    if (session.socket && [this.WebSocketCtor.OPEN, this.WebSocketCtor.CONNECTING].includes(session.socket.readyState)) session.socket.close();
+    await session.captureContext?.close?.().catch(() => {});
+    await session.player.stop();
+    session.monitor.reset();
+    if (this.session === session) {
+      this.sessionReady = false;
+    }
   }
 }
 
