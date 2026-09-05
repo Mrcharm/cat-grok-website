@@ -111,7 +111,8 @@ function skillsPage({ skills }) {
   const sections = categories.map(cat => {
     const cards = (cat.skills || []).map(skill => (
       '<article class="skill-card">' +
-      '<h3>' + escapeHtml(skill.name) + (skill.badge ? '<span class="badge">' + escapeHtml(skill.badge) + '</span>' : '') + '</h3>' +
+      '<h3>' + escapeHtml(skill.name) + (skill.badge ? '<span class="badge">' + escapeHtml(skill.badge) + '</span>' : '') +
+      (skill.origin === 'self' ? '<span class="origin self">自建</span>' : '<span class="origin">基于已有</span>') + '</h3>' +
       '<p class="skill-desc">' + escapeHtml(skill.description) + '</p>' +
       '<div class="skill-tags">' + (skill.tags || []).map(t => '<span class="skill-tag">' + escapeHtml(t) + '</span>').join('') + '</div>' +
       '<div class="skill-actions">' +
@@ -147,17 +148,19 @@ function skillsPage({ skills }) {
 
 function portfolioPage() {
   const projects = [
-    ['🎯', 'JARVIS 陪伴系统', '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', ['Three.js', 'Web Speech API', '产品原型'], '<a class="portfolio-link" href="../index.html">查看项目 →</a>'],
-    ['📊', '数据血缘与知识图谱平台', '从烟囱式数据架构到全行统一血缘图谱的设计与落地，覆盖元数据、影响分析与链路追踪。', ['数据治理', '知识图谱', '可视化'], '<span class="portfolio-link muted">截图与文档整理中</span>'],
-    ['🤖', 'AI 数据研发 Copilot', '自然语言到 SQL 的智能转换系统，覆盖需求澄清、证据收集、SQL 生成、校验与文档输出。', ['NL2SQL', 'AI 产品', 'B 端设计'], '<span class="portfolio-link muted">脱敏文档整理中</span>'],
-    ['⏳', '更多项目', 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', ['AI 应用', '研发平台', '数据大屏'], '<span class="portfolio-link muted">敬请期待</span>']
-  ].map(([icon, title, summary, tags, action], index) => (
-    '<article class="portfolio-item' + (index === 3 ? ' placeholder' : '') + '">' +
-    '<div class="portfolio-thumb">' + icon + '</div><div class="portfolio-info">' +
-    '<h3>' + escapeHtml(title) + '</h3><p>' + escapeHtml(summary) + '</p>' +
-    '<div class="portfolio-meta">' + tags.map((tag, tagIndex) => (
+    { icon: '🤖', title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], img: '', action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
+    { icon: '🗄️', title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE：映射设计、流程编排、SQL 预览与 Git 版本管理，覆盖脚本开发全生命周期。', tags: ['B 端产品', 'Web IDE', '数据研发'], img: '../assets/portfolio/etl-design.png', action: '<span class="portfolio-link muted">内部平台 · 界面演示</span>' },
+    { icon: '✨', title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步的全流程自动化。', tags: ['NL2SQL', 'AI 助手', 'Agent'], img: '../assets/portfolio/ai-assistant.png', action: '<span class="portfolio-link muted">已投产 · 界面演示</span>' },
+    { icon: '📊', title: '数据血缘与知识图谱平台', summary: '从烟囱式数据架构到全行统一血缘图谱的设计与落地：脚本血缘解析、影响分析与链路追踪。', tags: ['数据治理', '血缘解析', '可视化'], img: '../assets/portfolio/lineage-view.png', action: '<span class="portfolio-link muted">内部平台 · 界面演示</span>' },
+    { icon: '🧠', title: '知识图谱 · 图平台', summary: '基于图数据库的图谱构建与可视化查询：K 层展开、路径分析、图算法与自定义规则查询。', tags: ['知识图谱', '图查询', '关系网络'], img: '../assets/portfolio/graph-platform.png', action: '<span class="portfolio-link muted">平台功能演示</span>' },
+    { icon: '⏳', title: '更多项目', summary: 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', tags: ['AI 应用', '研发平台', '数据大屏'], img: '', ph: true, action: '<span class="portfolio-link muted">敬请期待</span>' }
+  ].map(p => (
+    '<article class="portfolio-item' + (p.ph ? ' placeholder' : '') + '">' +
+    '<div class="portfolio-thumb">' + (p.img ? '<img src="' + escapeHtml(p.img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy">' : p.icon) + '</div><div class="portfolio-info">' +
+    '<h3>' + escapeHtml(p.title) + '</h3><p>' + escapeHtml(p.summary) + '</p>' +
+    '<div class="portfolio-meta">' + p.tags.map((tag, tagIndex) => (
       '<span class="portfolio-tag' + (tagIndex === 0 ? ' highlight' : '') + '">' + escapeHtml(tag) + '</span>'
-    )).join('') + '</div>' + action + '</div></article>'
+    )).join('') + '</div>' + p.action + '</div></article>'
   )).join('');
 
   return layout({

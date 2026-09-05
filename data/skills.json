@@ -1,6 +1,6 @@
 {
-  "version": "3.0",
-  "updated": "2026-09-02",
+  "version": "3.1",
+  "updated": "2026-09-05",
   "categories": [
     {
       "id": "work",
@@ -13,31 +13,57 @@
           "name": "etl-sql-create",
           "badge": "SQL生成",
           "description": "把已满足 SQL 准入的结构化事实（evidence_card / direct_input）转换为可检核的 SQL 草案；已有草案时按用户反馈或检核问题定向修订。默认 PostgreSQL 方言。",
-          "tags": ["PostgreSQL", "NL2SQL", "ETL", "草案修订"]
+          "tags": [
+            "PostgreSQL",
+            "NL2SQL",
+            "ETL",
+            "草案修订"
+          ],
+          "origin": "self"
         },
         {
           "name": "etl-requirement-clarify",
           "badge": "需求澄清",
           "description": "把自然语言、JSON、Excel 或已有设计的混合需求转译为标准 ETL 需求澄清卡片，区分已确认内容、待用户确认事项与后续取证事项。多来源冲突时保留候选，不静默覆盖。",
-          "tags": ["需求分析", "Excel解析", "多来源合并"]
+          "tags": [
+            "需求分析",
+            "Excel解析",
+            "多来源合并"
+          ],
+          "origin": "self"
         },
         {
           "name": "etl-evidence-collect",
           "badge": "证据收集",
           "description": "把取证事项转换为受控查询计划，调用批准的数据库查询工具，把结果汇总为唯一结构化 evidence_card。每轮最多执行 3 个独立待查项，支持检查点续跑。",
-          "tags": ["证据管理", "查询规划", "白名单路由"]
+          "tags": [
+            "证据管理",
+            "查询规划",
+            "白名单路由"
+          ],
+          "origin": "self"
         },
         {
           "name": "etl-md-write",
           "badge": "文档写入",
           "description": "将各阶段产出写入或更新 PLAN.md 与 RECORD.md，并调用 publishArtifact 展示。按模板渲染章节，已有章节原位替换，重复写入幂等。",
-          "tags": ["Markdown", "模板渲染", "幂等写入"]
+          "tags": [
+            "Markdown",
+            "模板渲染",
+            "幂等写入"
+          ],
+          "origin": "self"
         },
         {
           "name": "etl-check-ruler",
           "badge": "校验规则",
           "description": "检核 SQL 并只返回高危与超高危问题；平台工具不可用时按固定静态规则兜底。不执行 SQL、不改写 SQL，不把「工具不可用」解释成「SQL 通过」。",
-          "tags": ["安全检核", "静态兜底", "风险映射"]
+          "tags": [
+            "安全检核",
+            "静态兜底",
+            "风险映射"
+          ],
+          "origin": "self"
         }
       ]
     },
@@ -46,12 +72,71 @@
       "icon": "📈",
       "title": "股票 · 投研",
       "skills": [
-        { "name": "a-share-daily-review", "badge": "复盘", "description": "A 股收盘全维度复盘：技术面、情绪面、短线博弈与板块拆解四条路径，自动采集指数行情、板块排行与涨停梯队。", "tags": ["A股", "复盘", "情绪面"] },
-        { "name": "ashare-short-term-trading", "badge": "短线", "description": "A 股日内与短线决策辅助：盘后诊断、标的初筛、盘中节点评估，支持从交割单回溯每笔交易的买卖质量。", "tags": ["A股", "短线", "交割单复盘"] },
-        { "name": "stock-research-trading-review", "badge": "交易", "description": "产业链证据研究、财报兑现、主升板块识别、核心股筛选与买卖点复盘，合并为一套证据驱动的交易决策。", "tags": ["产业链", "主升浪", "证据驱动"] },
-        { "name": "trading-analysis", "badge": "单票", "description": "A 股单票交易判断：能不能买、买点是否有效、买盘是否在控、是否仍在第一个有效机会窗口。", "tags": ["买点", "买盘", "决策"] },
-        { "name": "westockdata", "badge": "数据", "description": "金融市场结构化数据查询：A股/港股/美股、ETF、指数、板块、期货、可转债的 K 线、技术指标、筹码与财报。", "tags": ["K线", "筹码", "财报"] },
-        { "name": "neodata-financial-search", "badge": "搜索", "description": "自然语言通用金融数据搜索：股票、基金、指数、板块、债券、期货，一句话查询结构化金融数据。", "tags": ["NL2Data", "金融数据"] }
+        {
+          "name": "a-share-daily-review",
+          "badge": "复盘",
+          "description": "A 股收盘全维度复盘：技术面、情绪面、短线博弈与板块拆解四条路径，自动采集指数行情、板块排行与涨停梯队。",
+          "tags": [
+            "A股",
+            "复盘",
+            "情绪面"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "ashare-short-term-trading",
+          "badge": "短线",
+          "description": "A 股日内与短线决策辅助：盘后诊断、标的初筛、盘中节点评估，支持从交割单回溯每笔交易的买卖质量。",
+          "tags": [
+            "A股",
+            "短线",
+            "交割单复盘"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "stock-research-trading-review",
+          "badge": "交易",
+          "description": "产业链证据研究、财报兑现、主升板块识别、核心股筛选与买卖点复盘，合并为一套证据驱动的交易决策。",
+          "tags": [
+            "产业链",
+            "主升浪",
+            "证据驱动"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "trading-analysis",
+          "badge": "单票",
+          "description": "A 股单票交易判断：能不能买、买点是否有效、买盘是否在控、是否仍在第一个有效机会窗口。",
+          "tags": [
+            "买点",
+            "买盘",
+            "决策"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "westockdata",
+          "badge": "数据",
+          "description": "金融市场结构化数据查询：A股/港股/美股、ETF、指数、板块、期货、可转债的 K 线、技术指标、筹码与财报。",
+          "tags": [
+            "K线",
+            "筹码",
+            "财报"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "neodata-financial-search",
+          "badge": "搜索",
+          "description": "自然语言通用金融数据搜索：股票、基金、指数、板块、债券、期货，一句话查询结构化金融数据。",
+          "tags": [
+            "NL2Data",
+            "金融数据"
+          ],
+          "origin": "market"
+        }
       ]
     },
     {
@@ -59,11 +144,56 @@
       "icon": "🧠",
       "title": "思维框架",
       "skills": [
-        { "name": "buffett-perspective", "badge": "巴菲特", "description": "巴菲特思维框架：基于 60+ 年股东信、股东大会记录与深度采访的一手来源调研，提炼 6 个核心心智模型。", "tags": ["价值投资", "心智模型"] },
-        { "name": "munger-perspective", "badge": "芒格", "description": "芒格思维框架：多元思维模型、逆向思考与误判心理学，基于《穷查理宝典》与股东会演讲。", "tags": ["多元思维", "逆向"] },
-        { "name": "taleb-perspective", "badge": "塔勒布", "description": "塔勒布思维框架：反脆弱、凸性与尾部风险，基于 40+ 来源的深度调研，提炼 6 个核心心智模型。", "tags": ["反脆弱", "风险"] },
-        { "name": "mao-zedong-perspective", "badge": "方法论", "description": "从《矛盾论》《实践论》等提炼分析问题、制定战略、组织行动的方法论体系。", "tags": ["战略", "矛盾分析"] },
-        { "name": "best-minds", "badge": "模拟器", "description": "模拟器思维：不问「你怎么看」，而是问「世界上谁最懂这个？TA 会怎么说？」——让顶级专家替你思考。", "tags": ["专家模拟", "提问"] }
+        {
+          "name": "buffett-perspective",
+          "badge": "巴菲特",
+          "description": "巴菲特思维框架：基于 60+ 年股东信、股东大会记录与深度采访的一手来源调研，提炼 6 个核心心智模型。",
+          "tags": [
+            "价值投资",
+            "心智模型"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "munger-perspective",
+          "badge": "芒格",
+          "description": "芒格思维框架：多元思维模型、逆向思考与误判心理学，基于《穷查理宝典》与股东会演讲。",
+          "tags": [
+            "多元思维",
+            "逆向"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "taleb-perspective",
+          "badge": "塔勒布",
+          "description": "塔勒布思维框架：反脆弱、凸性与尾部风险，基于 40+ 来源的深度调研，提炼 6 个核心心智模型。",
+          "tags": [
+            "反脆弱",
+            "风险"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "mao-zedong-perspective",
+          "badge": "方法论",
+          "description": "从《矛盾论》《实践论》等提炼分析问题、制定战略、组织行动的方法论体系。",
+          "tags": [
+            "战略",
+            "矛盾分析"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "best-minds",
+          "badge": "模拟器",
+          "description": "模拟器思维：不问「你怎么看」，而是问「世界上谁最懂这个？TA 会怎么说？」——让顶级专家替你思考。",
+          "tags": [
+            "专家模拟",
+            "提问"
+          ],
+          "origin": "self"
+        }
       ]
     },
     {
@@ -71,11 +201,97 @@
       "icon": "✍️",
       "title": "写作 · 内容",
       "skills": [
-        { "name": "write-down", "badge": "成稿", "description": "中文长内容一站式流水线：文章、博客、技术复盘、方法论的成稿 + 多平台分发 + 配图。", "tags": ["长文", "分发", "配图"] },
-        { "name": "article-image-pipeline", "badge": "配图", "description": "写稿 + 配图生产流水线：从派单到生图的完整链路经验，覆盖插图风格规范与生产铁律。", "tags": ["插图", "流水线"] },
-        { "name": "humanizer", "badge": "去AI味", "description": "去除文本中的 AI 写作痕迹，让文字读起来更像人类写作。适用于润色、改写与降 AI 味。", "tags": ["润色", "自然写作"] },
-        { "name": "xiaohongshu-cover", "badge": "封面", "description": "小红书爆款封面设计：基于全网每日收录的 2000+ 爆款笔记数据，抓取同赛道封面的视觉元素。", "tags": ["小红书", "封面设计"] },
-        { "name": "gzh-explosive-content-detector", "badge": "选题", "description": "公众号爆款文章搜索：按关键词搜索爆款内容、推荐热门文章，助力把握内容趋势。", "tags": ["公众号", "爆款分析"] }
+        {
+          "name": "write-down",
+          "badge": "成稿",
+          "description": "中文长内容一站式流水线：文章、博客、技术复盘、方法论的成稿 + 多平台分发 + 配图。",
+          "tags": [
+            "长文",
+            "分发",
+            "配图"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "article-image-pipeline",
+          "badge": "配图",
+          "description": "写稿 + 配图生产流水线：从派单到生图的完整链路经验，覆盖插图风格规范与生产铁律。",
+          "tags": [
+            "插图",
+            "流水线"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "humanizer",
+          "badge": "去AI味",
+          "description": "去除文本中的 AI 写作痕迹，让文字读起来更像人类写作。适用于润色、改写与降 AI 味。",
+          "tags": [
+            "润色",
+            "自然写作"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "xiaohongshu-cover",
+          "badge": "封面",
+          "description": "小红书爆款封面设计：基于全网每日收录的 2000+ 爆款笔记数据，抓取同赛道封面的视觉元素。",
+          "tags": [
+            "小红书",
+            "封面设计"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "gzh-explosive-content-detector",
+          "badge": "选题",
+          "description": "公众号爆款文章搜索：按关键词搜索爆款内容、推荐热门文章，助力把握内容趋势。",
+          "tags": [
+            "公众号",
+            "爆款分析"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "xiaohongshu-search",
+          "badge": "小红书",
+          "description": "小红书热门笔记搜索：按关键词获取热门内容数据，基于数据评分排序推荐，发现热门趋势。",
+          "tags": [
+            "小红书",
+            "趋势"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "aihot",
+          "badge": "资讯",
+          "description": "中文 AI 资讯查询：今天 AI 圈有什么、AI 热点速览，日常跟进行业动态。",
+          "tags": [
+            "AI资讯",
+            "热点"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "ian-xiaohei-illustrations",
+          "badge": "插图",
+          "description": "生成 Ian 风格的中文正文配图：为文章、博客、方法论、流程文档配可读性强的插图。",
+          "tags": [
+            "插图",
+            "风格化"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "notebooklm-studio",
+          "badge": "学习",
+          "description": "把 URL、YouTube、文件与文本导入 Google NotebookLM，构建可问答的个人学习资料库。",
+          "tags": [
+            "NotebookLM",
+            "知识消化"
+          ],
+          "origin": "market"
+        }
       ]
     },
     {
@@ -83,11 +299,86 @@
       "icon": "🎨",
       "title": "产品设计",
       "skills": [
-        { "name": "product-design", "badge": "全流程", "description": "基于需求材料、历史版本、截图与业务约束，用保留式分析方法完成产品、交互与原型设计。", "tags": ["产品设计", "交互设计"] },
-        { "name": "prd-to-prototype", "badge": "原型", "description": "将 PRD、决策树、页面清单或口头需求渲染为单文件 HTML 原型：左侧可交互原型，右侧编号功能说明。", "tags": ["PRD", "HTML原型"] },
-        { "name": "research-design-patterns", "badge": "调研", "description": "针对给定产品领域挖掘主流产品与竞品的设计做法，提炼推荐模式与反模式。", "tags": ["竞品", "设计模式"] },
-        { "name": "user-story-mapping", "badge": "故事地图", "description": "创建用户故事地图：按活动、步骤、任务分层组织需求，让交付路径一目了然。", "tags": ["用户故事", "需求梳理"] },
-        { "name": "operation-manual", "badge": "手册", "description": "基于 PRD、真实平台与截图编写中文用户操作手册：端到端任务、一步一图、可独立操作。", "tags": ["操作手册", "一步一图"] }
+        {
+          "name": "product-design",
+          "badge": "全流程",
+          "description": "基于需求材料、历史版本、截图与业务约束，用保留式分析方法完成产品、交互与原型设计。",
+          "tags": [
+            "产品设计",
+            "交互设计"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "prd-to-prototype",
+          "badge": "原型",
+          "description": "将 PRD、决策树、页面清单或口头需求渲染为单文件 HTML 原型：左侧可交互原型，右侧编号功能说明。",
+          "tags": [
+            "PRD",
+            "HTML原型"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "research-design-patterns",
+          "badge": "调研",
+          "description": "针对给定产品领域挖掘主流产品与竞品的设计做法，提炼推荐模式与反模式。",
+          "tags": [
+            "竞品",
+            "设计模式"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "user-story-mapping",
+          "badge": "故事地图",
+          "description": "创建用户故事地图：按活动、步骤、任务分层组织需求，让交付路径一目了然。",
+          "tags": [
+            "用户故事",
+            "需求梳理"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "operation-manual",
+          "badge": "手册",
+          "description": "基于 PRD、真实平台与截图编写中文用户操作手册：端到端任务、一步一图、可独立操作。",
+          "tags": [
+            "操作手册",
+            "一步一图"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "office-hours",
+          "badge": "创意验证",
+          "description": "YC 办公时间工具：产品创意验证与设计思考，用结构化追问打磨「我有一个想法」。",
+          "tags": [
+            "创意验证",
+            "追问"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "ppt-generator-skill",
+          "badge": "PPT",
+          "description": "智能 PPT 生成助手：根据主题、行业与风格自动生成结构完整的 PPT 文件。",
+          "tags": [
+            "PPT",
+            "演示"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "ppt-slide-restyle",
+          "badge": "版式",
+          "description": "参照已有单页 PPT 生成同版式新页：复制原文件、保持样式布局一致、仅替换文字内容。",
+          "tags": [
+            "PPT",
+            "版式复刻"
+          ],
+          "origin": "self"
+        }
       ]
     },
     {
@@ -95,10 +386,46 @@
       "icon": "⚡",
       "title": "前端 · 构建",
       "skills": [
-        { "name": "frontend-skill", "badge": "落地页", "description": "生成视觉冲击强的落地页、网站、原型与 demo UI：强制克制构图、影像主导的层级与统一的内容结构。", "tags": ["UI", "落地页"] },
-        { "name": "taste-skill", "badge": "审美", "description": "反 slop 前端审美技能：落地页、作品集与改版设计，拒绝模板化堆砌。", "tags": ["审美", "反模板"] },
-        { "name": "frontend-slides", "badge": "演示", "description": "构建动画丰富的 HTML 演示文稿与网页幻灯片。", "tags": ["HTML", "幻灯片"] },
-        { "name": "web-deploy-github", "badge": "部署", "description": "创建并部署单页静态网站到 GitHub Pages 的标准流程。", "tags": ["静态站", "部署"] }
+        {
+          "name": "frontend-skill",
+          "badge": "落地页",
+          "description": "生成视觉冲击强的落地页、网站、原型与 demo UI：强制克制构图、影像主导的层级与统一的内容结构。",
+          "tags": [
+            "UI",
+            "落地页"
+          ],
+          "origin": "self"
+        },
+        {
+          "name": "taste-skill",
+          "badge": "审美",
+          "description": "反 slop 前端审美技能：落地页、作品集与改版设计，拒绝模板化堆砌。",
+          "tags": [
+            "审美",
+            "反模板"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "frontend-slides",
+          "badge": "演示",
+          "description": "构建动画丰富的 HTML 演示文稿与网页幻灯片。",
+          "tags": [
+            "HTML",
+            "幻灯片"
+          ],
+          "origin": "market"
+        },
+        {
+          "name": "web-deploy-github",
+          "badge": "部署",
+          "description": "创建并部署单页静态网站到 GitHub Pages 的标准流程。",
+          "tags": [
+            "静态站",
+            "部署"
+          ],
+          "origin": "self"
+        }
       ]
     }
   ]
