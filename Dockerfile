@@ -1,9 +1,9 @@
-FROM node:20-alpine
+FROM node:22.13-alpine
 
 WORKDIR /app
 RUN corepack enable
 
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 COPY --chown=node:node server ./server

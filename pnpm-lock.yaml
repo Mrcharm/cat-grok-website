@@ -17,9 +17,6 @@ importers:
       markdown-it:
         specifier: 14.3.0
         version: 14.3.0
-      ws:
-        specifier: 8.18.3
-        version: 8.18.3
     devDependencies:
       '@volcengine/rtc':
         specifier: 4.69.1
@@ -438,18 +435,6 @@ packages:
     deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
-  ws@8.18.3:
-    resolution: {integrity: sha512-PEIGCY5tSlUt50cqyMXfCzX+oOPqN0vuGqWzbcJ2xvnkzkq46oOpz7dQaTDBdfICb4N14+GARUDw2XV2N4tvzg==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
-
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
@@ -799,7 +784,5 @@ snapshots:
   undici-types@8.3.0: {}
 
   uuid@8.3.2: {}
-
-  ws@8.18.3: {}
 
   yocto-queue@0.1.0: {}

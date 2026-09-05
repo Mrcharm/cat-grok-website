@@ -1,14 +1,39 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { buildSite } from '../scripts/build.mjs';
 
-test('voice proxy has a non-root production container contract', async () => {
+const REQUIRED_SERVER_SETTINGS = [
+  'RTC_APP_ID',
+  'RTC_APP_KEY',
+  'VOLC_ACCESS_KEY_ID',
+  'VOLC_SECRET_ACCESS_KEY',
+  'S2S_APP_ID',
+  'S2S_ACCESS_TOKEN',
+  'ALLOWED_ORIGINS'
+];
+
+test('RTC service has a non-root production container contract', async () => {
   const dockerfile = await readFile('Dockerfile', 'utf8');
-  assert.match(dockerfile, /FROM node:20-alpine/);
+  assert.match(dockerfile, /FROM node:22\.13-alpine/);
+  assert.match(dockerfile, /COPY package\.json pnpm-lock\.yaml pnpm-workspace\.yaml/);
   assert.match(dockerfile, /pnpm install --prod --frozen-lockfile/);
   assert.match(dockerfile, /USER node/);
   assert.match(dockerfile, /CMD \["pnpm", "start:voice"\]/);
+});
+
+test('package runtime matches pnpm and permits only the required esbuild install script', async () => {
+  const [manifestText, workspace] = await Promise.all([
+    readFile('package.json', 'utf8'),
+    readFile('pnpm-workspace.yaml', 'utf8')
+  ]);
+  const manifest = JSON.parse(manifestText);
+  assert.equal(manifest.packageManager, 'pnpm@11.9.0');
+  assert.equal(manifest.engines.node, '>=22.13');
+  assert.deepEqual(workspace.trim().split(/\r?\n/), [
+    'allowBuilds:',
+    '  esbuild: true'
+  ]);
 });
 
 test('local secret files are excluded from Git and the container', async () => {
@@ -23,15 +48,25 @@ test('local secret files are excluded from Git and the container', async () => {
 
 test('deployment guide names server settings without sample secret values', async () => {
   const guide = await readFile('docs/deploy-realtime-voice.md', 'utf8');
-  for (const name of [
-    'DOUBAO_WS_URL',
-    'DOUBAO_APP_ID',
-    'DOUBAO_ACCESS_KEY',
-    'DOUBAO_MODEL_NAME',
-    'DOUBAO_SPEAKER',
-    'ALLOWED_ORIGINS'
-  ]) assert.match(guide, new RegExp(name));
-  assert.doesNotMatch(guide, /ghp_[A-Za-z0-9]+|access_token\s*=|secret_key\s*=/i);
+  const documented = [...guide.matchAll(/^\| `([A-Z0-9_]+)` \|/gm)]
+    .map(match => match[1]);
+  assert.deepEqual(documented, REQUIRED_SERVER_SETTINGS);
+  assert.doesNotMatch(guide, /ghp_[A-Za-z0-9]+|(?:access[_ -]?token|secret[_ -]?(?:access[_ -]?)?key|app[_ -]?key)\s*[=:]\s*\S+/i);
+});
+
+test('obsolete PCM and WebSocket implementation is absent', async () => {
+  const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
+  assert.equal(packageJson.dependencies?.ws, undefined);
+  for (const file of [
+    'server/doubao-protocol.mjs',
+    'server/doubao-session.mjs',
+    'assets/js/voice/pcm-capture.js',
+    'assets/js/voice/pcm-player.js',
+    'assets/js/voice/pcm-worklet.js',
+    'assets/js/voice/realtime-voice.js'
+  ]) {
+    await assert.rejects(access(file), error => error?.code === 'ENOENT', file);
+  }
 });
 
 test('generated public pages contain no server setting names or simulated voice', async () => {

@@ -16,14 +16,13 @@
   "dependencies": {
     "@volcengine/openapi": "1.36.2",
     "gray-matter": "4.0.3",
-    "markdown-it": "14.3.0",
-    "ws": "8.18.3"
+    "markdown-it": "14.3.0"
   },
   "devDependencies": {
     "@volcengine/rtc": "4.69.1",
     "esbuild": "0.28.2"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22.13"
   }
 }

@@ -181,8 +181,7 @@ export function createVoiceServer({
     json(response, 404, { error: 'not_found' }, origin);
   });
 
-  // WebSocket voice transport remains in the repository for its later migration,
-  // but this HTTP-only phase never accepts an upgrade.
+  // The retired /voice WebSocket protocol must not be reachable after the RTC migration.
   server.on('upgrade', (_request, socket) => {
     socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');
     socket.destroy();

@@ -16,23 +16,6 @@ const positiveInteger = (env, name, fallback) => {
 
 const atMostTwo = (env, name) => Math.min(positiveInteger(env, name, 2), 2);
 
-export function loadConfig(env = process.env) {
-  return {
-    port: positiveInteger(env, 'PORT', 8787),
-    doubaoWsUrl: required(env, 'DOUBAO_WS_URL'),
-    appId: required(env, 'DOUBAO_APP_ID'),
-    accessKey: required(env, 'DOUBAO_ACCESS_KEY'),
-    modelName: required(env, 'DOUBAO_MODEL_NAME'),
-    speaker: env.DOUBAO_SPEAKER?.trim() || 'zh_female_vv_jupiter_bigtts',
-    allowedOrigins: required(env, 'ALLOWED_ORIGINS')
-      .split(',')
-      .map(value => value.trim())
-      .filter(Boolean),
-    maxSessionMs: positiveInteger(env, 'MAX_SESSION_MS', 15 * 60 * 1000),
-    maxConnectionsPerIp: atMostTwo(env, 'MAX_CONNECTIONS_PER_IP')
-  };
-}
-
 export function loadRtcConfig(env = process.env) {
   const allowedOrigins = required(env, 'ALLOWED_ORIGINS')
     .split(',')
