@@ -28,7 +28,7 @@ export function persistentShell({ depth = 0, active = 'home' } = {}) {
 
   return '<header class="site-header">' +
     '<a class="brand" href="' + root + 'index.html">' +
-    '<span class="brand-mark" aria-hidden="true"></span>' +
+    '<span class="brand-mark" aria-hidden="true">C</span>' +
     '<span>MR.C <b>JARVIS</b></span></a>' +
     '<div class="topbar-right">' +
     '<nav id="site-nav" class="nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
@@ -57,7 +57,7 @@ export function layout({
     '<meta charset="utf-8">' +
     '<meta name="viewport" content="width=device-width,initial-scale=1">' +
     '<meta name="description" content="' + escapeHtml(description) + '">' +
-    '<meta name="theme-color" content="#05070d">' +
+    '<meta name="theme-color" content="#0b49ff">' +
     '<link rel="canonical" href="' + escapeHtml(canonical) + '">' +
     '<meta property="og:type" content="website">' +
     '<meta property="og:locale" content="zh_CN">' +

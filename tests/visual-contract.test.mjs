@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-test('JARVIS 主题使用青蓝色且支持减少动效', async () => {
+test('JARVIS 主题使用电蓝街头配色且支持减少动效', async () => {
   const css = await readFile('assets/styles/site.css', 'utf8');
   assert.match(css, /--jarvis-cyan:\s*#38e1ff/i);
+  assert.match(css, /--jarvis-blue:\s*#0b49ff/i);
+  assert.match(css, /\.street-hero\s*\{/);
   assert.match(css, /@media\s*\(max-width:\s*640px\)/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
