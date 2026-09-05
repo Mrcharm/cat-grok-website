@@ -23,3 +23,9 @@ The separately edited production endpoint in `index.html` is intentionally exclu
 - `pnpm build:voice`: generated `assets/dist/duplex-voice.js` successfully.
 - `pnpm test`: 133 passed, 0 failed (after the concurrent deployment-contract correction was present in the shared worktree; that correction is not part of this commit).
 - `git diff --check`: no whitespace errors.
+# 补充验收（2026-09-05，最终状态）
+
+- `e42b4e0` 已将取消门禁改为依据实际输出事件的 `response_id`，不再依赖 `response.created`。已取消 ID 的迟到事件被丢弃，新 ID 的文本或音频开始事件恢复新回复。
+- ASR delta 是完整修订假设，现覆盖显示；最终转写覆盖临时结果。
+- 聚焦测试 9 项通过，最终全量 134 项通过；独立复核无阻塞问题。
+- 以下为首次修复时的历史记录，其中 8 项及 `response.created` 描述已被上述修订替代。
