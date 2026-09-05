@@ -52,7 +52,7 @@ test('loadRtcConfig trims credentials and parses origins into server configurati
     s2s: { appId: 's2s-app-id', accessToken: 's2s-access-token' },
     allowedOrigins: ['https://mrcharm.github.io', 'http://localhost:4173'],
     sessionTtlMs: 900000,
-    maxConnectionsPerIp: 4
+    maxConnectionsPerIp: 2
   });
 });
 
@@ -61,6 +61,13 @@ test('loadRtcConfig applies the safe session and connection defaults', () => {
 
   assert.equal(config.sessionTtlMs, 900000);
   assert.equal(config.maxConnectionsPerIp, 2);
+});
+
+test('loadRtcConfig caps a valid requested per-IP connection limit at two', () => {
+  assert.equal(
+    loadRtcConfig({ ...valid, MAX_CONNECTIONS_PER_IP: '3' }).maxConnectionsPerIp,
+    2
+  );
 });
 
 test('loadRtcConfig rejects non-positive and non-numeric limits', () => {

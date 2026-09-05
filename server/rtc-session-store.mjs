@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { createRtcToken } from './rtc-token.mjs';
 
+const MAX_SESSIONS_PER_IP = 2;
+
 const publicFields = ({ sessionId, appId, roomId, userId, botUserId, taskId, token, expiresAt }) => ({
   sessionId,
   appId,
@@ -22,14 +24,20 @@ export function createRtcSessionStore({
   clearTimeoutFn = clearTimeout,
   onExpire = () => {}
 }) {
+  if (!Number.isSafeInteger(config.maxConnectionsPerIp) || config.maxConnectionsPerIp <= 0) {
+    throw new RangeError('maxConnectionsPerIp must be a positive integer');
+  }
+  const maxConnectionsPerIp = Math.min(config.maxConnectionsPerIp, MAX_SESSIONS_PER_IP);
   const sessions = new Map();
   const sessionIdsByIp = new Map();
 
-  const removeIpSession = session => {
+  const remove = session => {
+    sessions.delete(session.sessionId);
     const ids = sessionIdsByIp.get(session.ip);
     if (!ids) return;
     ids.delete(session.sessionId);
     if (ids.size === 0) sessionIdsByIp.delete(session.ip);
+    clearTimeoutFn(session.timer);
   };
 
   const expire = sessionId => Promise.resolve(onExpire(sessionId)).catch(() => {});
@@ -37,7 +45,7 @@ export function createRtcSessionStore({
   return {
     create(ip) {
       const active = sessionIdsByIp.get(ip);
-      if (active?.size >= config.maxConnectionsPerIp) return null;
+      if (active?.size >= maxConnectionsPerIp) return null;
 
       const issuedAt = now();
       const expiresAtMs = issuedAt + config.sessionTtlMs;
@@ -61,7 +69,9 @@ export function createRtcSessionStore({
         }),
         expiresAt: new Date(expiresAtMs).toISOString(),
         state: 'prepared',
+        startedRemotely: false,
         startPromise: null,
+        stopPromise: null,
         timer: null
       };
       session.timer = setTimeoutFn(() => expire(session.sessionId), config.sessionTtlMs);
@@ -79,16 +89,21 @@ export function createRtcSessionStore({
       const session = sessions.get(sessionId);
       if (!session) return null;
       if (session.state === 'started') return session;
+      if (session.stopPromise) {
+        await session.stopPromise.catch(() => {});
+        return sessions.get(sessionId) || null;
+      }
       if (session.startPromise) return session.startPromise;
 
       session.state = 'starting';
       session.startPromise = (async () => {
         try {
           await startVoiceChat(session);
-          session.state = 'started';
+          session.startedRemotely = true;
+          if (!session.stopPromise) session.state = 'started';
           return session;
         } catch (error) {
-          session.state = 'prepared';
+          if (!session.stopPromise) session.state = 'prepared';
           throw error;
         } finally {
           session.startPromise = null;
@@ -97,17 +112,35 @@ export function createRtcSessionStore({
       return session.startPromise;
     },
 
-    take(sessionId) {
+    async stop(sessionId, stopVoiceChat) {
       const session = sessions.get(sessionId);
       if (!session) return null;
-      sessions.delete(sessionId);
-      removeIpSession(session);
-      clearTimeoutFn(session.timer);
+      if (session.stopPromise) return session.stopPromise;
+
+      session.state = 'stopping';
+      const shared = (async () => {
+        try {
+          await session.startPromise;
+        } catch {
+          // A failed start has no remote task to stop.
+        }
+        if (session.startedRemotely) await stopVoiceChat(session);
+        remove(session);
+      })();
+      session.stopPromise = shared;
+      try {
+        await shared;
+      } catch (error) {
+        session.state = session.startedRemotely ? 'started' : 'prepared';
+        throw error;
+      } finally {
+        if (session.stopPromise === shared) session.stopPromise = null;
+      }
       return session;
     },
 
-    takeAll() {
-      return [...sessions.keys()].map(sessionId => this.take(sessionId)).filter(Boolean);
+    sessionIds() {
+      return [...sessions.keys()];
     }
   };
 }

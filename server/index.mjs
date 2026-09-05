@@ -29,7 +29,7 @@ const empty = (response, status, origin) => {
   response.end();
 };
 
-const parseJsonBody = async request => {
+const readBody = async request => {
   const contentLength = Number(request.headers['content-length'] || 0);
   if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BYTES) {
     request.resume();
@@ -48,9 +48,13 @@ const parseJsonBody = async request => {
     }
     chunks.push(chunk);
   }
-  if (size === 0) return {};
+  return Buffer.concat(chunks);
+};
+
+const parseJsonBody = body => {
+  if (body.length === 0) return {};
   try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
+    return JSON.parse(body.toString('utf8'));
   } catch {
     const error = new Error('invalid_json');
     error.status = 400;
@@ -76,30 +80,16 @@ export function createVoiceServer({
   clearTimeoutFn
 }) {
   let store;
-  const stopTakenSession = async session => {
-    try {
-      await session.startPromise;
-    } catch {
-      // A failed start has no remote task to stop.
-    }
-    if (session.state === 'started') {
-      try {
-        await rtcApi.stopVoiceChat(session);
-      } catch {
-        // The task has been removed locally; never retain a session or secret on stop failure.
-      }
-    }
-  };
-  const removeSession = async sessionId => {
-    const session = store.take(sessionId);
-    if (session) await stopTakenSession(session);
-  };
+  const stopSession = sessionId => store.stop(
+    sessionId,
+    rtcApi.stopVoiceChat?.bind(rtcApi) || (async () => {})
+  );
   store = createRtcSessionStore({
     config,
     tokenFactory,
     setTimeoutFn,
     clearTimeoutFn,
-    onExpire: removeSession
+    onExpire: stopSession
   });
 
   const server = http.createServer(async (request, response) => {
@@ -119,6 +109,13 @@ export function createVoiceServer({
       json(response, 403, { error: 'origin_not_allowed' });
       return;
     }
+    let body;
+    try {
+      body = await readBody(request);
+    } catch (error) {
+      json(response, error.status || 400, { error: error.message }, origin);
+      return;
+    }
     if (request.method === 'OPTIONS') {
       response.writeHead(204, {
         'access-control-allow-origin': origin,
@@ -133,7 +130,7 @@ export function createVoiceServer({
 
     if (request.method === 'POST') {
       try {
-        await parseJsonBody(request);
+        parseJsonBody(body);
       } catch (error) {
         json(response, error.status || 400, { error: error.message }, origin);
         return;
@@ -172,8 +169,12 @@ export function createVoiceServer({
     }
 
     if (request.method === 'DELETE' && sessionId && pathname === `/rtc/session/${encodeURIComponent(sessionId)}`) {
-      await removeSession(sessionId);
-      empty(response, 204, origin);
+      try {
+        await stopSession(sessionId);
+        empty(response, 204, origin);
+      } catch (error) {
+        json(response, 502, { error: error.code || 'RTC_UPSTREAM' }, origin);
+      }
       return;
     }
 
@@ -190,7 +191,7 @@ export function createVoiceServer({
   return {
     server,
     close(callback) {
-      Promise.all(store.takeAll().map(stopTakenSession))
+      Promise.all(store.sessionIds().map(sessionId => stopSession(sessionId).catch(() => {})))
         .finally(() => server.close(callback));
     }
   };

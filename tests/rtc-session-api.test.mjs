@@ -88,6 +88,14 @@ test('prepares at most two sessions per IP without starting AI or exposing secre
   });
 });
 
+test('defensively caps an injected per-IP session limit at two', async () => {
+  await withServer({ config: baseConfig({ maxConnectionsPerIp: 20 }), rtcApi: {} }, async request => {
+    assert.equal((await createSession(request)).response.status, 201);
+    assert.equal((await createSession(request)).response.status, 201);
+    assert.equal((await request('/rtc/session', { method: 'POST', headers: originHeaders, body: '{}' })).status, 429);
+  });
+});
+
 test('starts each prepared session once, including concurrent requests', async () => {
   let starts = 0;
   let releaseStart;
@@ -148,6 +156,59 @@ test('deletes idempotently and stops a started task exactly once', async () => {
   });
 });
 
+test('concurrent deletes wait for a pending start and stop only once', async () => {
+  let releaseStart;
+  let signalStart;
+  let stops = 0;
+  const starting = new Promise(resolve => { releaseStart = resolve; });
+  const startInvoked = new Promise(resolve => { signalStart = resolve; });
+  await withServer({
+    config: baseConfig(),
+    rtcApi: {
+      startVoiceChat: async () => { signalStart(); await starting; },
+      stopVoiceChat: async () => { stops += 1; }
+    }
+  }, async request => {
+    const { body: session } = await createSession(request);
+    const start = request(`/rtc/session/${session.sessionId}/start`, { method: 'POST', headers: originHeaders, body: '{}' });
+    await startInvoked;
+    const firstDelete = request(`/rtc/session/${session.sessionId}`, { method: 'DELETE', headers: { Origin: ALLOWED_ORIGIN } });
+    const secondDelete = request(`/rtc/session/${session.sessionId}`, { method: 'DELETE', headers: { Origin: ALLOWED_ORIGIN } });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(stops, 0);
+    releaseStart();
+    assert.equal((await start).status, 200);
+    assert.equal((await firstDelete).status, 204);
+    assert.equal((await secondDelete).status, 204);
+    assert.equal(stops, 1);
+  });
+});
+
+test('a rejected stop retains the session quota until a later delete succeeds', async () => {
+  let stopAttempts = 0;
+  await withServer({
+    config: baseConfig(),
+    rtcApi: {
+      startVoiceChat: async () => {},
+      stopVoiceChat: async () => {
+        stopAttempts += 1;
+        if (stopAttempts === 1) throw Object.assign(new Error('do-not-leak'), { code: 'RTC_UPSTREAM' });
+      }
+    }
+  }, async request => {
+    const { body: first } = await createSession(request);
+    await createSession(request);
+    await request(`/rtc/session/${first.sessionId}/start`, { method: 'POST', headers: originHeaders, body: '{}' });
+    const failed = await request(`/rtc/session/${first.sessionId}`, { method: 'DELETE', headers: { Origin: ALLOWED_ORIGIN } });
+    assert.equal(failed.status, 502);
+    assert.deepEqual(await failed.json(), { error: 'RTC_UPSTREAM' });
+    assert.equal((await request('/rtc/session', { method: 'POST', headers: originHeaders, body: '{}' })).status, 429);
+    assert.equal((await request(`/rtc/session/${first.sessionId}`, { method: 'DELETE', headers: { Origin: ALLOWED_ORIGIN } })).status, 204);
+    assert.equal((await createSession(request)).response.status, 201);
+    assert.equal(stopAttempts, 2);
+  });
+});
+
 test('automatically stops and removes sessions at the configured fifteen-minute TTL', async () => {
   let scheduled;
   let stops = 0;
@@ -167,11 +228,48 @@ test('automatically stops and removes sessions at the configured fifteen-minute 
   });
 });
 
+test('a failed TTL stop retains its session until a later delete retry succeeds', async () => {
+  let scheduled;
+  let stopAttempts = 0;
+  await withServer({
+    config: baseConfig({ maxConnectionsPerIp: 1 }),
+    rtcApi: {
+      startVoiceChat: async () => {},
+      stopVoiceChat: async () => {
+        stopAttempts += 1;
+        if (stopAttempts === 1) throw Object.assign(new Error('do-not-leak'), { code: 'RTC_UPSTREAM' });
+      }
+    },
+    setTimeoutFn: callback => { scheduled = callback; return 1; },
+    clearTimeoutFn: () => {}
+  }, async request => {
+    const { body: session } = await createSession(request);
+    await request(`/rtc/session/${session.sessionId}/start`, { method: 'POST', headers: originHeaders, body: '{}' });
+    await scheduled();
+    assert.equal((await request('/rtc/session', { method: 'POST', headers: originHeaders, body: '{}' })).status, 429);
+    assert.equal((await request(`/rtc/session/${session.sessionId}`, { method: 'DELETE', headers: { Origin: ALLOWED_ORIGIN } })).status, 204);
+    assert.equal((await createSession(request)).response.status, 201);
+    assert.equal(stopAttempts, 2);
+  });
+});
+
 test('rejects request bodies over 8 KiB', async () => {
   await withServer({ config: baseConfig(), rtcApi: {} }, async request => {
     const response = await request('/rtc/session', {
       method: 'POST', headers: originHeaders, body: JSON.stringify({ padding: 'x'.repeat(8192) })
     });
     assert.equal(response.status, 413);
+  });
+});
+
+test('rejects oversized DELETE and OPTIONS bodies before method handling', async () => {
+  await withServer({ config: baseConfig(), rtcApi: {} }, async request => {
+    const { body: session } = await createSession(request);
+    const headers = { ...originHeaders };
+    const oversized = 'x'.repeat(8193);
+    const deleted = await request(`/rtc/session/${session.sessionId}`, { method: 'DELETE', headers, body: oversized });
+    const preflight = await request('/rtc/session', { method: 'OPTIONS', headers, body: oversized });
+    assert.equal(deleted.status, 413);
+    assert.equal(preflight.status, 413);
   });
 });

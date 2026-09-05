@@ -14,6 +14,8 @@ const positiveInteger = (env, name, fallback) => {
   return value;
 };
 
+const atMostTwo = (env, name) => Math.min(positiveInteger(env, name, 2), 2);
+
 export function loadConfig(env = process.env) {
   return {
     port: positiveInteger(env, 'PORT', 8787),
@@ -27,7 +29,7 @@ export function loadConfig(env = process.env) {
       .map(value => value.trim())
       .filter(Boolean),
     maxSessionMs: positiveInteger(env, 'MAX_SESSION_MS', 15 * 60 * 1000),
-    maxConnectionsPerIp: positiveInteger(env, 'MAX_CONNECTIONS_PER_IP', 2)
+    maxConnectionsPerIp: atMostTwo(env, 'MAX_CONNECTIONS_PER_IP')
   };
 }
 
@@ -58,7 +60,7 @@ export function loadRtcConfig(env = process.env) {
       positiveInteger(env, 'RTC_SESSION_TTL_MS', 900000),
       900000
     ),
-    maxConnectionsPerIp: positiveInteger(env, 'MAX_CONNECTIONS_PER_IP', 2)
+    maxConnectionsPerIp: atMostTwo(env, 'MAX_CONNECTIONS_PER_IP')
   };
 }
 
