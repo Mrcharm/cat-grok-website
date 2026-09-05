@@ -16,6 +16,26 @@ const positiveInteger = (env, name, fallback) => {
 
 const atMostTwo = (env, name) => Math.min(positiveInteger(env, name, 2), 2);
 
+const DOUBAO_REALTIME_URL = 'wss://openspeech.bytedance.com/api/v3/duplex/realtime/dialogue';
+
+export function loadVoiceConfig(env = process.env) {
+  const allowedOrigins = required(env, 'ALLOWED_ORIGINS')
+    .split(',')
+    .map(value => value.trim())
+    .filter(Boolean);
+  if (allowedOrigins.length === 0) {
+    throw new Error('Missing required environment variable: ALLOWED_ORIGINS');
+  }
+
+  return {
+    apiKey: required(env, 'DOUBAO_API_KEY'),
+    allowedOrigins,
+    upstreamUrl: DOUBAO_REALTIME_URL,
+    sessionTtlMs: Math.min(positiveInteger(env, 'VOICE_SESSION_TTL_MS', 900000), 900000),
+    maxConnections: atMostTwo(env, 'VOICE_MAX_CONNECTIONS')
+  };
+}
+
 export function loadRtcConfig(env = process.env) {
   const allowedOrigins = required(env, 'ALLOWED_ORIGINS')
     .split(',')

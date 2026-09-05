@@ -4,8 +4,8 @@
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
-    "build": "pnpm build:rtc && node scripts/build.mjs",
-    "build:rtc": "node scripts/build-rtc.mjs",
+    "build": "pnpm build:voice && node scripts/build.mjs",
+    "build:voice": "node scripts/build-voice.mjs",
     "start:voice": "node server/index.mjs",
     "test": "node --test",
     "weekly:generate": "node scripts/generate-weekly-report.mjs",
@@ -16,7 +16,8 @@
   "dependencies": {
     "@volcengine/openapi": "1.36.2",
     "gray-matter": "4.0.3",
-    "markdown-it": "14.3.0"
+    "markdown-it": "14.3.0",
+    "ws": "8.18.3"
   },
   "devDependencies": {
     "@volcengine/rtc": "4.69.1",

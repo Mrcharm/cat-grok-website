@@ -19,8 +19,8 @@ test('首页使用一次启动的豆包实时语音入口而不是浏览器模�
   const html = (await buildSite({ write: false })).get('index.html');
   assert.match(html, /id="voiceDock"[^>]*data-voice-endpoint=/);
   assert.match(html, /id="voiceStatus"[^>]*aria-live="polite"[^>]*>JARVIS 已就绪</);
-  assert.match(html, /assets\/dist\/rtc-voice\.js/);
-  assert.doesNotMatch(html, /assets\/js\/voice\/realtime-voice\.js/);
+  assert.match(html, /assets\/dist\/duplex-voice\.js/);
+  assert.doesNotMatch(html, /assets\/dist\/rtc-voice\.js/);
   assert.match(html, /aria-live="polite"/);
   assert.doesNotMatch(html, /const REPLIES|speechSynthesis|SpeechRecognition/);
 });

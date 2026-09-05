@@ -578,7 +578,7 @@ test('pagehide while join is pending deletes the known session and releases RTC 
   assert.ok(trace.includes('release-microphone'));
 });
 
-test('the RTC entry imports the installed SDK and package build bundles it first', async () => {
+test('the retained RTC entry is isolated from the live voice bundle', async () => {
   const [entry, packageRaw] = await Promise.all([
     readFile('assets/js/voice/rtc-entry.js', 'utf8'),
     readFile('package.json', 'utf8')
@@ -586,6 +586,7 @@ test('the RTC entry imports the installed SDK and package build bundles it first
   const packageJson = JSON.parse(packageRaw);
 
   assert.match(entry, /from ['"]@volcengine\/rtc['"]/);
-  assert.equal(packageJson.scripts['build:rtc'], 'node scripts/build-rtc.mjs');
-  assert.match(packageJson.scripts.build, /^pnpm build:rtc && /);
+  assert.equal(packageJson.scripts['build:rtc'], undefined);
+  assert.equal(packageJson.scripts['build:voice'], 'node scripts/build-voice.mjs');
+  assert.match(packageJson.scripts.build, /^pnpm build:voice && /);
 });

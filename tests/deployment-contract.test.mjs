@@ -4,16 +4,11 @@ import { access, readFile } from 'node:fs/promises';
 import { buildSite } from '../scripts/build.mjs';
 
 const REQUIRED_SERVER_SETTINGS = [
-  'RTC_APP_ID',
-  'RTC_APP_KEY',
-  'VOLC_ACCESS_KEY_ID',
-  'VOLC_SECRET_ACCESS_KEY',
-  'S2S_APP_ID',
-  'S2S_ACCESS_TOKEN',
+  'DOUBAO_API_KEY',
   'ALLOWED_ORIGINS'
 ];
 
-test('RTC service has a non-root production container contract', async () => {
+test('duplex voice service has a non-root production container contract', async () => {
   const dockerfile = await readFile('Dockerfile', 'utf8');
   assert.match(dockerfile, /FROM node:22\.22\.2-alpine/);
   assert.match(dockerfile, /RUN npm install --global corepack@0\.35\.0 && corepack enable/);
@@ -56,28 +51,26 @@ test('deployment guide names server settings without sample secret values', asyn
   assert.doesNotMatch(guide, /ghp_[A-Za-z0-9]+|(?:access[_ -]?token|secret[_ -]?(?:access[_ -]?)?key|app[_ -]?key)\s*[=:]\s*\S+/i);
 });
 
-test('obsolete PCM and WebSocket implementation is absent', async () => {
+test('the live transport uses the bounded WebSocket proxy and new browser bundle', async () => {
   const packageJson = JSON.parse(await readFile('package.json', 'utf8'));
-  assert.equal(packageJson.dependencies?.ws, undefined);
+  assert.equal(packageJson.dependencies?.ws, '8.18.3');
   for (const file of [
-    'server/doubao-protocol.mjs',
-    'server/doubao-session.mjs',
-    'assets/js/voice/pcm-capture.js',
-    'assets/js/voice/pcm-player.js',
-    'assets/js/voice/pcm-worklet.js',
-    'assets/js/voice/realtime-voice.js'
+    'server/index.mjs',
+    'assets/js/voice/duplex-controller.js',
+    'assets/js/voice/duplex-entry.js',
+    'scripts/build-voice.mjs'
   ]) {
-    await assert.rejects(access(file), error => error?.code === 'ENOENT', file);
+    await access(file);
   }
 });
 
 test('generated public pages contain no server setting names or simulated voice', async () => {
   const files = await buildSite({ write: false });
   for (const [name, html] of files) {
-    assert.doesNotMatch(html, /RTC_APP_KEY|IAM_ACCESS_KEY|IAM_SECRET_KEY|S2S_ACCESS_TOKEN|DOUBAO_APP_ID|DOUBAO_ACCESS_KEY|DOUBAO_MODEL_NAME|secret_key|access_token/i, name);
+    assert.doesNotMatch(html, /DOUBAO_API_KEY|RTC_APP_KEY|IAM_ACCESS_KEY|IAM_SECRET_KEY|S2S_ACCESS_TOKEN|secret_key|access_token/i, name);
   }
   const home = files.get('index.html');
-  assert.match(home, /assets\/dist\/rtc-voice\.js/);
-  assert.doesNotMatch(home, /assets\/js\/voice\/realtime-voice\.js/);
+  assert.match(home, /assets\/dist\/duplex-voice\.js/);
+  assert.doesNotMatch(home, /assets\/dist\/rtc-voice\.js/);
   assert.doesNotMatch(home, /const REPLIES|speechSynthesis|SpeechRecognition/);
 });

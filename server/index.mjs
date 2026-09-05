@@ -1,212 +1,209 @@
 import http from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { isAllowedOrigin, loadRtcConfig } from './config.mjs';
-import { createRtcOpenApi } from './rtc-openapi.mjs';
-import { createRtcSessionStore } from './rtc-session-store.mjs';
-import { createClientIpResolver } from './rtc-client-ip.mjs';
+import WebSocket, { WebSocketServer } from 'ws';
+import { isAllowedOrigin, loadVoiceConfig } from './config.mjs';
 
-const MAX_JSON_BYTES = 8 * 1024;
+const MAX_MESSAGE_BYTES = 128 * 1024;
+const MAX_BUFFERED_BYTES = 256 * 1024;
+const PCM_FRAME_BYTES = 640;
+const GREETING = '你好，我是 JARVIS。语音连接成功。';
 
-const json = (response, status, payload, origin) => {
-  const headers = {
-    'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'no-store'
-  };
-  if (origin) {
-    headers['access-control-allow-origin'] = origin;
-    headers.vary = 'Origin';
-  }
-  response.writeHead(status, headers);
-  response.end(JSON.stringify(payload));
+const SESSION_CREATE = Object.freeze({
+  type: 'session.create',
+  session: {
+    model: '1.2.6.1',
+    instructions: '你是 JARVIS，猫哥的中文 AI 语音陪伴助手。回答自然、简洁、真诚。不要使用工具、联网、位置、音乐或录音能力。',
+    audio: {
+      input: { format: { type: 'pcm', sample_rate: 16000 } },
+      output: {
+        format: { type: 'pcm', sample_rate: 24000 },
+        voice: 'zh_male_yunzhou_jupiter_bigtts',
+        speed: 0,
+        loudness: 0
+      }
+    },
+    tools: []
+  },
+  extension: { extra: { enable_proactive_speak: false } }
+});
+
+const writeHttpError = (socket, status, label) => {
+  socket.write(`HTTP/1.1 ${status} ${label}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n`);
+  socket.destroy();
 };
 
-const empty = (response, status, origin) => {
-  const headers = { 'cache-control': 'no-store' };
-  if (origin) {
-    headers['access-control-allow-origin'] = origin;
-    headers.vary = 'Origin';
-  }
-  response.writeHead(status, headers);
-  response.end();
+const publicError = (socket, code, message) => {
+  if (socket.readyState !== WebSocket.OPEN) return;
+  socket.send(JSON.stringify({ type: 'error', error: { code, message } }));
 };
 
-const readBody = async request => {
-  const contentLength = Number(request.headers['content-length'] || 0);
-  if (Number.isFinite(contentLength) && contentLength > MAX_JSON_BYTES) {
-    request.resume();
-    const error = new Error('body_too_large');
-    error.status = 413;
-    throw error;
+const parseClientMessage = data => {
+  if (Buffer.byteLength(data) > MAX_MESSAGE_BYTES) throw new Error('MESSAGE_TOO_LARGE');
+  let event;
+  try {
+    event = JSON.parse(data.toString());
+  } catch {
+    throw new Error('INVALID_MESSAGE');
   }
-  let size = 0;
-  const chunks = [];
-  for await (const chunk of request) {
-    size += chunk.length;
-    if (size > MAX_JSON_BYTES) {
-      const error = new Error('body_too_large');
-      error.status = 413;
-      throw error;
+  if (event?.type === 'input_audio_buffer.append') {
+    if (typeof event.audio !== 'string') throw new Error('INVALID_AUDIO');
+    const audio = Buffer.from(event.audio, 'base64');
+    if (audio.byteLength !== PCM_FRAME_BYTES || audio.toString('base64') !== event.audio) {
+      throw new Error('INVALID_AUDIO');
     }
-    chunks.push(chunk);
+    return { type: event.type, audio: event.audio };
   }
-  return Buffer.concat(chunks);
+  if (event?.type === 'input_audio_buffer.commit') return { type: event.type };
+  if (event?.type === 'response.cancel') return { type: event.type };
+  if (event?.type === 'speech_text_buffer.commit') {
+    const text = typeof event.text === 'string' ? event.text.trim() : '';
+    if (!text || text.length > 300) throw new Error('INVALID_TEXT');
+    return { type: event.type, text };
+  }
+  throw new Error('UNSUPPORTED_MESSAGE');
 };
 
-const parseJsonBody = body => {
-  if (body.length === 0) return {};
-  try {
-    return JSON.parse(body.toString('utf8'));
-  } catch {
-    const error = new Error('invalid_json');
-    error.status = 400;
-    throw error;
-  }
-};
-
-const pathSessionId = pathname => {
-  const match = /^\/rtc\/session\/([^/]+)(?:\/start)?$/.exec(pathname);
-  if (!match) return null;
-  try {
-    return decodeURIComponent(match[1]);
-  } catch {
-    return null;
-  }
-};
-
-export function createVoiceServer({
-  config,
-  rtcApi = createRtcOpenApi({ config }),
-  tokenFactory,
-  setTimeoutFn,
-  clearTimeoutFn
-}) {
-  const resolveClientIp = createClientIpResolver(config.clientIp);
-  let store;
-  const stopSession = sessionId => store.stop(
-    sessionId,
-    rtcApi.stopVoiceChat?.bind(rtcApi) || (async () => {})
-  );
-  store = createRtcSessionStore({
-    config,
-    tokenFactory,
-    setTimeoutFn,
-    clearTimeoutFn,
-    onExpire: stopSession
-  });
-
-  const server = http.createServer(async (request, response) => {
+export function createVoiceServer({ config }) {
+  const sessions = new Set();
+  const wss = new WebSocketServer({ noServer: true, maxPayload: MAX_MESSAGE_BYTES });
+  const server = http.createServer((request, response) => {
     const pathname = new URL(request.url, 'http://localhost').pathname;
+    response.setHeader('content-type', 'application/json; charset=utf-8');
+    response.setHeader('cache-control', 'no-store');
     if (request.method === 'GET' && pathname === '/healthz') {
-      json(response, 200, { ok: true });
+      response.writeHead(200);
+      response.end(JSON.stringify({ ok: true }));
       return;
     }
-
-    if (!pathname.startsWith('/rtc/session')) {
-      json(response, 404, { error: 'not_found' });
-      return;
-    }
-
-    const origin = request.headers.origin;
-    if (!isAllowedOrigin(origin, config.allowedOrigins)) {
-      json(response, 403, { error: 'origin_not_allowed' });
-      return;
-    }
-    let body;
-    try {
-      body = await readBody(request);
-    } catch (error) {
-      json(response, error.status || 400, { error: error.message }, origin);
-      return;
-    }
-    if (request.method === 'OPTIONS') {
-      response.writeHead(204, {
-        'access-control-allow-origin': origin,
-        'access-control-allow-methods': 'POST, DELETE, OPTIONS',
-        'access-control-allow-headers': 'Content-Type',
-        'cache-control': 'no-store',
-        vary: 'Origin'
-      });
-      response.end();
-      return;
-    }
-
-    if (request.method === 'POST') {
-      try {
-        parseJsonBody(body);
-      } catch (error) {
-        json(response, error.status || 400, { error: error.message }, origin);
-        return;
-      }
-    }
-
-    if (request.method === 'POST' && pathname === '/rtc/session') {
-      const ip = resolveClientIp(request);
-      if (!ip) {
-        json(response, 503, { error: 'client_ip_unavailable' }, origin);
-        return;
-      }
-      let session;
-      try {
-        session = store.create(ip);
-      } catch {
-        json(response, 500, { error: 'session_unavailable' }, origin);
-        return;
-      }
-      if (!session) {
-        json(response, 429, { error: 'session_limit' }, origin);
-        return;
-      }
-      json(response, 201, store.public(session), origin);
-      return;
-    }
-
-    const sessionId = pathSessionId(pathname);
-    if (request.method === 'POST' && sessionId && pathname.endsWith('/start')) {
-      try {
-        const session = await store.start(sessionId, rtcApi.startVoiceChat.bind(rtcApi));
-        if (!session) {
-          json(response, 404, { error: 'session_not_found' }, origin);
-          return;
-        }
-        json(response, 200, { sessionId, state: 'started' }, origin);
-      } catch (error) {
-        json(response, 502, { error: error.code || 'RTC_UPSTREAM' }, origin);
-      }
-      return;
-    }
-
-    if (request.method === 'DELETE' && sessionId && pathname === `/rtc/session/${encodeURIComponent(sessionId)}`) {
-      try {
-        await stopSession(sessionId);
-        empty(response, 204, origin);
-      } catch (error) {
-        json(response, 502, { error: error.code || 'RTC_UPSTREAM' }, origin);
-      }
-      return;
-    }
-
-    json(response, 404, { error: 'not_found' }, origin);
+    response.writeHead(404);
+    response.end(JSON.stringify({ error: 'not_found' }));
   });
 
-  // The retired /voice WebSocket protocol must not be reachable after the RTC migration.
-  server.on('upgrade', (_request, socket) => {
-    socket.write('HTTP/1.1 404 Not Found\r\nConnection: close\r\n\r\n');
-    socket.destroy();
+  server.on('upgrade', (request, socket, head) => {
+    const pathname = new URL(request.url, 'http://localhost').pathname;
+    if (pathname !== '/voice') return writeHttpError(socket, 404, 'Not Found');
+    if (!isAllowedOrigin(request.headers.origin, config.allowedOrigins)) {
+      return writeHttpError(socket, 403, 'Forbidden');
+    }
+    if (sessions.size >= config.maxConnections) {
+      return writeHttpError(socket, 429, 'Too Many Requests');
+    }
+    wss.handleUpgrade(request, socket, head, browser => {
+      wss.emit('connection', browser, request);
+    });
+  });
+
+  wss.on('connection', browser => {
+    const context = {
+      browser,
+      upstream: null,
+      closing: false,
+      browserClosed: false,
+      upstreamClosed: false,
+      timer: null,
+      terminateTimer: null
+    };
+    sessions.add(context);
+    const upstream = new WebSocket(config.upstreamUrl, {
+      headers: {
+        'X-Api-Key': config.apiKey,
+        'X-Api-Connect-Id': randomUUID().replaceAll('-', '')
+      },
+      maxPayload: MAX_MESSAGE_BYTES,
+      handshakeTimeout: 10000
+    });
+    context.upstream = upstream;
+
+    const release = () => {
+      if (!context.browserClosed || !context.upstreamClosed) return;
+      clearTimeout(context.terminateTimer);
+      sessions.delete(context);
+    };
+    const cleanup = (code = 1000, reason = 'closed') => {
+      if (context.closing) return;
+      context.closing = true;
+      clearTimeout(context.timer);
+      if ([WebSocket.OPEN, WebSocket.CONNECTING].includes(browser.readyState)) browser.close(code, reason);
+      if ([WebSocket.OPEN, WebSocket.CONNECTING].includes(upstream.readyState)) upstream.close(code, reason);
+      context.terminateTimer = setTimeout(() => {
+        if (!context.browserClosed) browser.terminate();
+        if (!context.upstreamClosed) upstream.terminate();
+      }, 1000);
+      context.terminateTimer.unref?.();
+    };
+
+    context.timer = setTimeout(() => cleanup(1000, 'session_timeout'), config.sessionTtlMs);
+    context.timer.unref?.();
+
+    upstream.on('open', () => upstream.send(JSON.stringify(SESSION_CREATE)));
+    upstream.on('message', data => {
+      let event;
+      try {
+        event = JSON.parse(data.toString());
+      } catch {
+        publicError(browser, 'UPSTREAM_PROTOCOL', '语音服务返回了无法处理的数据。');
+        return cleanup(1011, 'upstream_protocol');
+      }
+      if (event?.type === 'error') {
+        publicError(browser, 'UPSTREAM_ERROR', '语音服务暂不可用，请稍后重试。');
+        return cleanup(1011, 'upstream_error');
+      }
+      if (browser.readyState === WebSocket.OPEN) {
+        if (browser.bufferedAmount > MAX_BUFFERED_BYTES) return cleanup(1013, 'backpressure');
+        browser.send(JSON.stringify(event));
+      }
+      if (event?.type === 'session.created' && upstream.readyState === WebSocket.OPEN) {
+        upstream.send(JSON.stringify({ type: 'speech_text_buffer.commit', text: GREETING }));
+      }
+    });
+    upstream.on('error', () => {
+      publicError(browser, 'UPSTREAM_UNAVAILABLE', '暂时无法连接语音服务，请稍后重试。');
+      cleanup(1011, 'upstream_unavailable');
+    });
+    upstream.on('close', () => {
+      context.upstreamClosed = true;
+      cleanup(1000, 'upstream_closed');
+      release();
+    });
+
+    browser.on('message', data => {
+      if (upstream.readyState !== WebSocket.OPEN) {
+        publicError(browser, 'SESSION_NOT_READY', 'JARVIS 仍在连接，请稍等。');
+        return;
+      }
+      if (upstream.bufferedAmount > MAX_BUFFERED_BYTES) return cleanup(1013, 'backpressure');
+      try {
+        upstream.send(JSON.stringify(parseClientMessage(data)));
+      } catch (error) {
+        publicError(browser, error.message, '语音数据无效，连接已结束。');
+        cleanup(1008, 'invalid_message');
+      }
+    });
+    browser.on('error', () => cleanup(1000, 'browser_error'));
+    browser.on('close', () => {
+      context.browserClosed = true;
+      cleanup(1000, 'browser_closed');
+      release();
+    });
   });
 
   return {
     server,
     close(callback) {
-      Promise.all(store.sessionIds().map(sessionId => stopSession(sessionId).catch(() => {})))
-        .finally(() => server.close(callback));
+      for (const context of [...sessions]) {
+        context.browser.close(1001, 'server_shutdown');
+        context.upstream?.close(1001, 'server_shutdown');
+      }
+      wss.close(() => server.close(callback));
     }
   };
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const config = loadRtcConfig();
+  const config = loadVoiceConfig();
   const app = createVoiceServer({ config });
-  app.server.listen(config.port || 8787, '0.0.0.0', () => {
-    console.log('JARVIS RTC session API listening');
+  app.server.listen(Number(process.env.PORT) || 8787, '0.0.0.0', () => {
+    console.log('JARVIS Doubao realtime voice proxy listening');
   });
 }
