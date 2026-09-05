@@ -64,6 +64,9 @@ export class RtcVoiceController {
   #onError;
   #maxDisconnects;
   #deleteTimeoutMs;
+  #now;
+  #setTimeout;
+  #clearTimeout;
   #disconnects = 0;
   #generation = 0;
   #current = null;
@@ -82,7 +85,10 @@ export class RtcVoiceController {
     onTranscript = () => {},
     onError = () => {},
     maxDisconnects = 3,
-    deleteTimeoutMs = 1500
+    deleteTimeoutMs = 1500,
+    now = () => Date.now(),
+    setTimeoutFn = setTimeout,
+    clearTimeoutFn = clearTimeout
   }) {
     this.#origin = new URL(endpoint).origin;
     this.#rtc = rtc;
@@ -94,6 +100,9 @@ export class RtcVoiceController {
     this.#onError = onError;
     this.#maxDisconnects = maxDisconnects;
     this.#deleteTimeoutMs = deleteTimeoutMs;
+    this.#now = now;
+    this.#setTimeout = setTimeoutFn;
+    this.#clearTimeout = clearTimeoutFn;
   }
 
   #setState(state) {
@@ -125,7 +134,8 @@ export class RtcVoiceController {
         engine: null,
         cleanupPromise: null,
         keepaliveRequested: false,
-        deleteRecord: null
+        deleteRecord: null,
+        expiryTimer: null
       };
       this.#current = context;
       await this.#start(context);
@@ -153,6 +163,13 @@ export class RtcVoiceController {
       const session = await prepared.json();
       context.session = session;
       this.#ensureCurrent(context);
+
+      const remainingMs = Date.parse(session.expiresAt) - this.#now();
+      if (!Number.isFinite(remainingMs) || remainingMs <= 0) throw new Error('Session expired');
+      context.expiryTimer = this.#setTimeout(() => {
+        if (this.#isCurrent(context)) void this.stop();
+      }, Math.min(remainingMs, 900000));
+      context.expiryTimer?.unref?.();
 
       const engine = this.#rtc.createEngine(session.appId, {
         autoPlayPolicy: this.#rtc.RTCAutoPlayPolicy.AUTO_PLAY
@@ -235,6 +252,17 @@ export class RtcVoiceController {
         void this.#fail(ERROR_MESSAGES.autoplay, context);
       }
     });
+    const codes = this.#rtc.ErrorCode;
+    const terminalErrors = new Set([
+      codes.TOKEN_EXPIRED, codes.RECONNECT_FAILED, codes.KICKED_OUT,
+      codes.ROOM_DISMISS, codes.DUPLICATE_LOGIN, codes.RTM_DUPLICATE_LOGIN,
+      codes.RTM_TOKEN_ERROR
+    ].filter(value => value !== undefined));
+    engine.on(events.onError, event => {
+      if (this.#isCurrent(context) && terminalErrors.has(event?.errorCode)) {
+        void this.#fail(ERROR_MESSAGES.connection, context);
+      }
+    });
     engine.on(events.onConnectionStateChanged, event => {
       if (!this.#isCurrent(context)) return;
       const states = this.#rtc.ConnectionState;
@@ -301,6 +329,8 @@ export class RtcVoiceController {
   }
 
   #cleanupContext(context) {
+    this.#clearTimeout(context.expiryTimer);
+    context.expiryTimer = null;
     const session = context.session;
     const engine = context.engine;
     context.session = null;

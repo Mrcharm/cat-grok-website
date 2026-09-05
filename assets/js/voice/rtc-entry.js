@@ -8,6 +8,7 @@ const {
   MediaType,
   RoomProfileType,
   ConnectionState,
+  ErrorCode,
   RTCAutoPlayPolicy
 } = RTC;
 
@@ -27,6 +28,7 @@ bootRtcVoice({
     MediaType,
     RoomProfileType,
     ConnectionState,
+    ErrorCode,
     RTCAutoPlayPolicy
   },
   requestPermission: requestMicrophonePermission

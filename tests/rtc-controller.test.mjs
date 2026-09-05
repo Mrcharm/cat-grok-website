@@ -11,9 +11,16 @@ const RTC = {
     onRemoteAudioFirstFrame: 'onRemoteAudioFirstFrame',
     onRoomBinaryMessageReceived: 'onRoomBinaryMessageReceived',
     onAutoplayFailed: 'onAutoplayFailed',
+    onError: 'onError',
     onConnectionStateChanged: 'onConnectionStateChanged'
   },
   MediaType: { AUDIO: 1 },
+  ErrorCode: {
+    TOKEN_EXPIRED: 'TOKEN_EXPIRED', RECONNECT_FAILED: 'RECONNECT_FAILED',
+    KICKED_OUT: 'KICKED_OUT', ROOM_DISMISS: 'ROOM_DISMISS',
+    DUPLICATE_LOGIN: 'DUPLICATE_LOGIN', RTM_DUPLICATE_LOGIN: 'RTM_DUPLICATE_LOGIN',
+    RTM_TOKEN_ERROR: 'RTM_TOKEN_ERROR'
+  },
   RoomProfileType: { chat: 5 },
   ConnectionState: {
     CONNECTION_STATE_DISCONNECTED: 1,
@@ -88,7 +95,10 @@ function setup({
   joinResponse,
   startResponse,
   deleteResponse,
-  deleteTimeoutMs = 25
+  deleteTimeoutMs = 25,
+  now = () => Date.parse(session.expiresAt) - 900000,
+  setTimeoutFn,
+  clearTimeoutFn
 } = {}) {
   const trace = [];
   const states = [];
@@ -131,6 +141,9 @@ function setup({
     requestPermission: permission,
     fetchFn,
     deleteTimeoutMs,
+    now,
+    setTimeoutFn,
+    clearTimeoutFn,
     music,
     onState: state => states.push(state),
     onTranscript: value => transcripts.push(value),
@@ -140,6 +153,55 @@ function setup({
 }
 
 const flush = () => new Promise(resolve => setImmediate(resolve));
+
+for (const code of Object.values(RTC.ErrorCode)) {
+  test(`SDK terminal onError ${code} releases all session resources`, async () => {
+    const { controller, engine, trace } = setup();
+    await controller.start();
+    engine.emit(RTC.events.onError, { errorCode: code });
+    await flush();
+    assert.equal(controller.state, 'error');
+    assert.deepEqual(trace.slice(trace.indexOf('delete-session')), [
+      'delete-session', 'leave-room', 'release-microphone', 'destroy-engine'
+    ]);
+  });
+}
+
+test('local expiresAt deadline ends session and a stale timer cannot end its replacement', async () => {
+  const timers = new Map();
+  let id = 0;
+  const { controller, trace } = setup({
+    setTimeoutFn: (callback, delay) => { timers.set(++id, { callback, delay }); return id; },
+    clearTimeoutFn: timer => timers.delete(timer)
+  });
+  await controller.start();
+  assert.equal(timers.size, 1);
+  const stale = timers.get(1);
+  assert.equal(stale.delay, 900000);
+  stale.callback();
+  await flush();
+  assert.equal(controller.state, 'stopped');
+  assert.equal(timers.size, 0);
+  assert.deepEqual(trace.slice(trace.indexOf('delete-session')), [
+    'delete-session', 'leave-room', 'release-microphone', 'destroy-engine'
+  ]);
+  await controller.start();
+  stale.callback();
+  await flush();
+  assert.equal(controller.state, 'listening');
+  assert.equal(timers.size, 1);
+  await controller.stop();
+  assert.equal(timers.size, 0);
+});
+
+test('a session already expired at prepare cannot capture or start remote AI', async () => {
+  const { controller, trace } = setup({ now: () => Date.parse(session.expiresAt) });
+  await assert.rejects(controller.start());
+  assert.equal(controller.state, 'error');
+  assert.ok(trace.includes('delete-session'));
+  assert.equal(trace.includes('capture'), false);
+  assert.equal(trace.includes('start-ai'), false);
+});
 
 const deferred = () => {
   let resolve;

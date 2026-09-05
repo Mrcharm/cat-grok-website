@@ -3,6 +3,7 @@ import { pathToFileURL } from 'node:url';
 import { isAllowedOrigin, loadRtcConfig } from './config.mjs';
 import { createRtcOpenApi } from './rtc-openapi.mjs';
 import { createRtcSessionStore } from './rtc-session-store.mjs';
+import { createClientIpResolver } from './rtc-client-ip.mjs';
 
 const MAX_JSON_BYTES = 8 * 1024;
 
@@ -79,6 +80,7 @@ export function createVoiceServer({
   setTimeoutFn,
   clearTimeoutFn
 }) {
+  const resolveClientIp = createClientIpResolver(config.clientIp);
   let store;
   const stopSession = sessionId => store.stop(
     sessionId,
@@ -138,9 +140,14 @@ export function createVoiceServer({
     }
 
     if (request.method === 'POST' && pathname === '/rtc/session') {
+      const ip = resolveClientIp(request);
+      if (!ip) {
+        json(response, 503, { error: 'client_ip_unavailable' }, origin);
+        return;
+      }
       let session;
       try {
-        session = store.create(request.socket.remoteAddress || 'unknown');
+        session = store.create(ip);
       } catch {
         json(response, 500, { error: 'session_unavailable' }, origin);
         return;

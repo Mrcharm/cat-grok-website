@@ -64,46 +64,71 @@ const stopBody = (config, session) => ({
   TaskId: session.taskId
 });
 
-export function createRtcOpenApi({ config, fetchImpl = globalThis.fetch, SignerClass = OfficialSigner }) {
+export function createRtcOpenApi({
+  config,
+  fetchImpl = globalThis.fetch,
+  SignerClass = OfficialSigner,
+  deadlineMs = 10000,
+  setTimeoutFn = setTimeout,
+  clearTimeoutFn = clearTimeout
+}) {
+  if (!Number.isSafeInteger(deadlineMs) || deadlineMs <= 0) throw new RangeError('Invalid RTC deadline');
   const request = async (action, body) => {
-    const signedRequest = {
-      region: REGION,
-      method: 'POST',
-      params: { Action: action, Version: VERSION },
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+    const controller = new AbortController();
+    let timer;
+    const deadline = new Promise((_, reject) => {
+      timer = setTimeoutFn(() => {
+        controller.abort();
+        reject(safeError('RTC_UPSTREAM'));
+      }, deadlineMs);
+    });
+    const operation = async () => {
+      const signedRequest = {
+        region: REGION,
+        method: 'POST',
+        params: { Action: action, Version: VERSION },
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      };
+
+      let response;
+      try {
+        const signer = new SignerClass(signedRequest, 'rtc');
+        signer.addAuthorization({
+          accessKeyId: config.iam.accessKeyId,
+          secretKey: config.iam.secretAccessKey
+        });
+        const query = new URLSearchParams(signedRequest.params);
+        response = await fetchImpl(`${HOST}?${query}`, {
+          method: signedRequest.method,
+          headers: signedRequest.headers,
+          body: signedRequest.body,
+          signal: controller.signal
+        });
+      } catch {
+        throw safeError('RTC_UPSTREAM');
+      }
+
+      let payload;
+      try {
+        payload = JSON.parse(await response.text());
+      } catch {
+        throw safeError(response.ok
+          ? 'RTC_UPSTREAM'
+          : failureCode(response.status));
+      }
+
+      if (!response.ok || payload?.ResponseMetadata?.Error) {
+        throw safeError(failureCode(response.status, payload));
+      }
+      return payload?.Result;
     };
-
-    let response;
     try {
-      const signer = new SignerClass(signedRequest, 'rtc');
-      signer.addAuthorization({
-        accessKeyId: config.iam.accessKeyId,
-        secretKey: config.iam.secretAccessKey
-      });
-      const query = new URLSearchParams(signedRequest.params);
-      response = await fetchImpl(`${HOST}?${query}`, {
-        method: signedRequest.method,
-        headers: signedRequest.headers,
-        body: signedRequest.body
-      });
-    } catch {
-      throw safeError('RTC_UPSTREAM');
+      // Abort alone cannot bound injected fetches or body readers that ignore it.
+      return await Promise.race([operation(), deadline]);
+    } finally {
+      clearTimeoutFn(timer);
     }
-
-    let payload;
-    try {
-      payload = JSON.parse(await response.text());
-    } catch {
-      throw safeError(response.ok
-        ? 'RTC_UPSTREAM'
-        : failureCode(response.status));
-    }
-
-    if (!response.ok || payload?.ResponseMetadata?.Error) {
-      throw safeError(failureCode(response.status, payload));
-    }
-    return payload?.Result;
   };
 
   return {

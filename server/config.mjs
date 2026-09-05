@@ -39,6 +39,10 @@ export function loadRtcConfig(env = process.env) {
       accessToken: required(env, 'S2S_ACCESS_TOKEN')
     },
     allowedOrigins,
+    clientIp: {
+      mode: env.RENDER === 'true' ? 'trusted-proxy' : 'direct',
+      trustedProxyCidrs: (env.RTC_TRUSTED_PROXY_CIDRS || '').split(',').map(value => value.trim()).filter(Boolean)
+    },
     sessionTtlMs: Math.min(
       positiveInteger(env, 'RTC_SESSION_TTL_MS', 900000),
       900000

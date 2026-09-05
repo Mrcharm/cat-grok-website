@@ -32,6 +32,44 @@ const originHeaders = {
   'Content-Type': 'application/json'
 };
 
+test('trusted proxy separates visitors and ignores spoofed prepended addresses', async () => {
+  await withServer({ config: baseConfig({ clientIp: {
+    mode: 'trusted-proxy', trustedProxyCidrs: ['127.0.0.1/32', '10.8.0.0/24']
+  } }), rtcApi: {} }, async request => {
+    const prepare = forwarded => request('/rtc/session', {
+      method: 'POST', headers: { ...originHeaders, 'X-Forwarded-For': forwarded }, body: '{}'
+    });
+    assert.equal((await prepare('192.0.2.1, 198.51.100.10, 10.8.0.2')).status, 201);
+    assert.equal((await prepare('192.0.2.2, 198.51.100.10, 10.8.0.2')).status, 201);
+    assert.equal((await prepare('192.0.2.3, 198.51.100.10, 10.8.0.2')).status, 429);
+    assert.equal((await prepare('198.51.100.11, 10.8.0.2')).status, 201);
+    for (const malformed of ['', 'unknown', '198.51.100.12,,10.8.0.2', '198.51.100.12:1234', '10.8.0.2']) {
+      assert.equal((await prepare(malformed)).status, 503, malformed);
+    }
+  });
+});
+
+test('forwarded metadata fails closed without a verified proxy boundary', async () => {
+  for (const trustedProxyCidrs of [[], ['10.8.0.0/24']]) {
+    await withServer({ config: baseConfig({ clientIp: { mode: 'trusted-proxy', trustedProxyCidrs } }), rtcApi: {} }, async request => {
+      const result = await request('/rtc/session', {
+        method: 'POST', headers: { ...originHeaders, 'X-Forwarded-For': '198.51.100.10' }, body: '{}'
+      });
+      assert.equal(result.status, 503);
+    });
+  }
+});
+
+test('direct deployments ignore attacker-controlled forwarding headers', async () => {
+  await withServer({ config: baseConfig(), rtcApi: {} }, async request => {
+    for (const [index, expected] of [201, 201, 429].entries()) {
+      assert.equal((await request('/rtc/session', {
+        method: 'POST', headers: { ...originHeaders, 'X-Forwarded-For': `198.51.100.${index + 1}` }, body: '{}'
+      })).status, expected);
+    }
+  });
+});
+
 async function createSession(request) {
   const response = await request('/rtc/session', {
     method: 'POST', headers: originHeaders, body: '{}'
@@ -120,7 +158,7 @@ test('starts each prepared session once, including concurrent requests', async (
   });
 });
 
-test('rolls a failed start back to prepared so it can be retried', async () => {
+test('a failed start enters compensating cleanup and cannot be restarted', async () => {
   let attempts = 0;
   await withServer({
     config: baseConfig(),
@@ -135,8 +173,8 @@ test('rolls a failed start back to prepared so it can be retried', async () => {
     assert.deepEqual(await failed.json(), { error: 'RTC_UPSTREAM' });
 
     const retried = await request(`/rtc/session/${session.sessionId}/start`, { method: 'POST', headers: originHeaders, body: '{}' });
-    assert.equal(retried.status, 200);
-    assert.equal(attempts, 2);
+    assert.equal(retried.status, 404);
+    assert.equal(attempts, 1);
   });
 });
 

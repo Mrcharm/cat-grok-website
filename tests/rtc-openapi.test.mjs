@@ -49,6 +49,44 @@ const textResponse = (status, body) => ({
   text: async () => body
 });
 
+for (const stalledPhase of ['headers', 'body']) {
+  test(`total deadline settles stalled ${stalledPhase} even when fetch ignores abort`, async () => {
+    let fire;
+    let signal;
+    let cleared = false;
+    const api = createRtcOpenApi({
+      config, SignerClass: CapturingSigner, deadlineMs: 25,
+      setTimeoutFn: (callback, delay) => { fire = callback; assert.equal(delay, 25); return 1; },
+      clearTimeoutFn: () => { cleared = true; },
+      fetchImpl: async (_url, init) => {
+        signal = init.signal;
+        if (stalledPhase === 'headers') return new Promise(() => {});
+        return { ok: true, status: 200, text: () => new Promise(() => {}) };
+      }
+    });
+    const pending = api.startVoiceChat(session);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(typeof fire, 'function');
+    const rejected = assert.rejects(pending, error => error.code === 'RTC_UPSTREAM');
+    fire();
+    await rejected;
+    assert.equal(signal.aborted, true);
+    assert.equal(cleared, true);
+  });
+}
+
+test('successful upstream request clears its total deadline', async () => {
+  let cleared = false;
+  const api = createRtcOpenApi({
+    config, SignerClass: CapturingSigner,
+    setTimeoutFn: () => 123,
+    clearTimeoutFn: id => { assert.equal(id, 123); cleared = true; },
+    fetchImpl: async () => jsonResponse(200, { Result: 'ok' })
+  });
+  await api.stopVoiceChat(session);
+  assert.equal(cleared, true);
+});
+
 test('startVoiceChat signs the O2.0 POST with the required query and body', async () => {
   CapturingSigner.calls = [];
   const requests = [];

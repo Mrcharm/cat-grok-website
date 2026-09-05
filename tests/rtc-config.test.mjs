@@ -51,8 +51,18 @@ test('loadRtcConfig trims credentials and parses origins into server configurati
     },
     s2s: { appId: 's2s-app-id', accessToken: 's2s-access-token' },
     allowedOrigins: ['https://mrcharm.github.io', 'http://localhost:4173'],
+    clientIp: { mode: 'direct', trustedProxyCidrs: [] },
     sessionTtlMs: 900000,
     maxConnectionsPerIp: 2
+  });
+});
+
+test('Render selects fail-closed trusted-proxy mode with optional non-secret CIDRs', () => {
+  assert.deepEqual(loadRtcConfig({ ...valid, RENDER: 'true' }).clientIp, {
+    mode: 'trusted-proxy', trustedProxyCidrs: []
+  });
+  assert.deepEqual(loadRtcConfig({ ...valid, RENDER: 'true', RTC_TRUSTED_PROXY_CIDRS: ' 10.8.0.0/24, 2001:db8::/64 ' }).clientIp, {
+    mode: 'trusted-proxy', trustedProxyCidrs: ['10.8.0.0/24', '2001:db8::/64']
   });
 });
 
