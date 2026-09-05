@@ -75,7 +75,6 @@ export function createRtcOpenApi({ config, fetchImpl = globalThis.fetch, SignerC
     };
 
     let response;
-    let payload;
     try {
       const signer = new SignerClass(signedRequest, 'rtc');
       signer.addAuthorization({
@@ -88,9 +87,17 @@ export function createRtcOpenApi({ config, fetchImpl = globalThis.fetch, SignerC
         headers: signedRequest.headers,
         body: signedRequest.body
       });
-      payload = await response.json();
     } catch {
       throw safeError('RTC_UPSTREAM');
+    }
+
+    let payload;
+    try {
+      payload = JSON.parse(await response.text());
+    } catch {
+      throw safeError(response.ok
+        ? 'RTC_UPSTREAM'
+        : failureCode(response.status));
     }
 
     if (!response.ok || payload?.ResponseMetadata?.Error) {

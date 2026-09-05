@@ -39,7 +39,14 @@ class CapturingSigner {
 const jsonResponse = (status, payload) => ({
   ok: status >= 200 && status < 300,
   status,
+  text: async () => JSON.stringify(payload),
   json: async () => payload
+});
+
+const textResponse = (status, body) => ({
+  ok: status >= 200 && status < 300,
+  status,
+  text: async () => body
 });
 
 test('startVoiceChat signs the O2.0 POST with the required query and body', async () => {
@@ -153,6 +160,118 @@ test('permission and quota failures expose stable safe codes only', async () => 
         && !error.message.includes('RequestLimitExceeded')
     );
   }
+});
+
+test('non-JSON permission and quota responses keep their HTTP failure classes', async () => {
+  for (const [status, expectedCode] of [
+    [403, 'RTC_PERMISSION'],
+    [429, 'RTC_QUOTA']
+  ]) {
+    const api = createRtcOpenApi({
+      config,
+      SignerClass: CapturingSigner,
+      fetchImpl: async () => textResponse(status, '<html>upstream error</html>')
+    });
+
+    await assert.rejects(
+      () => api.startVoiceChat(session),
+      error => error.code === expectedCode
+    );
+  }
+});
+
+test('a successful response with invalid JSON text becomes RTC_UPSTREAM without calling json', async () => {
+  let textCalls = 0;
+  let jsonCalls = 0;
+  const api = createRtcOpenApi({
+    config,
+    SignerClass: CapturingSigner,
+    fetchImpl: async () => ({
+      ok: true,
+      status: 200,
+      text: async () => {
+        textCalls += 1;
+        return '<html>unexpected success page</html>';
+      },
+      json: async () => {
+        jsonCalls += 1;
+        return { Result: 'must not be trusted' };
+      }
+    })
+  });
+
+  await assert.rejects(
+    () => api.startVoiceChat(session),
+    error => error.code === 'RTC_UPSTREAM'
+  );
+  assert.equal(textCalls, 1);
+  assert.equal(jsonCalls, 0);
+});
+
+test('public errors do not expose credential, body, signed-header, or upstream sentinels', async () => {
+  const sentinels = [
+    'SENTINEL_IAM_ACCESS_ID_DO_NOT_LEAK',
+    'SENTINEL_IAM_SECRET_DO_NOT_LEAK',
+    'SENTINEL_S2S_TOKEN_DO_NOT_LEAK',
+    'SENTINEL_SERIALIZED_BODY_DO_NOT_LEAK',
+    'SENTINEL_UPSTREAM_RAW_MESSAGE_DO_NOT_LEAK',
+    'SENTINEL_SIGNED_HEADER_DO_NOT_LEAK'
+  ];
+  const sensitiveConfig = {
+    rtc: { appId: 'rtc-app-id-placeholder' },
+    iam: {
+      accessKeyId: sentinels[0],
+      secretAccessKey: sentinels[1]
+    },
+    s2s: {
+      appId: 's2s-app-id-placeholder',
+      accessToken: sentinels[2]
+    }
+  };
+  const sensitiveSession = { ...session, userId: sentinels[3] };
+  class SentinelSigner {
+    constructor(request) { this.request = request; }
+    addAuthorization(credentials) {
+      this.request.headers.Authorization = `${sentinels[5]}:${credentials.secretKey}`;
+    }
+  }
+  const api = createRtcOpenApi({
+    config: sensitiveConfig,
+    SignerClass: SentinelSigner,
+    fetchImpl: async () => jsonResponse(403, {
+      ResponseMetadata: {
+        Error: {
+          Code: 'AccessDenied',
+          Message: sentinels[4]
+        }
+      }
+    })
+  });
+
+  await assert.rejects(
+    () => api.startVoiceChat(sensitiveSession),
+    error => {
+      const publicError = `${error.code}\n${error.message}\n${JSON.stringify(error)}`;
+      return error.code === 'RTC_PERMISSION'
+        && sentinels.every(sentinel => !publicError.includes(sentinel));
+    }
+  );
+});
+
+test('the installed Signer signs a no-network request without printing its value', async () => {
+  let authorization;
+  const api = createRtcOpenApi({
+    config,
+    fetchImpl: async (_url, init) => {
+      authorization = init.headers.Authorization;
+      return jsonResponse(200, { Result: 'ok' });
+    }
+  });
+
+  await api.startVoiceChat(session);
+
+  assert.equal(typeof authorization, 'string');
+  assert.ok(authorization.length > 0);
 });
 
 test('network and unclassified failures become RTC_UPSTREAM without raw details', async () => {
