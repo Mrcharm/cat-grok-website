@@ -455,9 +455,9 @@ test('pagehide while start AI is pending cancels and begins cleanup immediately'
   assert.equal(states.slice(states.lastIndexOf('stopped') + 1).includes('listening'), false);
 });
 
-test('a session returned after stop is deleted without reviving the old start', async () => {
+test('a session returned after keepalive stop is deleted without reviving the old start', async () => {
   const pendingPrepare = deferred();
-  const { controller, trace, states } = setup({
+  const { controller, trace, states, requests } = setup({
     prepareResponse: () => pendingPrepare.promise
   });
   const starting = controller.start();
@@ -469,7 +469,34 @@ test('a session returned after stop is deleted without reviving the old start', 
   await starting;
 
   assert.ok(trace.includes('delete-session'));
+  const deletion = requests.find(request => request.options.method === 'DELETE');
+  assert.equal(deletion.options.keepalive, true);
   assert.equal(states.slice(states.lastIndexOf('stopped') + 1).includes('listening'), false);
+});
+
+test('pagehide upgrades an in-flight ordinary stop to a keepalive DELETE', async () => {
+  const pendingDelete = deferred();
+  const { controller, requests } = setup({
+    deleteResponse: () => pendingDelete.promise,
+    deleteTimeoutMs: 100
+  });
+  await controller.start();
+
+  const stopping = controller.stop();
+  const listeners = new Map();
+  const target = {
+    addEventListener(name, listener) { listeners.set(name, listener); },
+    removeEventListener(name) { listeners.delete(name); }
+  };
+  bindRtcLifecycle(controller, target);
+  listeners.get('pagehide')();
+
+  const deletions = requests.filter(request => request.options.method === 'DELETE');
+  assert.ok(deletions.some(request => request.options.keepalive === true));
+  assert.ok(deletions.every(request => new URL(request.url).pathname === `/rtc/session/${session.sessionId}`));
+
+  pendingDelete.resolve(response({ status: 204 }));
+  await stopping;
 });
 
 test('pagehide while join is pending deletes the known session and releases RTC immediately', async () => {

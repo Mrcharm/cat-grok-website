@@ -123,7 +123,9 @@ export class RtcVoiceController {
         cancelled: false,
         session: null,
         engine: null,
-        cleanupPromise: null
+        cleanupPromise: null,
+        keepaliveRequested: false,
+        deleteRecord: null
       };
       this.#current = context;
       await this.#start(context);
@@ -187,7 +189,7 @@ export class RtcVoiceController {
       this.#setState('listening');
     } catch (cause) {
       if (cause === START_CANCELLED || !this.#isCurrent(context)) {
-        await this.#cleanupContext(context, { keepalive: false });
+        await this.#cleanupContext(context);
         return;
       }
       const error = this.state === 'permission' ? ERROR_MESSAGES.microphone : ERROR_MESSAGES.service;
@@ -256,17 +258,18 @@ export class RtcVoiceController {
       this.#setState('error');
       this.#onError(error);
     }
-    await this.#cleanupContext(context, { keepalive: false });
+    await this.#cleanupContext(context);
     if (this.#current === context) this.#current = null;
   }
 
   stop({ keepalive = false } = {}) {
-    if (this.#stopPromise) return this.#stopPromise;
     const context = this.#current;
+    if (context && keepalive) this.#requestKeepalive(context);
+    if (this.#stopPromise) return this.#stopPromise;
     this.#generation += 1;
     if (context) context.cancelled = true;
     const run = (async () => {
-      if (context) await this.#cleanupContext(context, { keepalive });
+      if (context) await this.#cleanupContext(context);
       if (this.#current === context) this.#current = null;
       this.#setState('stopped');
     })();
@@ -277,7 +280,27 @@ export class RtcVoiceController {
     return tracked;
   }
 
-  #cleanupContext(context, { keepalive }) {
+  #sendDelete(session, keepalive) {
+    try {
+      return Promise.resolve(this.#fetch(
+        sessionUrl(this.#origin, `/${encodeURIComponent(session.sessionId)}`),
+        { method: 'DELETE', keepalive }
+      )).catch(() => {});
+    } catch {
+      return Promise.resolve();
+    }
+  }
+
+  #requestKeepalive(context) {
+    if (context.keepaliveRequested) return;
+    context.keepaliveRequested = true;
+    const record = context.deleteRecord;
+    if (!record || record.keepaliveSent) return;
+    record.keepaliveSent = true;
+    void this.#sendDelete(record.session, true);
+  }
+
+  #cleanupContext(context) {
     const session = context.session;
     const engine = context.engine;
     context.session = null;
@@ -288,15 +311,9 @@ export class RtcVoiceController {
       this.#disconnects = 0;
       try {
         if (session) {
-          let deletion;
-          try {
-            deletion = Promise.resolve(this.#fetch(
-              sessionUrl(this.#origin, `/${encodeURIComponent(session.sessionId)}`),
-              { method: 'DELETE', keepalive }
-            )).catch(() => {});
-          } catch {
-            deletion = Promise.resolve();
-          }
+          const keepalive = context.keepaliveRequested;
+          context.deleteRecord = { session, keepaliveSent: keepalive };
+          const deletion = this.#sendDelete(session, keepalive);
           if (!keepalive) await settleWithin(deletion, this.#deleteTimeoutMs);
         }
       } finally {
