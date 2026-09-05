@@ -29,7 +29,9 @@ Health Check Path: /healthz
 
 ## 连接首页
 
-后端完成真实验证前，保留首页 `data-voice-endpoint=""`。验证通过后只填 Render 的公开 HTTPS Origin，不带 `/voice`；浏览器代码会转换为 WSS 并追加该路径。仓库和页面中都不得出现 API Key。
+首页 `data-voice-endpoint` 已配置为 `https://jarvis-doubao-voice.onrender.com`，不带 `/voice`；浏览器代码转换为 WSS 并追加该路径。仓库和页面中都不得出现 API Key。
+
+2026-09-05 线上验证：健康检查返回 200；通过公开代理完成豆包 `session.created`，收到 325712 字节开场白 PCM 及 `response.done`。另以系统合成中文语音提问，服务成功转写“你好，请问 1+1 等于几？”，返回回答文字及 1226212 字节 PCM。这些结果证明线上代理、鉴权、语音输入识别和回答返回链路，不代表真实设备麦克风、连续对话及扬声器听感已验收。测试不采集私人录音。Free 服务休眠后首次连接可能需要约一分钟。
 
 ## 验收
 

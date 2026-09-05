@@ -29,7 +29,8 @@ test('package runtime matches pnpm and permits only the required esbuild install
   assert.equal(manifest.engines.node, '>=22.13');
   assert.deepEqual(workspace.trim().split(/\r?\n/), [
     'allowBuilds:',
-    '  esbuild: true'
+    '  esbuild: true',
+    '  protobufjs: false'
   ]);
 });
 
