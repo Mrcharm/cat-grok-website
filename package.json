@@ -4,7 +4,8 @@
   "type": "module",
   "packageManager": "pnpm@11.9.0",
   "scripts": {
-    "build": "node scripts/build.mjs",
+    "build": "pnpm build:rtc && node scripts/build.mjs",
+    "build:rtc": "node scripts/build-rtc.mjs",
     "start:voice": "node server/index.mjs",
     "test": "node --test",
     "weekly:generate": "node scripts/generate-weekly-report.mjs",

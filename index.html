@@ -188,7 +188,7 @@ a{color:inherit;text-decoration:none}
 
 <!-- Bottom voice dock -->
 <div class="voice-dock" id="voiceDock" data-voice-endpoint="" data-voice-state="idle">
-  <span class="voice-status" id="voiceStatus">JARVIS 已就绪</span>
+  <span class="voice-status" id="voiceStatus" role="status" aria-live="polite" aria-atomic="true">JARVIS 已就绪</span>
   <input class="dock-input" id="userInput" type="text" placeholder="点击麦克风后直接说话，也可以输入文字…" maxlength="300" autocomplete="off">
   <button class="voice-btn" id="voiceBtn" type="button" aria-label="开始实时语音对话" aria-pressed="false" title="开始实时语音对话">
     <svg viewBox="0 0 24 24"><path d="M12 14a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v5a3 3 0 0 0 3 3zm5-3a5 5 0 0 1-10 0H5a7 7 0 0 0 6 6.92V21h2v-3.08A7 7 0 0 0 19 11h-2z"/></svg>
@@ -314,7 +314,7 @@ a{color:inherit;text-decoration:none}
   });
 })();
 </script>
-<script type="module" src="assets/js/voice/realtime-voice.js"></script>
+<script src="assets/dist/rtc-voice.js"></script>
 <script type="module" src="assets/js/site.js"></script>
 </body>
 </html>

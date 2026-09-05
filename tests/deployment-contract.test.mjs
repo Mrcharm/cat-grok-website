@@ -37,9 +37,10 @@ test('deployment guide names server settings without sample secret values', asyn
 test('generated public pages contain no server setting names or simulated voice', async () => {
   const files = await buildSite({ write: false });
   for (const [name, html] of files) {
-    assert.doesNotMatch(html, /DOUBAO_APP_ID|DOUBAO_ACCESS_KEY|DOUBAO_MODEL_NAME|secret_key|access_token/i, name);
+    assert.doesNotMatch(html, /RTC_APP_KEY|IAM_ACCESS_KEY|IAM_SECRET_KEY|S2S_ACCESS_TOKEN|DOUBAO_APP_ID|DOUBAO_ACCESS_KEY|DOUBAO_MODEL_NAME|secret_key|access_token/i, name);
   }
   const home = files.get('index.html');
-  assert.match(home, /assets\/js\/voice\/realtime-voice\.js/);
+  assert.match(home, /assets\/dist\/rtc-voice\.js/);
+  assert.doesNotMatch(home, /assets\/js\/voice\/realtime-voice\.js/);
   assert.doesNotMatch(home, /const REPLIES|speechSynthesis|SpeechRecognition/);
 });
