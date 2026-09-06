@@ -41,7 +41,7 @@ ws.on('message', async raw => {
   } else if (phase==='question') {
     phase='answer'; answer=''; const input=Buffer.from(downsampleToPcm16(samples,24000)); let cursor=0;
     send({type:'input_audio_unmute.commit'});
-    pump=setInterval(()=>{const frame=Buffer.alloc(640); input.copy(frame,0,cursor,Math.min(cursor+640,input.length)); cursor+=640; send({type:'input_audio_buffer.append',audio:frame.toString('base64')});},20);
+    pump=setInterval(()=>{const frame=Buffer.alloc(640); if(cursor<input.length) input.copy(frame,0,cursor,Math.min(cursor+640,input.length)); cursor+=640; send({type:'input_audio_buffer.append',audio:frame.toString('base64')});},20);
   } else if (phase==='answer') {
     clearInterval(pump); send({type:'input_audio_mute.commit'}); await wav('model-answer',pcm);
     console.log('ANSWER',answer); rounds++; phase='idle';
