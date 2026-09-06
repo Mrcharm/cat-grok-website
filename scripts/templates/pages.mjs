@@ -148,7 +148,7 @@ function skillsPage({ skills }) {
 
 function portfolioPage() {
   const projects = [
-    { title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], imgs: [], action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
+    { title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], imgs: ['../assets/portfolio/jarvis-home.jpg'], action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
     { title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE：映射设计、流程编排、SQL 预览与 Git 版本管理，浅色与深色双主题。', tags: ['B 端产品', 'Web IDE', '数据研发'], imgs: ['../assets/portfolio/design-light.jpg', '../assets/portfolio/design-flow.jpg'], action: '<span class="portfolio-link muted">界面演示</span>' },
     { title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步，支持一键导出数据线详细设计报告。', tags: ['NL2SQL', 'AI 助手', 'Agent'], imgs: ['../assets/portfolio/ai-assistant.png', '../assets/portfolio/ai-export.jpg'], action: '<span class="portfolio-link muted">已投产 · 界面演示</span>' },
     { title: '数据血缘平台', summary: '脚本血缘解析与全链路血缘视图：数据血缘、全链路血缘、任务血缘三种视图，支持字段级加工公式追溯。', tags: ['数据治理', '血缘解析', '可视化'], imgs: ['../assets/portfolio/lineage-analysis.png', '../assets/portfolio/lineage-detail.png'], action: '<span class="portfolio-link muted">界面演示</span>' },

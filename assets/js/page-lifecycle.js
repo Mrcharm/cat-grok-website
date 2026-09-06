@@ -1,5 +1,6 @@
 import { initArticlesPage } from './articles.js';
 import { initSkillsPage } from './skills.js';
+import { initPortfolioPage } from './portfolio.js';
 import { bootDuplexVoice } from './voice/duplex-controller.js?v=20260906c';
 
 const INITIALIZERS = {
@@ -8,7 +9,8 @@ const INITIALIZERS = {
     return () => voice?.destroy();
   },
   articles: initArticlesPage,
-  skills: initSkillsPage
+  skills: initSkillsPage,
+  portfolio: initPortfolioPage
 };
 
 export function createPageLifecycle() {
