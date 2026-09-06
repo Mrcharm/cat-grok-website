@@ -12,7 +12,7 @@ export const NAV_ITEMS = [
   ['portfolio', '作品集', 'portfolio/']
 ];
 
-export const NETEASE_SONG_ID = '2086327879';
+export const NETEASE_SONG_ID = '1336856498';
 export const NETEASE_PLAYER_URL =
   'https://music.163.com/outchain/player?type=2&amp;id=' +
   NETEASE_SONG_ID +
@@ -33,10 +33,10 @@ export function persistentShell({ depth = 0, active = 'home' } = {}) {
     '<div class="topbar-right">' +
     '<nav id="site-nav" class="nav" data-open="false" aria-label="主导航">' + nav + '</nav>' +
     '<button class="menu-button" type="button" aria-expanded="false" aria-controls="site-nav">菜单</button>' +
-    '<button class="music-btn playing" type="button" aria-label="停止背景音乐：《鲜花》" aria-pressed="true">' +
+    '<button class="music-btn playing" type="button" aria-label="停止背景音乐：《我想part2》" aria-pressed="true">' +
     '<span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>音乐</span></button>' +
     '</div></header>' +
-    '<iframe class="background-music-frame" id="background-music-frame" title="背景音乐：回春丹乐队《鲜花》" ' +
+    '<iframe class="background-music-frame" id="background-music-frame" title="背景音乐：法老、杨秋儒《我想part2》" ' +
     'aria-hidden="true" tabindex="-1" src="' + NETEASE_PLAYER_URL + '"></iframe>';
 }
 
@@ -81,6 +81,6 @@ export function layout({
     persistentShell({ depth, active }) +
     '<main id="main">' + body + '</main>' +
     '<footer><strong>猫哥 · JARVIS</strong><span>AI 陪伴系统 · 静态生成</span></footer>' +
-    '<script type="module" src="' + root + 'assets/js/site.js?v=20260906c"></script>' +
+    '<script type="module" src="' + root + 'assets/js/site.js?v=20260906music"></script>' +
     '</body></html>';
 }

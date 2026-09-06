@@ -14,7 +14,7 @@ test('生成当前四个 JARVIS 公开页面', async () => {
   assert.deepEqual([...files.keys()].sort(), routes.map(([path]) => path).sort());
 });
 
-test('四页使用同一品牌、导航和《鲜花》隐藏单曲', async () => {
+test('四页使用同一品牌、导航和《我想part2》隐藏单曲', async () => {
   const files = await buildSite({ write: false });
   for (const [path] of routes) {
     const html = files.get(path);
@@ -24,7 +24,7 @@ test('四页使用同一品牌、导航和《鲜花》隐藏单曲', async () =>
     assert.match(html, /首页[\s\S]*文章[\s\S]*技能[\s\S]*作品集/);
     assert.match(html, /class="[^"]*music-btn[^"]*"[^>]*aria-pressed="true"/);
     assert.match(html, /id="background-music-frame"/);
-    assert.match(html, /type=2&amp;id=2086327879&amp;auto=1/);
+    assert.match(html, /type=2&amp;id=1336856498&amp;auto=1/);
     assert.doesNotMatch(html, /music-panel|music-unlock|885054268/);
     assert.equal((html.match(/<main\b/g) || []).length, 1, path);
   }

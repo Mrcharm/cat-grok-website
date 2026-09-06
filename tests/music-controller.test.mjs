@@ -49,14 +49,14 @@ function createMusicFixture() {
   return { root, button, interactionTarget, dependencies: { root, interactionTarget } };
 }
 
-test('首次加载立即尝试播放《鲜花》单曲', () => {
+test('首次加载立即尝试播放《我想part2》单曲', () => {
   const fixture = createMusicFixture();
   createMusicController(fixture.dependencies).start();
   assert.match(fixture.root.frame.src, /type=2/);
-  assert.match(fixture.root.frame.src, /id=2086327879/);
+  assert.match(fixture.root.frame.src, /id=1336856498/);
   assert.match(fixture.root.frame.src, /auto=1/);
   assert.equal(fixture.button.getAttribute('aria-pressed'), 'true');
-  assert.equal(fixture.button.getAttribute('aria-label'), '停止背景音乐：《鲜花》');
+  assert.equal(fixture.button.getAttribute('aria-label'), '停止背景音乐：《我想part2》');
 });
 
 test('点击音乐按钮停止，再次点击恢复', () => {
@@ -68,7 +68,7 @@ test('点击音乐按钮停止，再次点击恢复', () => {
   assert.equal(fixture.button.getAttribute('aria-pressed'), 'false');
   assert.equal(fixture.button.classList.contains('playing'), false);
   fixture.button.dispatch('click');
-  assert.match(fixture.root.frame.src, /id=2086327879/);
+  assert.match(fixture.root.frame.src, /id=1336856498/);
   assert.equal(fixture.button.getAttribute('aria-pressed'), 'true');
   assert.equal(fixture.button.classList.contains('playing'), true);
 });
@@ -79,7 +79,7 @@ test('首次页面交互重建 iframe 以恢复被拦截的自动播放', () => 
   const initialFrame = fixture.root.frame;
   fixture.interactionTarget.dispatch('pointerdown');
   assert.notEqual(fixture.root.frame, initialFrame);
-  assert.match(fixture.root.frame.src, /id=2086327879/);
+  assert.match(fixture.root.frame.src, /id=1336856498/);
   assert.equal(fixture.interactionTarget.has('pointerdown'), false);
   assert.equal(fixture.interactionTarget.has('keydown'), false);
 });

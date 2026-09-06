@@ -7,8 +7,8 @@ import { createVoiceServer } from '../server/index.mjs';
 
 for (const file of ['index.html', 'articles/index.html', 'skills/index.html', 'portfolio/index.html']) await access(file);
 const home = await readFile('index.html', 'utf8');
-if (!home.includes('MR.C') || !home.includes('JARVIS') || !home.includes('type=2&amp;id=2086327879&amp;auto=1')) {
-  throw new Error('首页缺少统一品牌或《鲜花》背景音乐');
+if (!home.includes('MR.C') || !home.includes('JARVIS') || !home.includes('type=2&amp;id=1336856498&amp;auto=1')) {
+  throw new Error('首页缺少统一品牌或《我想part2》背景音乐');
 }
 if (!home.includes('assets/dist/duplex-voice.js') || home.includes('assets/dist/rtc-voice.js') || home.includes('speechSynthesis')) {
   throw new Error('首页未正确启用豆包双工语音 bundle');
@@ -55,4 +55,4 @@ try {
   await new Promise(resolve => upstreamWss.close(() => upstreamServer.close(resolve)));
 }
 
-console.log('smoke: four JARVIS pages, Flowers music, and Doubao duplex WebSocket initialization are present');
+console.log('smoke: four JARVIS pages, Wo Xiang part2 music, and Doubao duplex WebSocket initialization are present');

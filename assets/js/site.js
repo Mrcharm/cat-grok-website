@@ -41,7 +41,7 @@ export function linkRoute(link) {
   return link.dataset?.route || routeKey(link.href);
 }
 
-const FLOWERS_URL = 'https://music.163.com/outchain/player?type=2&id=2086327879&auto=1&height=32';
+const BACKGROUND_MUSIC_URL = 'https://music.163.com/outchain/player?type=2&id=1336856498&auto=1&height=32';
 
 export function createMusicController({
   root = document,
@@ -59,7 +59,7 @@ export function createMusicController({
     return root.querySelector('#background-music-frame');
   }
 
-  function replaceFrame(src = FLOWERS_URL) {
+  function replaceFrame(src = BACKGROUND_MUSIC_URL) {
     const current = frame();
     const next = current.cloneNode(false);
     next.src = src;
@@ -69,7 +69,7 @@ export function createMusicController({
 
   function renderState() {
     button.setAttribute('aria-pressed', String(playing));
-    button.setAttribute('aria-label', playing ? '停止背景音乐：《鲜花》' : '播放背景音乐：《鲜花》');
+    button.setAttribute('aria-label', playing ? '停止背景音乐：《我想part2》' : '播放背景音乐：《我想part2》');
     button.classList[playing ? 'add' : 'remove']('playing');
   }
 
@@ -109,7 +109,7 @@ export function createMusicController({
     interactionTarget.addEventListener('pointerdown', recoverAfterGesture);
     interactionTarget.addEventListener('keydown', recoverAfterGesture);
     playing = true;
-    frame().src = FLOWERS_URL;
+    frame().src = BACKGROUND_MUSIC_URL;
     renderState();
   }
 
