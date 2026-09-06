@@ -9,7 +9,10 @@ test('header and homepage use one centered frame width', async () => {
 });
 test('reference homepage keeps three populated columns and the supplied portrait', async () => {
   const html = (await buildSite({write:false})).get('index.html');
-  assert.match(html, /electric-cat-user.png/);
+  assert.match(html, /electric-cat-collage.png/);
+  assert.match(html, /street-paper-edge/);
+  assert.match(html, /KEEP GOING/);
+  assert.match(html, /home-street.css/);
   assert.equal((html.match(/class="home-column"/g)||[]).length, 3);
   assert.equal((html.match(/class="home-preview"/g)||[]).length, 6);
   assert.match(html, /企业 AI 落地/);

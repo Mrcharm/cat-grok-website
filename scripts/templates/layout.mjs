@@ -75,6 +75,7 @@ export function layout({
     '<meta name="twitter:image" content="' + siteRoot + 'og.png">' +
     '<title>' + escapeHtml(title) + '</title>' +
     '<link rel="stylesheet" href="' + root + 'assets/styles/site.css?v=20260906c">' +
+    '<link rel="stylesheet" href="' + root + 'assets/styles/home-street.css">' +
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
     persistentShell({ depth, active }) +

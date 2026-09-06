@@ -13,6 +13,10 @@ export function normalizeHomeDocument(source) {
     html = html.replace('</head>', '<link rel="stylesheet" href="assets/styles/site.css">\n</head>');
   }
 
+  if (!html.includes('assets/styles/home-street.css')) {
+    html = html.replace('</head>', '<link rel="stylesheet" href="assets/styles/home-street.css"></head>');
+  }
+
   if (!html.includes('rel="canonical"')) {
     const siteUrl = 'https://mrcharm.github.io/cat-grok-website/';
     const social =
