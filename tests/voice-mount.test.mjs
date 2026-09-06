@@ -21,6 +21,12 @@ test('voice mount is single and a disposed mount cannot overwrite the replacemen
   try {
     const first = bootDuplexVoice({ root });
     assert.equal(bootDuplexVoice({ root }), first);
+    first.onTranscript({speaker:'user',text:'一加一',turnId:'u1'});
+    first.onTranscript({speaker:'user',text:'一加一等于几',turnId:'u1'});
+    first.onTranscript({speaker:'assistant',text:'等于二',turnId:'r1'});
+    first.onTranscript({speaker:'user',text:'谢谢',turnId:'u2'});
+    assert.equal(elements.get('#transcriptToast').children.length,3,'keep both speakers and update the current partial transcript');
+    assert.deepEqual(elements.get('#transcriptToast').children.map(row=>row.children[1]?.textContent),['一加一等于几','等于二','谢谢']);
     first.destroy();
     const second = bootDuplexVoice({ root });
     assert.notEqual(first,second);

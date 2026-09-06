@@ -86,6 +86,28 @@ test('sending text before connecting is safely rejected', () => {
   assert.equal(controller.sendText('你好'), false);
 });
 
+test('capture context is unlocked in the click and selected microphone is requested', async () => {
+  FakeAudioContext.instances = [];
+  let requested, rejectPermission;
+  const c = new DuplexVoiceController({endpoint:'https://voice.invalid', mediaDevices:{getUserMedia: constraints => {
+    requested=constraints; return new Promise((_,reject)=>{rejectPermission=reject;});
+  }},WebSocketCtor:FakeSocket,AudioContextCtor:FakeAudioContext});
+  c.deviceId='headset';
+  const starting=c.start().catch(()=>{});
+  try {
+    assert.equal(FakeAudioContext.instances.length,2);
+    assert.deepEqual(requested.audio.deviceId,{exact:'headset'});
+  } finally {rejectPermission(Error('test cleanup'));await starting;}
+});
+
+test('text entry cannot send a say-hello event disguised as conversation', () => {
+ const c=new DuplexVoiceController({endpoint:'https://voice.invalid',mediaDevices:{},WebSocketCtor:FakeSocket,AudioContextCtor:FakeAudioContext});
+ const socket=new FakeSocket();socket.readyState=FakeSocket.OPEN;
+ c.session={generation:0,sessionReady:true,socket};
+ assert.equal(c.sendText('你好吗'),false);
+ assert.equal(socket.sent.length,0);
+});
+
 test('speaker is unlocked before waiting for microphone permission', async () => {
   FakeAudioContext.instances = [];
   let resolvePermission;
@@ -265,6 +287,7 @@ test('late audio from a canceled response is ignored until a clearly new respons
   const unlockedOutput = controller.session.player.context;
 
   socket.emit('message', { data: JSON.stringify({ type: 'conversation.item.input_audio_transcription.started' }) });
+  assert.equal(socket.sent.filter(e=>e.type==='response.cancel').length,0,'server already detected the new turn; a delayed cancel can kill its new answer');
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.started', question_id: 'q1', response_id: 'r1', tts_type: 'default' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAAAAA==' }) });
   await waitTurn();
