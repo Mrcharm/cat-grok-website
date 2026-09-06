@@ -149,10 +149,10 @@ function skillsPage({ skills }) {
 function portfolioPage() {
   const projects = [
     { icon: '🤖', title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], img: '', action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
-    { icon: '🗄️', title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE：映射设计、流程编排、SQL 预览与 Git 版本管理，覆盖脚本开发全生命周期。', tags: ['B 端产品', 'Web IDE', '数据研发'], img: '../assets/portfolio/etl-design.png', action: '<span class="portfolio-link muted">内部平台 · 界面演示</span>' },
+    { icon: '🗄️', title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE。主导设计了「模型/需求 → PERL 脚本」的八步闭环：解析设计输入、补齐元数据、加工逻辑设计、SQL 生成、规则检核到试运行验证。', tags: ['B 端产品', 'Web IDE', '方法论设计'], img: '../assets/portfolio/design-blueprint.png', action: '<span class="portfolio-link muted">设计方案演示</span>' },
     { icon: '✨', title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步的全流程自动化。', tags: ['NL2SQL', 'AI 助手', 'Agent'], img: '../assets/portfolio/ai-assistant.png', action: '<span class="portfolio-link muted">已投产 · 界面演示</span>' },
-    { icon: '📊', title: '数据血缘与知识图谱平台', summary: '从烟囱式数据架构到全行统一血缘图谱的设计与落地：脚本血缘解析、影响分析与链路追踪。', tags: ['数据治理', '血缘解析', '可视化'], img: '../assets/portfolio/lineage-view.png', action: '<span class="portfolio-link muted">内部平台 · 界面演示</span>' },
-    { icon: '🧠', title: '知识图谱 · 图平台', summary: '基于图数据库的图谱构建与可视化查询：K 层展开、路径分析、图算法与自定义规则查询。', tags: ['知识图谱', '图查询', '关系网络'], img: '../assets/portfolio/graph-platform.png', action: '<span class="portfolio-link muted">平台功能演示</span>' },
+    { icon: '🧠', title: '数据血缘 · 图谱平台', summary: '从烟囱式数据架构到全行统一血缘图谱的设计与落地：脚本血缘解析、K 层展开、路径分析与图算法应用。', tags: ['数据治理', '知识图谱', '可视化'], img: '../assets/portfolio/graph-platform.png', action: '<span class="portfolio-link muted">平台功能演示</span>' },
+    
     { icon: '⏳', title: '更多项目', summary: 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', tags: ['AI 应用', '研发平台', '数据大屏'], img: '', ph: true, action: '<span class="portfolio-link muted">敬请期待</span>' }
   ].map(p => (
     '<article class="portfolio-item' + (p.ph ? ' placeholder' : '') + '">' +
