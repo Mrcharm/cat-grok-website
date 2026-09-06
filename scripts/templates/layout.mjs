@@ -74,12 +74,12 @@ export function layout({
     '<meta name="twitter:description" content="' + escapeHtml(description) + '">' +
     '<meta name="twitter:image" content="' + siteRoot + 'og.png">' +
     '<title>' + escapeHtml(title) + '</title>' +
-    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css">' +
+    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css?v=20260906b">' +
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
     persistentShell({ depth, active }) +
     '<main id="main">' + body + '</main>' +
     '<footer><strong>猫哥 · JARVIS</strong><span>AI 陪伴系统 · 静态生成</span></footer>' +
-    '<script type="module" src="' + root + 'assets/js/site.js"></script>' +
+    '<script type="module" src="' + root + 'assets/js/site.js?v=20260906b"></script>' +
     '</body></html>';
 }
