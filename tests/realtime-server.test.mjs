@@ -78,12 +78,12 @@ test('proxy initializes the verified Doubao session, greets on session.created, 
     type: 'session.create',
     session: {
       model: '1.2.6.1',
-      instructions: '你是 JARVIS，猫哥的中文 AI 语音陪伴助手。回答自然、简洁、真诚。不要使用工具、联网、位置、音乐或录音能力。',
+      instructions: '你是 JARVIS，猫哥的中文 AI 语音陪伴助手。用温柔、舒缓、自然的女声交流，回答简洁、真诚，不夸张撒娇。不要使用工具、联网、位置、音乐或录音能力。',
       audio: {
-        input: { format: { type: 'pcm', sample_rate: 16000 } },
+        input: { format: { type: 'pcm', rate: 16000 } },
         output: {
-          format: { type: 'pcm', sample_rate: 24000 },
-          voice: 'zh_male_yunzhou_jupiter_bigtts',
+          format: { type: 'pcm', rate: 24000 },
+          voice: 'zh_female_xiaohe_jupiter_bigtts',
           speed: 0,
           loudness: 0
         }
@@ -109,6 +109,11 @@ test('proxy initializes the verified Doubao session, greets on session.created, 
   const cancelled = nextJson(upstream);
   browser.send(JSON.stringify({ type: 'response.cancel' }));
   assert.deepEqual(await cancelled, { type: 'response.cancel' });
+  for (const type of ['input_audio_mute.commit', 'input_audio_unmute.commit']) {
+    const received = nextJson(upstream);
+    browser.send(JSON.stringify({ type, unwanted: 'stripped' }));
+    assert.deepEqual(await received, { type });
+  }
 });
 
 test('proxy rejects disallowed origins and caps active sessions globally at two', async t => {

@@ -94,6 +94,20 @@ const base64ToBytes = value => {
 
 const eventText = event => event?.text || event?.delta || event?.transcript || '';
 
+// Live model 1.2.6.1 returns float32 LE for output format "pcm".
+// Input remains int16 LE; the two directions must not share a decoder.
+export function decodeOutputPcm(bytes) {
+  if (bytes.byteLength % 4) throw new Error('invalid_output_alignment');
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  const samples = new Float32Array(bytes.byteLength / 4);
+  for (let i = 0; i < samples.length; i++) {
+    const value = view.getFloat32(i * 4, true);
+    if (!Number.isFinite(value) || Math.abs(value) > 1) throw new Error('invalid_output_sample');
+    samples[i] = value;
+  }
+  return samples;
+}
+
 class PcmStreamPlayer {
   constructor(AudioContextCtor) {
     this.AudioContextCtor = AudioContextCtor;
@@ -112,15 +126,15 @@ class PcmStreamPlayer {
   }
 
   async enqueue(bytes) {
-    if (bytes.byteLength < 2) return;
+    if (!bytes.byteLength) return;
+    const decoded = decodeOutputPcm(bytes);
     const epoch = this.epoch;
     await this.start();
     if (epoch !== this.epoch || !this.context || this.context.state === 'closed') return;
-    const samples = Math.floor(bytes.byteLength / 2);
+    const samples = decoded.length;
     const buffer = this.context.createBuffer(1, samples, OUTPUT_SAMPLE_RATE);
     const channel = buffer.getChannelData(0);
-    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-    for (let index = 0; index < samples; index += 1) channel[index] = view.getInt16(index * 2, true) / 32768;
+    channel.set(decoded);
     const source = this.context.createBufferSource();
     source.buffer = buffer;
     source.connect(this.context.destination);
@@ -302,9 +316,13 @@ export class DuplexVoiceController {
     const silence = new Uint8Array(PCM_FRAME_BYTES);
     session.audioTimer = setInterval(() => {
       if (!this.isCurrent(session) || !session.sessionReady || session.socket?.readyState !== this.WebSocketCtor.OPEN) return;
-      const muted = session.track?.muted || session.track?.readyState === 'ended';
-      const frame = muted ? silence : session.pendingFrames.shift() || silence;
-      if (muted) session.pendingFrames = [];
+      const muted = Boolean(session.track?.muted || session.track?.readyState === 'ended');
+      if (muted !== Boolean(session.upstreamMuted)) {
+        session.socket.send(JSON.stringify({ type: muted ? 'input_audio_mute.commit' : 'input_audio_unmute.commit' }));
+        session.upstreamMuted = muted;
+      }
+      if (muted) { session.pendingFrames = []; return; }
+      const frame = session.pendingFrames.shift() || silence;
       session.socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: bytesToBase64(frame) }));
     }, 20);
     session.activityTimer = setInterval(() => {

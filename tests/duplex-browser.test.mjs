@@ -119,7 +119,11 @@ test('muted microphone does not close the reply audio channel', async () => {
     assert.equal(socket.readyState, FakeSocket.OPEN);
     assert.equal(controller.session.player.context.state, 'running');
     assert.ok(diagnostics.some(d => d.microphone === 'muted'));
-    assert.ok(socket.sent.some(e => e.type === 'input_audio_buffer.append' && e.audio === Buffer.alloc(640).toString('base64')), 'muted input keeps the protocol alive with silence');
+    assert.equal(socket.sent.filter(e => e.type === 'input_audio_mute.commit').length, 1);
+    assert.equal(socket.sent.filter(e => e.type === 'input_audio_buffer.append').length, 0);
+    track.muted = false;
+    await new Promise(resolve => setTimeout(resolve, 50));
+    assert.ok(socket.sent.some(e => e.type === 'input_audio_unmute.commit'));
   } finally { await controller.stop(); }
 });
 
@@ -255,19 +259,19 @@ test('late audio from a canceled response is ignored until a clearly new respons
   await starting;
   socket.emit('message', { data: JSON.stringify({ type: 'session.created' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.started', question_id: 'q1', response_id: 'r1', tts_type: 'default' }) });
-  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAA=' }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAAAAA==' }) });
   await waitTurn();
   assert.equal(FakeAudioContext.starts.length, 1);
   const unlockedOutput = controller.session.player.context;
 
   socket.emit('message', { data: JSON.stringify({ type: 'conversation.item.input_audio_transcription.started' }) });
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.started', question_id: 'q1', response_id: 'r1', tts_type: 'default' }) });
-  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAA=' }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r1', delta: 'AAAAAA==' }) });
   await waitTurn();
   assert.equal(FakeAudioContext.starts.length, 1);
 
   socket.emit('message', { data: JSON.stringify({ type: 'response.output_text.delta', question_id: 'q2', response_id: 'r2', delta: '新回答' }) });
-  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r2', delta: 'AAA=' }) });
+  socket.emit('message', { data: JSON.stringify({ type: 'response.output_audio.delta', response_id: 'r2', delta: 'AAAAAA==' }) });
   await waitTurn();
   try {
     assert.equal(FakeAudioContext.starts.length, 2);

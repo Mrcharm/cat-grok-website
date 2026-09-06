@@ -4,6 +4,7 @@ import { loadAndValidateContent } from './validate-content.mjs';
 import { writeGeneratedFiles } from './lib/render.mjs';
 import { renderPages } from './templates/pages.mjs';
 import { normalizeHomeDocument } from './templates/home-document.mjs';
+import { homeHighlights } from './templates/home-highlights.mjs';
 
 export async function buildSite({ write = true } = {}) {
   const data = await loadAndValidateContent();
@@ -15,7 +16,8 @@ export async function buildSite({ write = true } = {}) {
   const blog = JSON.parse(blogRaw);
   const skills = JSON.parse(skillsRaw);
   const files = renderPages({ ...data, blog, skills });
-  files.set('index.html', normalizeHomeDocument(homeRaw));
+  const home = homeRaw.replace(/<!-- HOME_HIGHLIGHTS_START -->[\s\S]*?<!-- HOME_HIGHLIGHTS_END -->/, '<!-- HOME_HIGHLIGHTS_START -->' + homeHighlights(blog, skills) + '<!-- HOME_HIGHLIGHTS_END -->');
+  files.set('index.html', normalizeHomeDocument(home));
   if (write) await writeGeneratedFiles(files);
   return files;
 }

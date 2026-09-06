@@ -43,8 +43,8 @@ try {
   const session = JSON.parse(sessionData.toString());
   assert.equal(session.type, 'session.create');
   assert.equal(session.session.model, '1.2.6.1');
-  assert.deepEqual(session.session.audio.input.format, { type: 'pcm', sample_rate: 16000 });
-  assert.deepEqual(session.session.audio.output.format, { type: 'pcm', sample_rate: 24000 });
+  assert.deepEqual(session.session.audio.input.format, { type: 'pcm', rate: 16000 });
+  assert.deepEqual(session.session.audio.output.format, { type: 'pcm', rate: 24000 });
 
   upstream.send(JSON.stringify({ type: 'session.created' }));
   const [greetingData] = await once(upstream, 'message');

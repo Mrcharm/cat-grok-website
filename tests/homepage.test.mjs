@@ -18,7 +18,7 @@ test('首页第一屏不把智能体团队当作主体', async () => {
 test('首页采用电蓝街头主视觉并保留三个内容入口', async () => {
   const html = (await buildSite({ write: false })).get('index.html');
   assert.match(html, /class="street-hero"/);
-  assert.match(html, /assets\/images\/electric-cat\.png/);
+  assert.match(html, /assets\/images\/electric-cat-user\.png/);
   assert.match(html, /猫哥，[\s\S]*不止一面/);
   for (const path of ['articles/', 'skills/', 'portfolio/']) assert.match(html, new RegExp('href="' + path));
   assert.doesNotMatch(html, /coreCanvas|three\.min\.js/);
