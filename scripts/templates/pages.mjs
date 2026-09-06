@@ -148,20 +148,26 @@ function skillsPage({ skills }) {
 
 function portfolioPage() {
   const projects = [
-    { icon: '🤖', title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], img: '', action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
-    { icon: '🗄️', title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE。主导设计了「模型/需求 → PERL 脚本」的八步闭环：解析设计输入、补齐元数据、加工逻辑设计、SQL 生成、规则检核到试运行验证。', tags: ['B 端产品', 'Web IDE', '方法论设计'], img: '../assets/portfolio/design-blueprint.png', action: '<span class="portfolio-link muted">设计方案演示</span>' },
-    { icon: '✨', title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步的全流程自动化。', tags: ['NL2SQL', 'AI 助手', 'Agent'], img: '../assets/portfolio/ai-assistant.png', action: '<span class="portfolio-link muted">已投产 · 界面演示</span>' },
-    { icon: '🧠', title: '数据血缘 · 图谱平台', summary: '从烟囱式数据架构到全行统一血缘图谱的设计与落地：脚本血缘解析、K 层展开、路径分析与图算法应用。', tags: ['数据治理', '知识图谱', '可视化'], img: '../assets/portfolio/graph-platform.png', action: '<span class="portfolio-link muted">平台功能演示</span>' },
-    
-    { icon: '⏳', title: '更多项目', summary: 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', tags: ['AI 应用', '研发平台', '数据大屏'], img: '', ph: true, action: '<span class="portfolio-link muted">敬请期待</span>' }
-  ].map(p => (
-    '<article class="portfolio-item' + (p.ph ? ' placeholder' : '') + '">' +
-    '<div class="portfolio-thumb">' + (p.img ? '<img src="' + escapeHtml(p.img) + '" alt="' + escapeHtml(p.title) + '" loading="lazy">' : p.icon) + '</div><div class="portfolio-info">' +
-    '<h3>' + escapeHtml(p.title) + '</h3><p>' + escapeHtml(p.summary) + '</p>' +
-    '<div class="portfolio-meta">' + p.tags.map((tag, tagIndex) => (
-      '<span class="portfolio-tag' + (tagIndex === 0 ? ' highlight' : '') + '">' + escapeHtml(tag) + '</span>'
-    )).join('') + '</div>' + p.action + '</div></article>'
-  )).join('');
+    { title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], imgs: [], action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
+    { title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE：映射设计、流程编排、SQL 预览与 Git 版本管理，浅色与深色双主题。', tags: ['B 端产品', 'Web IDE', '数据研发'], imgs: ['../assets/portfolio/design-light.jpg', '../assets/portfolio/design-flow.jpg'], action: '<span class="portfolio-link muted">界面演示</span>' },
+    { title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步，支持一键导出数据线详细设计报告。', tags: ['NL2SQL', 'AI 助手', 'Agent'], imgs: ['../assets/portfolio/ai-assistant.png', '../assets/portfolio/ai-export.jpg'], action: '<span class="portfolio-link muted">已投产 · 界面演示</span>' },
+    { title: '数据血缘平台', summary: '脚本血缘解析与全链路血缘视图：数据血缘、全链路血缘、任务血缘三种视图，支持字段级加工公式追溯。', tags: ['数据治理', '血缘解析', '可视化'], imgs: ['../assets/portfolio/lineage-analysis.png', '../assets/portfolio/lineage-detail.png'], action: '<span class="portfolio-link muted">界面演示</span>' },
+    { title: '知识图谱 · 图平台', summary: '资金流向与股权关系的图谱构建与可视化查询：K 层展开、路径分析、图模式查询与图算法应用。', tags: ['知识图谱', '图查询', '关系网络'], imgs: ['../assets/portfolio/graph-flow.png', '../assets/portfolio/graph-mode.png'], action: '<span class="portfolio-link muted">平台功能演示</span>' },
+    { title: '模型设计平台', summary: '数据仓库建模管理平台：数据仓库管理、口径编辑器、维度建模与模型设计全流程支撑。', tags: ['数据建模', '口径管理', '数据仓库'], imgs: ['../assets/portfolio/model-dw.jpg'], action: '<span class="portfolio-link muted">界面演示</span>' },
+    { title: '更多项目', summary: 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', tags: ['AI 应用', '研发平台', '数据大屏'], imgs: [], ph: true, action: '<span class="portfolio-link muted">敬请期待</span>' }
+  ].map(p => {
+    const thumbs = p.imgs.length
+      ? '<div class="portfolio-thumbs">' + p.imgs.map((src, i) => (
+          '<img src="' + escapeHtml(src) + '" alt="' + escapeHtml(p.title) + ' ' + (i + 1) + '" loading="lazy"' + (i > 0 ? ' class="alt"' : '') + '>'
+        )).join('') + '</div>'
+      : '<div class="portfolio-thumb">' + (p.ph ? '⏳' : '🧠') + '</div>';
+    return '<article class="portfolio-item' + (p.ph ? ' placeholder' : '') + '">' +
+      thumbs + '<div class="portfolio-info">' +
+      '<h3>' + escapeHtml(p.title) + '</h3><p>' + escapeHtml(p.summary) + '</p>' +
+      '<div class="portfolio-meta">' + p.tags.map((tag, tagIndex) => (
+        '<span class="portfolio-tag' + (tagIndex === 0 ? ' highlight' : '') + '">' + escapeHtml(tag) + '</span>'
+      )).join('') + '</div>' + p.action + '</div></article>';
+  }).join('');
 
   return layout({
     title: '作品集 · 猫哥 JARVIS',
@@ -175,7 +181,6 @@ function portfolioPage() {
       '</section><div class="portfolio-grid">' + projects + '</div></div>'
   });
 }
-
 function timelinePage({ roadmap, timeline, profile }) {
   const lineNames = Object.fromEntries(profile.lifeLines.map(item => [item.id, item.title]));
   const entries = timeline.map(item => {

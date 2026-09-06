@@ -4,7 +4,7 @@ import { buildSite } from '../scripts/build.mjs';
 
 test('作品集保留 JARVIS 和数据产品代表作', async () => {
   const html = (await buildSite({ write: false })).get('portfolio/index.html');
-  for (const text of ['JARVIS 陪伴系统', '数据血缘 · 图谱平台', 'AI 数据研发 Copilot']) {
+  for (const text of ['JARVIS 陪伴系统', '数据血缘平台', '知识图谱 · 图平台', '模型设计平台', 'AI 数据研发 Copilot']) {
     assert.match(html, new RegExp(text));
   }
 });

@@ -15,6 +15,6 @@ test('reference homepage keeps three populated columns and the supplied portrait
   assert.match(html, /home-street.css/);
   assert.equal((html.match(/class="home-column"/g)||[]).length, 3);
   assert.equal((html.match(/class="home-preview"/g)||[]).length, 6);
-  assert.match(html, /企业 AI 落地/);
+  assert.match(html, /Obsidian/);
   assert.doesNotMatch(html, /72%|45%/);
 });

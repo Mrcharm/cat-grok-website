@@ -41,3 +41,6 @@ body{background:#fff}.site-header{height:80px;padding-inline:max(42px,calc((100v
 .transcript-message strong{display:block;color:#123bff;font-size:12px}
 .transcript-message.user strong{color:#555}
 @media(max-width:760px){.site-header,.home-page .site-header{left:50%;right:auto;width:calc(100% - 24px);height:76px;padding-inline:18px}.site-header::before{top:-14px;height:12px}.voice-dock,.transcript-toast{width:calc(100vw - 24px);right:12px;left:12px}.transcript-toast{bottom:205px}}
+/* multi-image thumbs */
+.portfolio-thumbs{display:flex;flex-direction:column;gap:2px}
+.portfolio-thumbs img{width:100%;aspect-ratio:16/9;object-fit:cover;object-position:top;display:block;background:var(--jarvis-panel2)}

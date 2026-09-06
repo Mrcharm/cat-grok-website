@@ -1,21 +1,151 @@
 {
   "items": [
-    { "title": "企业 AI 落地：大家张口闭口就谈 tool、MCP、skill，但是你真的知道区别吗？", "url": "https://blog.csdn.net/Mr_charm/article/details/163793993", "date": "2026-08-16", "views": 194, "category": "项目实战" },
-    { "title": "【项目实战】做数据血缘，我最贵的教训：先打通资产键，再谈解析", "url": "https://blog.csdn.net/Mr_charm/article/details/163616403", "date": "2026-08-09", "views": 222, "category": "项目实战" },
-    { "title": "【项目实战】从烟囱设计到全行一张图：知识图谱平台，我踩过哪些坑？", "url": "https://blog.csdn.net/Mr_charm/article/details/163615200", "date": "2026-08-09", "views": 182, "category": "项目实战" },
-    { "title": "【项目实战】我的 AI 数据研发——能替代一半的数据开发人员？", "url": "https://blog.csdn.net/Mr_charm/article/details/163543970", "date": "2026-08-06", "views": 319, "category": "项目实战" },
-    { "title": "【项目实战】如何搭建一个 AI 取数助手", "url": "https://blog.csdn.net/Mr_charm/article/details/156361948", "date": "2025-12-28", "views": 631, "category": "项目实战" },
-    { "title": "【项目经验】讲讲我对数据研发平台的看法", "url": "https://blog.csdn.net/Mr_charm/article/details/156354455", "date": "2025-12-28", "views": 475, "category": "项目实战" },
-    { "title": "【面试】数据平台产品经理面试知识点总结", "url": "https://blog.csdn.net/Mr_charm/article/details/146723400", "date": "2025-08-03", "views": 1481, "category": "面试" },
-    { "title": "【数据分析实战经验】如何写游戏体验报告（以最强蜗牛为例）", "url": "https://blog.csdn.net/Mr_charm/article/details/116651473", "date": "2021-05-11", "views": 3134, "category": "数据分析" },
-    { "title": "【数据分析实战经验】一文梳理各类型玩法的分析要点 & 有效结论", "url": "https://blog.csdn.net/Mr_charm/article/details/115512697", "date": "2021-04-08", "views": 995, "category": "数据分析" },
-    { "title": "【数据分析实战经验】利用 Python 对数据进行区间判断，打标签", "url": "https://blog.csdn.net/Mr_charm/article/details/108997976", "date": "2020-10-10", "views": 2153, "category": "数据分析" },
-    { "title": "【数据分析实战经验】航空公司客户价值分析 LRMFC 模型（K-means）", "url": "https://blog.csdn.net/Mr_charm/article/details/106454487", "date": "2020-05-31", "views": 6575, "category": "数据分析" },
-    { "title": "【读书笔记】Tableau & FineBi 学习小记", "url": "https://blog.csdn.net/Mr_charm/article/details/107592950", "date": "2020-07-28", "views": 1060, "category": "读书笔记" },
-    { "title": "【读书笔记】七周成为数据分析师——python 可视化篇⑥", "url": "https://blog.csdn.net/Mr_charm/article/details/107753114", "date": "2020-08-02", "views": 371, "category": "读书笔记" },
-    { "title": "【七七八八】我从国企辞职了，来游戏公司做了数据分析师", "url": "https://blog.csdn.net/Mr_charm/article/details/108775175", "date": "2020-10-07", "views": 624, "category": "七七八八" },
-    { "title": "【七七八八】Don't Settle. Keep Faith（离职前的心路历程）", "url": "https://blog.csdn.net/Mr_charm/article/details/107423931", "date": "2020-07-18", "views": 1084, "category": "七七八八" },
-    { "title": "【面试相关】数据分析面试前必看知识点 Q&A①", "url": "https://blog.csdn.net/Mr_charm/article/details/107305734", "date": "2020-07-12", "views": 859, "category": "面试" },
-    { "title": "【面试相关】数据分析面试前必看知识点 Q&A②", "url": "https://blog.csdn.net/Mr_charm/article/details/111308590", "date": "2020-12-27", "views": 618, "category": "面试" }
+    {
+      "title": "【项目实战】你的 Obsidian 正在变成屎山吗？139 篇笔记，133 篇查不出是否过期",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/164340707",
+      "date": "2026-09-03",
+      "views": 205,
+      "category": "项目实战"
+    },
+    {
+      "title": "【企业 AI 研发平台落地踩坑实录系列-第三篇】问题从来不在提示词写得好不好",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163977876",
+      "date": "2026-08-22",
+      "views": 316,
+      "category": "项目实战"
+    },
+    {
+      "title": "【企业 AI Skill 落地踩坑实录系列-第二篇】AI 越不确定，企业越要先钉死这六个确定性",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163977648",
+      "date": "2026-08-22",
+      "views": 192,
+      "category": "项目实战"
+    },
+    {
+      "title": "【企业 AI Skill 落地踩坑实录系列-第一篇】别急着写 Skill：先问你的 AI 框架，兜不兜得住？",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163975726",
+      "date": "2026-08-22",
+      "views": 291,
+      "category": "项目实战"
+    },
+    {
+      "title": "【项目实战】企业 AI 落地：大家张口闭口就谈 tool、MCP、skill，但是你真的知道区别吗？",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163793993",
+      "date": "2026-08-16",
+      "views": 421,
+      "category": "项目实战"
+    },
+    {
+      "title": "【项目实战】做数据血缘，我最贵的教训：先打通资产键，再谈解析",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163616403",
+      "date": "2026-08-09",
+      "views": 227,
+      "category": "项目实战"
+    },
+    {
+      "title": "【项目实战】从烟囱设计到全行一张图：知识图谱平台，我踩过哪些坑？",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163615200",
+      "date": "2026-08-09",
+      "views": 189,
+      "category": "项目实战"
+    },
+    {
+      "title": "【项目实战】我的 AI 数据研发——能替代一半的数据开发人员？——从多智能体混战到 SDD 驱动",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/163543970",
+      "date": "2026-08-06",
+      "views": 327,
+      "category": "项目实战"
+    },
+    {
+      "title": "【项目实战】如何搭建一个 AI 取数助手",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/156361948",
+      "date": "2025-12-28",
+      "views": 637,
+      "category": "项目实战"
+    },
+    {
+      "title": "【项目经验】讲讲我对数据研发平台的看法",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/156354455",
+      "date": "2025-12-28",
+      "views": 475,
+      "category": "项目实战"
+    },
+    {
+      "title": "【面试】数据平台产品经理面试知识点总结",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/146723400",
+      "date": "2025-08-03",
+      "views": 1485,
+      "category": "面试"
+    },
+    {
+      "title": "【数据分析实战经验】如何写游戏体验报告（以最强蜗牛为例）",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/116651473",
+      "date": "2021-05-11",
+      "views": 3139,
+      "category": "数据分析"
+    },
+    {
+      "title": "【读书笔记】0423 近期思考",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/116049076",
+      "date": "2021-04-25",
+      "views": 601,
+      "category": "读书笔记"
+    },
+    {
+      "title": "【数据分析实战经验】0415 近期思考",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/115391520",
+      "date": "2021-04-15",
+      "views": 391,
+      "category": "数据分析"
+    },
+    {
+      "title": "【数据分析实战经验】一文梳理各类型玩法的分析要点 & 有效结论",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/115512697",
+      "date": "2021-04-08",
+      "views": 1001,
+      "category": "数据分析"
+    },
+    {
+      "title": "【数据分析实战经验】0323 近期思考",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/115115073",
+      "date": "2021-03-23",
+      "views": 383,
+      "category": "数据分析"
+    },
+    {
+      "title": "【七七八八】coursera python-basis certification",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/114239936",
+      "date": "2021-02-28",
+      "views": 234,
+      "category": "七七八八"
+    },
+    {
+      "title": "【数据分析实战经验】整理半年来所学数据分析的技术栈知识点及面试关键点",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/114227674",
+      "date": "2021-02-28",
+      "views": 643,
+      "category": "数据分析"
+    },
+    {
+      "title": "【读书笔记】github 课程-Python-100-Days",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/113789354",
+      "date": "2021-02-15",
+      "views": 863,
+      "category": "读书笔记"
+    },
+    {
+      "title": "【读书笔记】数据驱动业务--talkindata",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/113529956",
+      "date": "2021-02-02",
+      "views": 551,
+      "category": "读书笔记"
+    },
+    {
+      "title": "【面试相关】数据分析面试前必看知识点Q&A③",
+      "url": "https://blog.csdn.net/Mr_charm/article/details/111860584",
+      "date": "2021-01-17",
+      "views": 916,
+      "category": "面试"
+    }
   ]
 }

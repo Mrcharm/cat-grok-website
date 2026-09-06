@@ -1,6 +1,6 @@
 {
-  "version": "3.1",
-  "updated": "2026-09-05",
+  "version": "3.2",
+  "updated": "2026-09-06",
   "categories": [
     {
       "id": "work",
@@ -73,35 +73,13 @@
       "title": "股票 · 投研",
       "skills": [
         {
-          "name": "a-share-daily-review",
-          "badge": "复盘",
-          "description": "A 股收盘全维度复盘：技术面、情绪面、短线博弈与板块拆解四条路径，自动采集指数行情、板块排行与涨停梯队。",
+          "name": "a-share-fupan",
+          "badge": "深度复盘",
+          "description": "A 股每日深度复盘：指定日期全面分析大盘走势、量能、板块轮动、涨停跌停、龙虎榜、资金流向、政策资讯与知名短线选手观点，推演次日操作策略。",
           "tags": [
             "A股",
-            "复盘",
-            "情绪面"
-          ],
-          "origin": "self"
-        },
-        {
-          "name": "ashare-short-term-trading",
-          "badge": "短线",
-          "description": "A 股日内与短线决策辅助：盘后诊断、标的初筛、盘中节点评估，支持从交割单回溯每笔交易的买卖质量。",
-          "tags": [
-            "A股",
-            "短线",
-            "交割单复盘"
-          ],
-          "origin": "self"
-        },
-        {
-          "name": "stock-research-trading-review",
-          "badge": "交易",
-          "description": "产业链证据研究、财报兑现、主升板块识别、核心股筛选与买卖点复盘，合并为一套证据驱动的交易决策。",
-          "tags": [
-            "产业链",
-            "主升浪",
-            "证据驱动"
+            "龙虎榜",
+            "次日策略"
           ],
           "origin": "self"
         },
@@ -115,27 +93,6 @@
             "决策"
           ],
           "origin": "self"
-        },
-        {
-          "name": "westockdata",
-          "badge": "数据",
-          "description": "金融市场结构化数据查询：A股/港股/美股、ETF、指数、板块、期货、可转债的 K 线、技术指标、筹码与财报。",
-          "tags": [
-            "K线",
-            "筹码",
-            "财报"
-          ],
-          "origin": "self"
-        },
-        {
-          "name": "neodata-financial-search",
-          "badge": "搜索",
-          "description": "自然语言通用金融数据搜索：股票、基金、指数、板块、债券、期货，一句话查询结构化金融数据。",
-          "tags": [
-            "NL2Data",
-            "金融数据"
-          ],
-          "origin": "market"
         }
       ]
     },
@@ -144,46 +101,6 @@
       "icon": "🧠",
       "title": "思维框架",
       "skills": [
-        {
-          "name": "buffett-perspective",
-          "badge": "巴菲特",
-          "description": "巴菲特思维框架：基于 60+ 年股东信、股东大会记录与深度采访的一手来源调研，提炼 6 个核心心智模型。",
-          "tags": [
-            "价值投资",
-            "心智模型"
-          ],
-          "origin": "self"
-        },
-        {
-          "name": "munger-perspective",
-          "badge": "芒格",
-          "description": "芒格思维框架：多元思维模型、逆向思考与误判心理学，基于《穷查理宝典》与股东会演讲。",
-          "tags": [
-            "多元思维",
-            "逆向"
-          ],
-          "origin": "self"
-        },
-        {
-          "name": "taleb-perspective",
-          "badge": "塔勒布",
-          "description": "塔勒布思维框架：反脆弱、凸性与尾部风险，基于 40+ 来源的深度调研，提炼 6 个核心心智模型。",
-          "tags": [
-            "反脆弱",
-            "风险"
-          ],
-          "origin": "self"
-        },
-        {
-          "name": "mao-zedong-perspective",
-          "badge": "方法论",
-          "description": "从《矛盾论》《实践论》等提炼分析问题、制定战略、组织行动的方法论体系。",
-          "tags": [
-            "战略",
-            "矛盾分析"
-          ],
-          "origin": "self"
-        },
         {
           "name": "best-minds",
           "badge": "模拟器",
@@ -213,16 +130,6 @@
           "origin": "self"
         },
         {
-          "name": "article-image-pipeline",
-          "badge": "配图",
-          "description": "写稿 + 配图生产流水线：从派单到生图的完整链路经验，覆盖插图风格规范与生产铁律。",
-          "tags": [
-            "插图",
-            "流水线"
-          ],
-          "origin": "self"
-        },
-        {
           "name": "humanizer",
           "badge": "去AI味",
           "description": "去除文本中的 AI 写作痕迹，让文字读起来更像人类写作。适用于润色、改写与降 AI 味。",
@@ -233,62 +140,12 @@
           "origin": "market"
         },
         {
-          "name": "xiaohongshu-cover",
-          "badge": "封面",
-          "description": "小红书爆款封面设计：基于全网每日收录的 2000+ 爆款笔记数据，抓取同赛道封面的视觉元素。",
-          "tags": [
-            "小红书",
-            "封面设计"
-          ],
-          "origin": "market"
-        },
-        {
-          "name": "gzh-explosive-content-detector",
-          "badge": "选题",
-          "description": "公众号爆款文章搜索：按关键词搜索爆款内容、推荐热门文章，助力把握内容趋势。",
-          "tags": [
-            "公众号",
-            "爆款分析"
-          ],
-          "origin": "market"
-        },
-        {
-          "name": "xiaohongshu-search",
-          "badge": "小红书",
-          "description": "小红书热门笔记搜索：按关键词获取热门内容数据，基于数据评分排序推荐，发现热门趋势。",
-          "tags": [
-            "小红书",
-            "趋势"
-          ],
-          "origin": "market"
-        },
-        {
-          "name": "aihot",
-          "badge": "资讯",
-          "description": "中文 AI 资讯查询：今天 AI 圈有什么、AI 热点速览，日常跟进行业动态。",
-          "tags": [
-            "AI资讯",
-            "热点"
-          ],
-          "origin": "market"
-        },
-        {
           "name": "ian-xiaohei-illustrations",
           "badge": "插图",
           "description": "生成 Ian 风格的中文正文配图：为文章、博客、方法论、流程文档配可读性强的插图。",
           "tags": [
             "插图",
             "风格化"
-          ],
-          "origin": "market"
-        },
-        {
-          "name": "notebooklm-studio",
-          "badge": "学习",
-          "description": "把 URL、YouTube、文件与文本导入 Google NotebookLM，构建可问答的个人学习资料库。",
-          "tags": [
-            "NotebookLM",
-            "知识消化"
           ],
           "origin": "market"
         }
@@ -415,16 +272,6 @@
             "幻灯片"
           ],
           "origin": "market"
-        },
-        {
-          "name": "web-deploy-github",
-          "badge": "部署",
-          "description": "创建并部署单页静态网站到 GitHub Pages 的标准流程。",
-          "tags": [
-            "静态站",
-            "部署"
-          ],
-          "origin": "self"
         }
       ]
     }

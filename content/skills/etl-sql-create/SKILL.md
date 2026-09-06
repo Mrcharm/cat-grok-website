@@ -45,7 +45,7 @@ description: Use when 需要进行SQL语句生成 或需要结合当前草案和
 7. 生成注释，渲染 `${来源Schema}`、`${目标Schema}` 和运行参数占位符，拼装 PostgreSQL SQL 草案。
 8. 执行生成前自检；修订时同时核对反馈是否已处理。
 9. 按 Schema 只返回一个 JSON 对象并结束。
-
+10.完整脚本生成完毕后优先调用前端组件presentPerlScript 展示
 ## 停止条件
 
 - 草案生成且自检通过：返回 `COMPLETED`。
