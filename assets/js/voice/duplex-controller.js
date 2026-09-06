@@ -301,8 +301,10 @@ export class DuplexVoiceController {
   startPumps(session) {
     const silence = new Uint8Array(PCM_FRAME_BYTES);
     session.audioTimer = setInterval(() => {
-      if (!this.isCurrent(session) || !session.sessionReady || session.track?.muted || session.track?.readyState === 'ended' || session.socket?.readyState !== this.WebSocketCtor.OPEN) return;
-      const frame = session.pendingFrames.shift() || silence;
+      if (!this.isCurrent(session) || !session.sessionReady || session.socket?.readyState !== this.WebSocketCtor.OPEN) return;
+      const muted = session.track?.muted || session.track?.readyState === 'ended';
+      const frame = muted ? silence : session.pendingFrames.shift() || silence;
+      if (muted) session.pendingFrames = [];
       session.socket.send(JSON.stringify({ type: 'input_audio_buffer.append', audio: bytesToBase64(frame) }));
     }, 20);
     session.activityTimer = setInterval(() => {

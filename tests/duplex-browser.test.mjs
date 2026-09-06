@@ -119,6 +119,7 @@ test('muted microphone does not close the reply audio channel', async () => {
     assert.equal(socket.readyState, FakeSocket.OPEN);
     assert.equal(controller.session.player.context.state, 'running');
     assert.ok(diagnostics.some(d => d.microphone === 'muted'));
+    assert.ok(socket.sent.some(e => e.type === 'input_audio_buffer.append' && e.audio === Buffer.alloc(640).toString('base64')), 'muted input keeps the protocol alive with silence');
   } finally { await controller.stop(); }
 });
 
