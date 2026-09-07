@@ -1,7 +1,7 @@
 import { initArticlesPage } from './articles.js';
-import { initSkillsPage } from './skills.js';
-import { initPortfolioPage } from './portfolio.js';
-import { bootDuplexVoice } from './voice/duplex-controller.js?v=20260906c';
+import { initSkillsPage } from './skills.js?v=20260906d';
+import { initPortfolioPage } from './portfolio.js?v=20260906d';
+import { bootDuplexVoice } from './voice/duplex-controller.js?v=20260906d';
 
 const INITIALIZERS = {
   home: root => {

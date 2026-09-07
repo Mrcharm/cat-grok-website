@@ -1,4 +1,4 @@
-import { createPageLifecycle } from './page-lifecycle.js?v=20260906c';
+import { createPageLifecycle } from './page-lifecycle.js?v=20260906d';
 
 const ROUTES = new Map([
   ['/', 'home'],
