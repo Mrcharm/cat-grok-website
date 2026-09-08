@@ -29,24 +29,29 @@ export function initPortfolioPage(root = document) {
   function onClick(event) {
     const target = event.target;
     if (!target || typeof target.closest !== 'function') return;
+    // 打开：点击 wrap 内的作品缩略图
     const thumb = target.closest('.portfolio-thumbs img');
-    if (thumb) {
+    if (thumb && wrap.contains(thumb)) {
       event.preventDefault();
       open(thumb.getAttribute('src'), thumb.getAttribute('alt'));
       return;
     }
-    if (target.closest('.lightbox-close') || target === overlay) close();
+    // 关闭：lightbox 打开时点击 × 或遮罩背景（overlay 挂在 body 下，必须在 document 层委托）
+    if (overlay.classList.contains('open') &&
+        (target.closest('.lightbox-close') || target === overlay)) {
+      close();
+    }
   }
 
   function onKey(event) {
     if (event.key === 'Escape' && overlay.classList.contains('open')) close();
   }
 
-  wrap.addEventListener('click', onClick);
+  document.addEventListener('click', onClick);
   document.addEventListener('keydown', onKey);
 
   return () => {
-    wrap.removeEventListener('click', onClick);
+    document.removeEventListener('click', onClick);
     document.removeEventListener('keydown', onKey);
     overlay.remove();
     document.body.style.overflow = '';
