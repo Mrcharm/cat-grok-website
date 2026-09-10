@@ -13,14 +13,13 @@ description: Use when 任务包含自然语言、JSON、Excel 或混合形式的
 
 先判「内容从哪里来」，再分流到对应规则。优先依据平台识别的内容类型，文件扩展名仅作为辅助线索。
 
-四个并列输入来源：
+三个并列输入来源：
 
 | 来源 | 判定依据 | 处理 |
 |---|---|---|
 | 自然语言 | 用户消息正文 | 按自然语言规则拆解 |
 | Excel | `.xlsx`/`.xls` 附件、平台解析表格 | 按 Excel 规则拆解 |
-| 已有设计 | `etl_design` 工具返回结果 | 先做准入判断（见下），通过后按 JSON 规则拆解 |
-| 用户 JSON | 用户直接提交的 JSON 正文 | 按 JSON 规则「通用 JSON」部分拆解 |
+| 已有设计 | 调用方传入的已有设计 JSON | 先做准入判断（见下），通过后按 JSON 规则拆解 |
 
 各来源对应的规则文件见「读取说明」。
 
@@ -35,20 +34,14 @@ description: Use when 任务包含自然语言、JSON、Excel 或混合形式的
 
 - `references/natural-language-mixed-input-rules.md`：自然语言输入时读取；
 - `references/excel-input-rules.md`：Excel 输入时读取；
-- `references/json-input-rules.md`：`etl_design` 准入通过或用户提交 JSON 时读取。
-
-## 附件读取
-
-附件必须由平台提供可被对应读取工具接受的附件对象或附件引用；具体由平台按附件类型选择读取方式，技能不写死具体读取工具。
-
-自然语言正文或平台已解析的结构化内容直接可见时，不调用附件工具。
+- `references/json-input-rules.md`：已有设计 JSON 准入通过时读取。
 
 
 ## 执行流程
 
-1. 每次新的需求分析首次执行时，调用`etl_design`获取当前脚本已有设计结果；后续澄清复用上一轮结果。严格使用工具真实返回内容，不得补造、改写或推测。
-2. 按 `references/json-input-rules.md` 判断返回内容是否准入；通过后作为 JSON 来源，未取得或无有效内容时忽略该来源，不阻塞需求澄清。
-3. 读取实际可用的自然语言、通过准入的 `etl_design` 结果和 Excel，按各自来源规则拆解。
+1. 接收调用方传入的已有设计 JSON；未传入时忽略该来源，不阻塞需求澄清。
+2. 收到已有设计 JSON 时，按 `references/json-input-rules.md` 判断内容是否准入；通过后作为 JSON 来源，未传入或无有效内容时忽略该来源，不阻塞需求澄清。
+3. 复用本轮已取得的自然语言、通过准入的已有设计结果和 Excel 解析结果，按各自来源规则拆解；不得重复读取或再次调用附件读取工具。
 4. 按附件、Sheet、连续业务区域或关键 JSONPath 建立精简的 `input_sources`。
 5. 按介质规则提取脚本、场景、目标、来源、显式步骤和字段规则，并按混合输入规则合并。
 6. 先合并多行或多介质中重复出现的同一最终目标表；若仍存在两个及以上不同的最终目标表，按 `clarification-rules.md`「单目标表限制」停止并返回。
@@ -72,9 +65,9 @@ description: Use when 任务包含自然语言、JSON、Excel 或混合形式的
 
 - 只返回符合 `references/requirement-clarify-output.schema.json` 的 JSON，不附加 Markdown。
 - 唯一业务语义以 `references/clarification-rules.md` 为准；两文件冲突时返回 `ERROR`。
-- 不重复书写多字段共用规则；映射组通过 `shared_rule_refs` 引用。
 - 每个目标字段必须保留独立的字段映射，不得因分组压缩而遗漏。
+- 不重复书写多字段共用规则；映射组通过 `shared_rule_refs` 引用。
 - 无显式业务步骤时不虚构步骤。
-- 按执行流程调用 `etl_design` 获取当前脚本已有设计结果。
+- 不调用数据库、元数据、知识库等外部系统；已有设计 JSON 由调用方传入，本技能不自行获取。
 - 不生成、解释、校验或优化 SQL。
-- 不控制调用方如何向最终用户展示结果。
+

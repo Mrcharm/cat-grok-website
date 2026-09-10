@@ -75,6 +75,7 @@ function homePage({ profile }) {
 function articlesPage({ blog }) {
   const items = (blog?.items || []).map(item => (
     '<article class="blog-card">' +
+    (item.cover ? '<img class="blog-cover" src="' + escapeHtml(item.cover) + '" alt="' + escapeHtml(item.title.replace(/【[^】]*】/g, '')) + '" loading="lazy">' : '') +
     '<div class="blog-meta"><span class="blog-cat">' + escapeHtml(item.category) + '</span>' +
     '<span>' + escapeHtml(item.date) + '</span></div>' +
     '<h3>' + escapeHtml(item.title.replace(/【[^】]*】/g, '')) + '</h3>' +

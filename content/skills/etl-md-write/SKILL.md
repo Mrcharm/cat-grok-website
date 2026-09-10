@@ -63,8 +63,9 @@ Markdown 文件读写使用平台提供的文件能力，不固定工具名；�
 4. 按 References/markdown-templates.md 及/source-json-mapping.md生成内容;
 5. 更新前先读取目标文件；已有唯一目标章节时原位替换，章节不存在时追加，空文件或首次建立时直接写入；
 6. 同时更新 PLAN 和 RECORD 时分别保持幂等，不得产生重复章节；
-7. 返回符合输出 Schema 的最小 JSON，其中包含实际更新文件、推荐展示内容和错误。
-8. 展示时内容优先调用前端 `publishArtifact` 展示。
+7. SQL 生成阶段更新 RECORD 时，「### 当前 SQL 草案」必须包含 `sql_draft.sql_text` 全文代码块；`source_payload` 中无 `sql_draft` 时，在该节写明"来源 JSON 未含 sql_draft"，不得静默省略该节；
+8. 返回符合输出 Schema 的最小 JSON，其中包含实际更新文件、推荐展示内容和错误。
+9. 展示时内容优先调用前端 `publishArtifact` 展示。
 
 ## 失败处理与幂等
 

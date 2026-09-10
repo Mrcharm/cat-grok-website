@@ -17,6 +17,7 @@ description: Use when 需要查询或补齐 ETL 相关的表、字段、Schema�
 - 复杂的多项证据收集要求；
 - `etl-requirement-clarify` 结构化需求卡片；
 - 上一轮返回的完整 `query_plan` 和 `evidence_card` 检查点；
+- 下游技能（etl-sql-create）返回的缺口清单 `gaps[]`，由调用方随完整 `evidence_card` 一并传入；
 - 用户补充、候选选择或确认跳过信息。
 
 
@@ -39,9 +40,9 @@ description: Use when 需要查询或补齐 ETL 相关的表、字段、Schema�
 
 ## 执行流程
 
-1. 判断是首次长链路、简单查询、检查点续跑还是用户补充。
+1. 判断是首次长链路、简单查询、检查点续跑、用户补充还是缺口回补。
 2. 首次长链路只生成计划并返回；简单查询可直接规划并执行。
-3. 续跑必须取得完整 `query_plan` 和 `evidence_card`，不得从需求或 Markdown 重新规划。
+3. 检查点续跑必须取得完整 `query_plan` 和 `evidence_card`，不得从需求或 Markdown 重新规划；缺口回补必须取得完整 `evidence_card` 和 `gaps[]`，不要求 `query_plan`，只针对 `gaps[]` 追加查询。
 4. 每轮最多执行 3 个依赖已满足且彼此独立的 `PENDING` 查询项。
 5. 使用固定“底座数据库”，按 `evidence-rules.md` 完成查询、状态判定、依赖传递和证据合并。
 6. 判定顶层状态，按 Schema 返回完整 `query_plan` 和 `evidence_card`。
@@ -52,7 +53,7 @@ description: Use when 需要查询或补齐 ETL 相关的表、字段、Schema�
 - 仍有当前可执行的 `PENDING`：返回 `IN_PROGRESS`。
 - 没有当前可执行的 `PENDING`，但存在 `NEED_CONFIRMATION`：返回 `NEED_USER_INPUT`。
 - 不存在 `PENDING` 且不存在 `NEED_CONFIRMATION`：返回 `COMPLETED`。
-- 只传入 `query_plan` 或 `evidence_card` 其中一项：返回 `INPUT_INVALID`。
+- 检查点续跑只传入 `query_plan` 或 `evidence_card` 其中一项，或缺口回补未同时传入 `evidence_card` 和 `gaps[]`：返回 `INPUT_INVALID`。
 - 没有可识别查询或取证要求：返回 `INPUT_INVALID`。
 - Skill 输出无法通过 Schema，或执行流程发生不可恢复的自身错误：返回 `ERROR`。
 

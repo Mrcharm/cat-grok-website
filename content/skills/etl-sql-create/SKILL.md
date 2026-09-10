@@ -11,10 +11,7 @@ description: Use when 需要进行SQL语句生成 或需要结合当前草案和
 
 ## 调用输入
 
-首次构造从以下两种结构化事实中二选一：
-
-- 当前有效且已经确认的 `evidence_card`；
-- 用户直接提供且已经确认的 `direct_input`。
+首次构造只接收当前有效且已经确认的 `evidence_card`。
 
 定向修订还必须读取当前 `sql_draft`，以及至少一项用户反馈或结构化检核问题。
 
@@ -36,13 +33,13 @@ description: Use when 需要进行SQL语句生成 或需要结合当前草案和
 
 ## 执行流程
 
-1. 识别 `evidence_card` 或 `direct_input`，按是否同时存在 `sql_draft` 和反馈或检核问题判断首次构造或定向修订。
+1. 识别 `evidence_card`，按是否同时存在 `sql_draft` 和反馈或检核问题判断首次构造或定向修订。
 2. 校验所有会改变 SQL 语义的目标表、目标字段、来源表、来源字段、映射、关联、过滤和聚合均已确定；
 3. 按业务规则和输出 Schema 建立固定 Step 1～8 的 `generation_plan`。
 4. 按加工粒度规划全局步骤，必要时增加会话级临时表。
 5. 为每步规划目标、来源、JOIN、WHERE、GROUP BY、HAVING、ORDER BY、子查询、策略和算子等。
 6. 逐个目标字段生成可追溯表达式，完成 INSERT 与 SELECT 数量及顺序对账。
-7. 生成注释，渲染 `${来源Schema}`、`${目标Schema}` 和运行参数占位符，拼装 PostgreSQL SQL 草案。
+7. 生成注释，填入证据卡已确认的 schema 真实值，保留 `${TXNDATE}`、`${TXN_DATE}` 运行参数占位符，拼装 PostgreSQL SQL 草案。
 8. 执行生成前自检；修订时同时核对反馈是否已处理。
 9. 按 Schema 只返回一个 JSON 对象并结束。
 10.完整脚本生成完毕后优先调用前端组件presentPerlScript 展示
