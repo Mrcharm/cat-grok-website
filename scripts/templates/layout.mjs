@@ -37,7 +37,7 @@ export function persistentShell({ depth = 0, active = 'home' } = {}) {
     '<span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>音乐</span></button>' +
     '</div></header>' +
     '<iframe class="background-music-frame" id="background-music-frame" title="背景音乐：法老、杨秋儒《我想part2》" ' +
-    'aria-hidden="true" tabindex="-1" src="' + NETEASE_PLAYER_URL + '"></iframe>';
+    'allow="autoplay" aria-hidden="true" tabindex="-1" src="' + NETEASE_PLAYER_URL + '"></iframe>';
 }
 
 export function layout({
@@ -74,13 +74,13 @@ export function layout({
     '<meta name="twitter:description" content="' + escapeHtml(description) + '">' +
     '<meta name="twitter:image" content="' + siteRoot + 'og.png">' +
     '<title>' + escapeHtml(title) + '</title>' +
-    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css?v=20260912a">' +
+    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css?v=20260912b">' +
     '<link rel="stylesheet" href="' + root + 'assets/styles/home-street.css">' +
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
     persistentShell({ depth, active }) +
     '<main id="main">' + body + '</main>' +
     '<footer><strong>猫哥 · JARVIS</strong><span>AI 陪伴系统 · 静态生成</span></footer>' +
-    '<script type="module" src="' + root + 'assets/js/site.js?v=20260912a"></script>' +
+    '<script type="module" src="' + root + 'assets/js/site.js?v=20260912b"></script>' +
     '</body></html>';
 }

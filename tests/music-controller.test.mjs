@@ -73,15 +73,21 @@ test('点击音乐按钮停止，再次点击恢复', () => {
   assert.equal(fixture.button.classList.contains('playing'), true);
 });
 
-test('首次页面交互重建 iframe 以恢复被拦截的自动播放', () => {
+test('页面交互不再重建 iframe，只有音乐按钮会改动播放器', () => {
   const fixture = createMusicFixture();
   createMusicController(fixture.dependencies).start();
   const initialFrame = fixture.root.frame;
-  fixture.interactionTarget.dispatch('pointerdown');
-  assert.notEqual(fixture.root.frame, initialFrame);
-  assert.match(fixture.root.frame.src, /id=1336856498/);
+
+  // 导航、筛选、下载等任何页面交互都不得注册手势监听，也不得重建 iframe ——
+  // 重建播放器会把正在播的歌打回 0:00。
   assert.equal(fixture.interactionTarget.has('pointerdown'), false);
   assert.equal(fixture.interactionTarget.has('keydown'), false);
+  fixture.interactionTarget.dispatch('pointerdown');
+  fixture.interactionTarget.dispatch('keydown');
+
+  assert.equal(fixture.root.frame, initialFrame);
+  assert.match(fixture.root.frame.src, /id=1336856498/);
+  assert.equal(fixture.button.getAttribute('aria-pressed'), 'true');
 });
 
 test('用户主动停止后，其他页面交互不会恢复音乐', () => {

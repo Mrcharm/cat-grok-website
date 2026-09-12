@@ -43,10 +43,7 @@ export function linkRoute(link) {
 
 const BACKGROUND_MUSIC_URL = 'https://music.163.com/outchain/player?type=2&id=1336856498&auto=1&height=32';
 
-export function createMusicController({
-  root = document,
-  interactionTarget = document
-} = {}) {
+export function createMusicController({ root = document } = {}) {
   const button = root.querySelector('.music-btn');
   if (!root.querySelector('#background-music-frame') || !button) {
     return { start() {}, toggle() {}, play() {}, stop() {}, destroy() {} };
@@ -59,6 +56,11 @@ export function createMusicController({
     return root.querySelector('#background-music-frame');
   }
 
+  // Two hard rules, both learned the hard way:
+  //   1. the widget only restarts when the visitor asks for it - rebuilding the
+  //      iframe on the first click used to cut the song back to 0:00;
+  //   2. nothing outside this controller may touch the iframe, because the
+  //      网易云 outchain player gives us no way to resume where it left off.
   function replaceFrame(src = BACKGROUND_MUSIC_URL) {
     const current = frame();
     const next = current.cloneNode(false);
@@ -73,23 +75,16 @@ export function createMusicController({
     button.classList[playing ? 'add' : 'remove']('playing');
   }
 
-  function detachGestureRecovery() {
-    interactionTarget.removeEventListener('pointerdown', recoverAfterGesture);
-    interactionTarget.removeEventListener('keydown', recoverAfterGesture);
-  }
-
   function play() {
     playing = true;
     replaceFrame();
     renderState();
-    detachGestureRecovery();
   }
 
   function stop() {
     playing = false;
     frame().src = 'about:blank';
     renderState();
-    detachGestureRecovery();
   }
 
   function toggle() {
@@ -97,17 +92,10 @@ export function createMusicController({
     else play();
   }
 
-  function recoverAfterGesture() {
-    if (playing) replaceFrame();
-    detachGestureRecovery();
-  }
-
   function start() {
     if (started) return;
     started = true;
     button.addEventListener('click', toggle);
-    interactionTarget.addEventListener('pointerdown', recoverAfterGesture);
-    interactionTarget.addEventListener('keydown', recoverAfterGesture);
     playing = true;
     frame().src = BACKGROUND_MUSIC_URL;
     renderState();
@@ -116,7 +104,6 @@ export function createMusicController({
   function destroy() {
     if (!started) return;
     button.removeEventListener('click', toggle);
-    detachGestureRecovery();
     started = false;
   }
 
