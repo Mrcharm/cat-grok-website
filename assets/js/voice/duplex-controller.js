@@ -497,6 +497,24 @@ const STATE_LABELS = {
 
 const mountedVoices = new WeakMap();
 
+// The relay runs on a free Render instance that sleeps after ~15 minutes idle
+// and needs ~30s to boot. Ping /healthz once per page load so the instance is
+// already awake by the time the visitor taps the microphone.
+let relayWarmed = false;
+function warmRelay(endpoint) {
+  if (relayWarmed || !endpoint) return;
+  relayWarmed = true;
+  const ping = () => {
+    try {
+      fetch(new URL('/healthz', endpoint).href, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
+    } catch {
+      /* malformed endpoint — the connect path will surface it */
+    }
+  };
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(ping, { timeout: 2500 });
+  else setTimeout(ping, 1200);
+}
+
 export function bootDuplexVoice({ root = document } = {}) {
   const dock = root.querySelector('#voiceDock');
   const button = root.querySelector('#voiceBtn');
@@ -556,6 +574,7 @@ export function bootDuplexVoice({ root = document } = {}) {
     button.addEventListener('click', () => showMessage('assistant', '实时语音服务尚未配置。'));
     return null;
   }
+  warmRelay(endpoint);
 
   const controller = new DuplexVoiceController({
     endpoint,
