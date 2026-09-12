@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import WebSocket, { WebSocketServer } from 'ws';
 import { isAllowedOrigin, loadVoiceConfig } from './config.mjs';
+import { resolveKeepAliveBaseUrl, startKeepAlive } from './keep-alive.mjs';
 
 const MAX_MESSAGE_BYTES = 128 * 1024;
 const MAX_BUFFERED_BYTES = 256 * 1024;
@@ -206,5 +207,6 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const app = createVoiceServer({ config });
   app.server.listen(Number(process.env.PORT) || 8787, '0.0.0.0', () => {
     console.log('JARVIS Doubao realtime voice proxy listening');
+    startKeepAlive({ baseUrl: resolveKeepAliveBaseUrl() });
   });
 }
