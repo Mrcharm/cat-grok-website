@@ -52,3 +52,7 @@ body{background:#fff}.site-header{height:80px;padding-inline:max(42px,calc((100v
 .lightbox-close:hover{border-color:rgba(56,225,255,.6);color:#38e1ff}
 /* blog post covers */
 .blog-cover{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;object-position:top;border-radius:8px;margin-bottom:12px;background:var(--jarvis-panel2,rgba(56,225,255,.05))}
+/* portfolio video demo */
+.portfolio-video{border-bottom:2px solid var(--ink);background:#0b0f17}
+.portfolio-video video{display:block;width:100%;aspect-ratio:1944/832;object-fit:cover;background:#0b0f17}
+@media(max-width:720px){.portfolio-video video{aspect-ratio:16/10;object-fit:contain}}
