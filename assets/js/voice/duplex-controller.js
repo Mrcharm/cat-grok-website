@@ -498,21 +498,43 @@ const STATE_LABELS = {
 const mountedVoices = new WeakMap();
 
 // The relay runs on a free Render instance that sleeps after ~15 minutes idle
-// and needs ~30s to boot. Ping /healthz once per page load so the instance is
-// already awake by the time the visitor taps the microphone.
+// and needs ~30s to boot, so the goal is an instance that is already awake by
+// the time the visitor taps the microphone. Two things make that hold:
+//
+//   1. the first ping fires on load rather than on an idle slot — the idle
+//      callback could sit for up to 2.5s behind the homepage's own work, and
+//      every one of those seconds is spent inside the cold start the visitor
+//      is already waiting on;
+//   2. a heartbeat repeats it, because Render drops the instance back to sleep
+//      15 minutes into a visit and the next tap would pay the cold start again.
+//
+// Module scope on purpose: SPA navigation disposes the controller, but the tab
+// is still open, so the heartbeat has to outlive any single mount.
+const RELAY_HEARTBEAT_MS = 8 * 60 * 1000;
+
+// Mirrors server/keep-alive.mjs. Beating the relay between midnight and 07:00
+// Shanghai would spend free-plan instance hours on nobody's visit, so the
+// heartbeat goes quiet and accepts one cold start for the first early visitor.
+export function isWithinRelayWarmWindow(now = Date.now()) {
+  const hour = (new Date(now).getUTCHours() + 8) % 24;
+  return hour >= 7 && hour < 24;
+}
+
 let relayWarmed = false;
 function warmRelay(endpoint) {
   if (relayWarmed || !endpoint) return;
   relayWarmed = true;
   const ping = () => {
+    if (!isWithinRelayWarmWindow()) return;
     try {
       fetch(new URL('/healthz', endpoint).href, { mode: 'no-cors', cache: 'no-store' }).catch(() => {});
     } catch {
       /* malformed endpoint — the connect path will surface it */
     }
   };
-  if (typeof requestIdleCallback === 'function') requestIdleCallback(ping, { timeout: 2500 });
-  else setTimeout(ping, 1200);
+  ping();
+  const heartbeat = setInterval(ping, RELAY_HEARTBEAT_MS);
+  heartbeat.unref?.();
 }
 
 export function bootDuplexVoice({ root = document } = {}) {
