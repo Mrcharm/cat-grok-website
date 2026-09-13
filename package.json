@@ -11,6 +11,8 @@
     "weekly:generate": "node scripts/generate-weekly-report.mjs",
     "validate": "node scripts/validate-content.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "healthcheck": "node scripts/healthcheck.mjs",
+    "healthcheck:online": "node scripts/healthcheck.mjs --online",
     "check": "pnpm validate && pnpm test && pnpm build && pnpm smoke"
   },
   "dependencies": {

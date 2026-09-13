@@ -2,5 +2,6 @@ node_modules/
 .superpowers/
 .superpowers/sdd/
 .worktrees/
+.workbuddy/
 .env*
 *.log
