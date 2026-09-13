@@ -7,7 +7,7 @@ import { createVoiceServer } from '../server/index.mjs';
 
 for (const file of ['index.html', 'articles/index.html', 'skills/index.html', 'portfolio/index.html']) await access(file);
 const home = await readFile('index.html', 'utf8');
-if (!home.includes('MR.C') || !home.includes('JARVIS') || !home.includes('type=2&amp;id=1336856498&amp;auto=1')) {
+if (!home.includes('MR.C') || !home.includes('JARVIS') || !home.includes('assets/music/want-part2.mp3')) {
   throw new Error('首页缺少统一品牌或《我想part2》背景音乐');
 }
 if (!home.includes('assets/dist/duplex-voice.js') || home.includes('assets/dist/rtc-voice.js') || home.includes('speechSynthesis')) {

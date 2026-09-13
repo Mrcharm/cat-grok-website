@@ -24,7 +24,7 @@ test('四页使用同一品牌、导航和《我想part2》隐藏单曲', async 
     assert.match(html, /首页[\s\S]*文章[\s\S]*技能[\s\S]*作品集/);
     assert.match(html, /class="[^"]*music-btn[^"]*"[^>]*aria-pressed="true"/);
     assert.match(html, /id="background-music-frame"/);
-    assert.match(html, /type=2&amp;id=1336856498&amp;auto=1/);
+    assert.match(html, /<audio[^>]*id="background-music-frame"[^>]*src="[^"]*assets\/music\/want-part2\.mp3"/);
     assert.doesNotMatch(html, /music-panel|music-unlock|885054268/);
     assert.equal((html.match(/<main\b/g) || []).length, 1, path);
   }

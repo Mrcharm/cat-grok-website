@@ -41,70 +41,106 @@ export function linkRoute(link) {
   return link.dataset?.route || routeKey(link.href);
 }
 
-const BACKGROUND_MUSIC_URL = 'https://music.163.com/outchain/player?type=2&id=1336856498&auto=1&height=32';
-
-export function createMusicController({ root = document } = {}) {
+// 背景音乐控制器。
+//
+// 三条铁律，前两条是踩出来的：
+//   1. 进站就尝试播放；被浏览器的自动播放策略拦下时，在访客的第一次交互
+//      （点击 / 按键 / 触摸）立刻续上，不必专门去点音乐按钮 —— 音乐元素的
+//      状态我们自己读得到，所以能精确知道该不该继续等手势；
+//   2. 任何情况下都不重建播放器元素。重建会把歌拉回 0:00，这正是「点导航
+//      打断音乐」的成因；
+//   3. 按钮状态以真实媒体事件为准，不做乐观假设 —— 否则自动播放被拦时按钮
+//      会显示成「正在播放」，语音模块据此误判成有声可停。
+export function createMusicController({ root = document, interactionTarget = document } = {}) {
+  const audio = root.querySelector('#background-music-frame');
   const button = root.querySelector('.music-btn');
-  if (!root.querySelector('#background-music-frame') || !button) {
+  if (!audio || !button || typeof audio.play !== 'function') {
     return { start() {}, toggle() {}, play() {}, stop() {}, destroy() {} };
   }
 
-  let playing = true;
   let started = false;
+  let wanted = true; // 访客是否要听音乐，只有显式停止才置 false
 
-  function frame() {
-    return root.querySelector('#background-music-frame');
+  // 点在音乐按钮上时不要先被 unlock 播起来、再被按钮的 click 停掉。
+  const touchingButton = event =>
+    typeof button.contains === 'function' && event?.target && button.contains(event.target);
+
+  function attempt() {
+    if (!wanted || !audio.paused) return;
+    let result;
+    try {
+      result = audio.play();
+    } catch {
+      renderState(); // 连播放都发起不了（无音源等），如实反映到按钮上
+      return;
+    }
+    // 被自动播放策略拒绝时保持静默：unlock 监听还挂着，下一次交互会再试一次。
+    if (result && typeof result.catch === 'function') result.catch(() => renderState());
   }
 
-  // Two hard rules, both learned the hard way:
-  //   1. the widget only restarts when the visitor asks for it - rebuilding the
-  //      iframe on the first click used to cut the song back to 0:00;
-  //   2. nothing outside this controller may touch the iframe, because the
-  //      网易云 outchain player gives us no way to resume where it left off.
-  function replaceFrame(src = BACKGROUND_MUSIC_URL) {
-    const current = frame();
-    const next = current.cloneNode(false);
-    next.src = src;
-    current.replaceWith(next);
-    return next;
+  function unlock(event) {
+    if (touchingButton(event)) return;
+    attempt();
+  }
+
+  function attachUnlock() {
+    interactionTarget.addEventListener('pointerdown', unlock);
+    interactionTarget.addEventListener('keydown', unlock);
+    interactionTarget.addEventListener('touchstart', unlock, { passive: true });
+  }
+
+  function detachUnlock() {
+    interactionTarget.removeEventListener('pointerdown', unlock);
+    interactionTarget.removeEventListener('keydown', unlock);
+    interactionTarget.removeEventListener('touchstart', unlock);
   }
 
   function renderState() {
+    const playing = !audio.paused && !audio.ended;
     button.setAttribute('aria-pressed', String(playing));
     button.setAttribute('aria-label', playing ? '停止背景音乐：《我想part2》' : '播放背景音乐：《我想part2》');
     button.classList[playing ? 'add' : 'remove']('playing');
   }
 
   function play() {
-    playing = true;
-    replaceFrame();
-    renderState();
+    wanted = true;
+    attempt();
   }
 
   function stop() {
-    playing = false;
-    frame().src = 'about:blank';
-    renderState();
+    wanted = false;
+    audio.pause();
   }
 
   function toggle() {
-    if (playing) stop();
-    else play();
+    if (audio.paused) play();
+    else stop();
+  }
+
+  function handlePlay() {
+    detachUnlock(); // 已经出声，不必再等手势
+    renderState();
   }
 
   function start() {
     if (started) return;
     started = true;
     button.addEventListener('click', toggle);
-    playing = true;
-    frame().src = BACKGROUND_MUSIC_URL;
-    renderState();
+    audio.addEventListener('play', handlePlay);
+    audio.addEventListener('pause', renderState);
+    audio.addEventListener('ended', renderState);
+    attachUnlock();
+    attempt();
   }
 
   function destroy() {
     if (!started) return;
-    button.removeEventListener('click', toggle);
     started = false;
+    button.removeEventListener('click', toggle);
+    audio.removeEventListener('play', handlePlay);
+    audio.removeEventListener('pause', renderState);
+    audio.removeEventListener('ended', renderState);
+    detachUnlock();
   }
 
   return { start, toggle, play, stop, destroy };

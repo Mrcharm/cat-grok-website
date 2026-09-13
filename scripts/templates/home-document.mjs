@@ -1,7 +1,9 @@
 import { persistentShell } from './layout.mjs';
 
+// 头部 + 背景音乐的整块替换。收尾标签必须包含 audio：音乐元素已从
+// 网易云 iframe 换成自托管的 <audio>，漏了它首页就换不掉旧壳。
 const HEADER_AND_MUSIC =
-  /<header class="(?:topbar|site-header)">[\s\S]*?<\/(?:div|aside|iframe)>\s*(?=(?:<!-- Fullscreen|<main\b))/;
+  /<header class="(?:topbar|site-header)">[\s\S]*?<\/(?:div|aside|iframe|audio)>\s*(?=(?:<!-- Fullscreen|<main\b))/;
 
 export function normalizeHomeDocument(source) {
   let html = source
@@ -53,5 +55,5 @@ export function normalizeHomeDocument(source) {
     html = html.replace('</body>', '<script type="module" src="assets/js/site.js"></script>\n</body>');
   }
 
-  return html.replace(/(assets\/(?:styles\/site\.css|js\/site\.js))(?:\?v=[^"\s]*)?"/g, '$1?v=20260912b"');
+  return html.replace(/(assets\/(?:styles\/site\.css|js\/site\.js))(?:\?v=[^"\s]*)?"/g, '$1?v=20260913a"');
 }

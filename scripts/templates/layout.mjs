@@ -12,11 +12,10 @@ export const NAV_ITEMS = [
   ['portfolio', '作品集', 'portfolio/']
 ];
 
-export const NETEASE_SONG_ID = '1336856498';
-export const NETEASE_PLAYER_URL =
-  'https://music.163.com/outchain/player?type=2&amp;id=' +
-  NETEASE_SONG_ID +
-  '&amp;auto=1&amp;height=32';
+// 背景音乐：法老、杨秋儒《我想part2》。音频自托管在 assets/music/，来源是网易云
+// 外链（song/media/outer/url?id=1336856498.mp3）。
+export const BACKGROUND_MUSIC_SONG_ID = '1336856498';
+export const BACKGROUND_MUSIC_FILE = 'assets/music/want-part2.mp3';
 
 export function persistentShell({ depth = 0, active = 'home' } = {}) {
   const root = '../'.repeat(depth);
@@ -36,8 +35,15 @@ export function persistentShell({ depth = 0, active = 'home' } = {}) {
     '<button class="music-btn playing" type="button" aria-label="停止背景音乐：《我想part2》" aria-pressed="true">' +
     '<span class="bar" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>音乐</span></button>' +
     '</div></header>' +
-    '<iframe class="background-music-frame" id="background-music-frame" title="背景音乐：法老、杨秋儒《我想part2》" ' +
-    'allow="autoplay" aria-hidden="true" tabindex="-1" src="' + NETEASE_PLAYER_URL + '"></iframe>';
+    // 曾经嵌的是网易云 outchain 播放器 iframe。实测（Chrome，且显式放开
+    // autoplay-policy）它 9 秒内对 music.126.net 的音频请求数为 0 —— 那个跨域
+    // 播放器已经不出声，而且我们读不到它的播放状态，只能在被拦截时整个重建，
+    // 一重建就把歌拉回 0:00（就是「点导航会打断音乐」的成因）。
+    // 换成自托管的原生 <audio>：状态可读，能续播，任何点击都不会重建它。
+    // id / class 沿用旧名，避免动到 tests/ 与 scripts/healthcheck.mjs 里已有的断言。
+    '<audio class="background-music-frame" id="background-music-frame" ' +
+    'title="背景音乐：法老、杨秋儒《我想part2》" aria-hidden="true" ' +
+    'src="' + root + BACKGROUND_MUSIC_FILE + '" autoplay loop preload="auto" playsinline></audio>';
 }
 
 export function layout({
@@ -74,13 +80,13 @@ export function layout({
     '<meta name="twitter:description" content="' + escapeHtml(description) + '">' +
     '<meta name="twitter:image" content="' + siteRoot + 'og.png">' +
     '<title>' + escapeHtml(title) + '</title>' +
-    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css?v=20260912b">' +
+    '<link rel="stylesheet" href="' + root + 'assets/styles/site.css?v=20260913a">' +
     '<link rel="stylesheet" href="' + root + 'assets/styles/home-street.css">' +
     '</head><body class="' + escapeHtml(pageClass) + '">' +
     '<a class="skip-link" href="#main">跳到主要内容</a>' +
     persistentShell({ depth, active }) +
     '<main id="main">' + body + '</main>' +
     '<footer><strong>猫哥 · JARVIS</strong><span>AI 陪伴系统 · 静态生成</span></footer>' +
-    '<script type="module" src="' + root + 'assets/js/site.js?v=20260912b"></script>' +
+    '<script type="module" src="' + root + 'assets/js/site.js?v=20260913a"></script>' +
     '</body></html>';
 }
