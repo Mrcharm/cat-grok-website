@@ -55,5 +55,5 @@ export function normalizeHomeDocument(source) {
     html = html.replace('</body>', '<script type="module" src="assets/js/site.js"></script>\n</body>');
   }
 
-  return html.replace(/(assets\/(?:styles\/site\.css|js\/site\.js))(?:\?v=[^"\s]*)?"/g, '$1?v=20260913a"');
+  return html.replace(/(assets\/(?:styles\/site\.css|js\/site\.js))(?:\?v=[^"\s]*)?"/g, '$1?v=20260914a"');
 }

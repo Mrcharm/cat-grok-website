@@ -151,13 +151,19 @@ function portfolioPage() {
   const projects = [
     { title: 'JARVIS 陪伴系统', summary: '一个基于 Three.js 的沉浸式 AI 陪伴界面，包含语音交互、情绪识别与长期记忆模拟。', tags: ['Three.js', 'Web Speech API', '产品原型'], imgs: ['../assets/portfolio/jarvis-home.jpg'], action: '<a class="portfolio-link" href="../index.html">查看项目 →</a>' },
     { title: 'ETL 在线设计平台', summary: '面向数据研发的一站式 Web IDE：字段映射配置、流程编排、SQL 实时预览与脚本编辑，浅色与深色双主题。', tags: ['B 端产品', 'Web IDE', '数据研发'], imgs: ['../assets/portfolio/etl-studio-mapping.jpg', '../assets/portfolio/etl-studio-flow.jpg', '../assets/portfolio/etl-studio-script.jpg'], action: '<span class="portfolio-link muted">界面演示</span>' },
-    { title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步，支持一键导出数据线详细设计报告；MAIN 调度器按路由判定直达或走八步长链路。', tags: ['NL2SQL', 'AI 助手', 'Agent'], video: '../assets/portfolio/ai-copilot-demo.mp4', poster: '../assets/portfolio/ai-copilot-demo.jpg', action: '<span class="portfolio-link muted">已投产 · 录屏演示</span>' },
+    { title: 'AI 数据研发 Copilot', summary: '平台内置 AI 助手「Etl-Jarvis」：需求澄清、证据采集、SQL 生成、检核与文档同步，支持一键导出数据线详细设计报告；MAIN 调度器按路由判定直达或走八步长链路。', tags: ['NL2SQL', 'AI 助手', 'Agent'], diagram: { src: '../assets/portfolio/main-flow.png', alt: 'MAIN 执行顺序（3.0）：用户消息分四类输入，路由判定能否单 Skill 直达 —— 是则简单直接任务直接返回用户，否则进入初始化长链路，依次执行 ① 需求澄清 ② 证据收集 ③ 用户确认证据 ④ SQL 生成 ⑤ SQL 检核，五项阶段结果同步写回 PLAN 与 RECORD，⑥ 最终输出' }, video: '../assets/portfolio/ai-copilot-demo.mp4', poster: '../assets/portfolio/ai-copilot-demo.jpg', action: '<span class="portfolio-link muted">已投产 · 录屏演示</span>' },
     { title: '数据血缘平台', summary: '脚本血缘解析与全链路血缘视图：数据血缘、全链路血缘、任务血缘三种视图，支持字段级加工公式追溯。', tags: ['数据治理', '血缘解析', '可视化'], imgs: ['../assets/portfolio/lineage-analysis.png', '../assets/portfolio/lineage-detail.png'], action: '<span class="portfolio-link muted">界面演示</span>' },
     { title: '知识图谱 · 图平台', summary: '资金流向与股权关系的图谱构建与可视化查询：K 层展开、路径分析、图模式查询与图算法应用。', tags: ['知识图谱', '图查询', '关系网络'], imgs: ['../assets/portfolio/graph-flow.png', '../assets/portfolio/graph-mode.png'], action: '<span class="portfolio-link muted">平台功能演示</span>' },
     { title: '模型设计平台', summary: '数据仓库建模管理平台：数据仓库管理、口径编辑器、维度建模与模型设计全流程支撑。', tags: ['数据建模', '口径管理', '数据仓库'], imgs: ['../assets/portfolio/model-dw.jpg'], action: '<span class="portfolio-link muted">界面演示</span>' },
     { title: '更多项目', summary: 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', tags: ['AI 应用', '研发平台', '数据大屏'], imgs: [], ph: true, action: '<span class="portfolio-link muted">敬请期待</span>' }
   ].map(p => {
-    const thumbs = p.video
+    // 流程图固定放在最上面，按原始比例完整显示、不裁切（内容全在图里，裁掉就等于没展示），
+    // 卡片里是缩略预览，点一下开大图。它和 video / imgs 可以共存。
+    const diagram = p.diagram
+      ? '<div class="portfolio-diagram"><img src="' + escapeHtml(p.diagram.src) +
+        '" alt="' + escapeHtml(p.diagram.alt) + '" loading="lazy"></div>'
+      : '';
+    const media = p.video
       ? '<div class="portfolio-video"><video controls preload="none" playsinline poster="' +
         escapeHtml(p.poster) + '" src="' + escapeHtml(p.video) + '">您的浏览器不支持内嵌视频播放。</video></div>'
       : (p.imgs && p.imgs.length
@@ -166,7 +172,7 @@ function portfolioPage() {
           )).join('') + '</div>'
         : '<div class="portfolio-thumb">' + (p.ph ? '⏳' : '🧠') + '</div>');
     return '<article class="portfolio-item' + (p.ph ? ' placeholder' : '') + '">' +
-      thumbs + '<div class="portfolio-info">' +
+      diagram + media + '<div class="portfolio-info">' +
       '<h3>' + escapeHtml(p.title) + '</h3><p>' + escapeHtml(p.summary) + '</p>' +
       '<div class="portfolio-meta">' + p.tags.map((tag, tagIndex) => (
         '<span class="portfolio-tag' + (tagIndex === 0 ? ' highlight' : '') + '">' + escapeHtml(tag) + '</span>'

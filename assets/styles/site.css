@@ -44,6 +44,11 @@ body{background:#fff}.site-header{height:80px;padding-inline:max(42px,calc((100v
 /* multi-image thumbs */
 .portfolio-thumbs{display:flex;flex-direction:column;gap:2px}
 .portfolio-thumbs img{width:100%;aspect-ratio:16/9;object-fit:cover;object-position:top;display:block;background:var(--jarvis-panel2)}
+/* 流程图：按原始比例完整展示、不裁切（信息全在图里），卡片内限高，点击开大图。
+   底色取自图片自身背景，contain 留白处看不出来。 */
+.portfolio-diagram{border-bottom:2px solid var(--ink);background:#f4f4f1}
+.portfolio-diagram img{display:block;width:100%;height:auto;max-height:520px;object-fit:contain;cursor:zoom-in}
+@media(max-width:720px){.portfolio-diagram img{max-height:400px}}
 /* lightbox image preview */
 .lightbox{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(3,5,10,.92);opacity:0;pointer-events:none;transition:opacity .2s ease;cursor:zoom-out}
 .lightbox.open{opacity:1;pointer-events:auto}

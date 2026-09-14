@@ -29,8 +29,8 @@ export function initPortfolioPage(root = document) {
   function onClick(event) {
     const target = event.target;
     if (!target || typeof target.closest !== 'function') return;
-    // 打开：点击 wrap 内的作品缩略图
-    const thumb = target.closest('.portfolio-thumbs img');
+    // 打开：点击 wrap 内的作品缩略图或流程图
+    const thumb = target.closest('.portfolio-thumbs img, .portfolio-diagram img');
     if (thumb && wrap.contains(thumb)) {
       event.preventDefault();
       open(thumb.getAttribute('src'), thumb.getAttribute('alt'));
