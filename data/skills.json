@@ -219,9 +219,10 @@
         {
           "name": "ppt-generator-skill",
           "badge": "PPT",
-          "description": "智能 PPT 生成助手：根据主题、行业与风格自动生成结构完整的 PPT 文件。",
+          "description": "智能 PPT 生成助手：按主题、行业与风格生成结构完整的 PPT，内置晋升/述职申报专用编排范式与 20+ 套风格规范。",
           "tags": [
             "PPT",
+            "述职",
             "演示"
           ],
           "origin": "market"
