@@ -1,5 +1,5 @@
 {
-  "version": "3.3",
+  "version": "3.4",
   "updated": "2026-10-22",
   "categories": [
     {
@@ -273,6 +273,23 @@
             "幻灯片"
           ],
           "origin": "market"
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "icon": "🧭",
+      "title": "生活 · 旅行",
+      "skills": [
+        {
+          "name": "personal-travel-plan",
+          "badge": "行程",
+          "description": "按目的地类型生成可执行行程 DOCX：逐日时间表、天气多源核验、放票时刻、落地预算与落选方案留档。",
+          "tags": [
+            "行程规划",
+            "适老化"
+          ],
+          "origin": "self"
         }
       ]
     }
