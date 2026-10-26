@@ -5,7 +5,8 @@
       "url": "https://blog.csdn.net/Mr_charm/article/details/169067820",
       "date": "2026-10-25",
       "views": 1,
-      "category": "面试"
+      "category": "面试",
+      "cover": "../assets/blog-covers/169067820.jpg"
     },
     {
       "title": "【项目实战】你的 Obsidian 正在变成屎山吗？139 篇笔记，133 篇查不出是否过期",
