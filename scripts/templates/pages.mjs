@@ -155,6 +155,7 @@ function portfolioPage() {
     { title: '数据血缘平台', summary: '脚本血缘解析与全链路血缘视图：数据血缘、全链路血缘、任务血缘三种视图，支持字段级加工公式追溯。', tags: ['数据治理', '血缘解析', '可视化'], imgs: ['../assets/portfolio/lineage-analysis.png', '../assets/portfolio/lineage-detail.png'], action: '<span class="portfolio-link muted">界面演示</span>' },
     { title: '知识图谱 · 图平台', summary: '资金流向与股权关系的图谱构建与可视化查询：K 层展开、路径分析、图模式查询与图算法应用。', tags: ['知识图谱', '图查询', '关系网络'], imgs: ['../assets/portfolio/graph-flow.png', '../assets/portfolio/graph-mode.png'], action: '<span class="portfolio-link muted">平台功能演示</span>' },
     { title: '模型设计平台', summary: '数据仓库建模管理平台：数据仓库管理、口径编辑器、维度建模与模型设计全流程支撑。', tags: ['数据建模', '口径管理', '数据仓库'], imgs: ['../assets/portfolio/model-dw.jpg'], action: '<span class="portfolio-link muted">界面演示</span>' },
+    { title: '数据能力塔台 · 移动端', summary: '给业务管理者的移动端数据驾驶舱（小程序形态）：数据质量、数据时效等治理指标一屏总览，目标值对照、环比变动与未达标归因逐卡呈现，即开即用。', tags: ['移动端', '数据驾驶舱', '数据治理'], diagram: { src: '../assets/portfolio/metrics-tower-mobile.png', alt: '数据能力塔台移动端两屏演示：左为数据质量板块（源端强控、湖仓监测、对外报送、问题整改），右为数据时效板块（实时供应、实时指标计算、批量时效、供应与业务指标时效）' }, action: '<span class="portfolio-link muted">界面演示</span>' },
     { title: '更多项目', summary: 'AI 应用探索、研发平台重构、数据可视化大屏——持续补充中。', tags: ['AI 应用', '研发平台', '数据大屏'], imgs: [], ph: true, action: '<span class="portfolio-link muted">敬请期待</span>' }
   ].map(p => {
     // 流程图固定放在最上面，按原始比例完整显示、不裁切（内容全在图里，裁掉就等于没展示），
